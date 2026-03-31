@@ -119,7 +119,7 @@
     color: var(--subtitle);
   }
 
-  #layer-toggle, #view-toggle, #metric-toggle {
+  #layer-toggle, #view-toggle, #metric-toggle, #geography-toggle, #year-toggle {
     position: absolute; left: 24px;
     z-index: 10; display: flex; gap: 4px;
   }
@@ -131,6 +131,8 @@
     max-width: 520px;
     gap: 6px;
   }
+  #geography-toggle { top: 250px; }
+  #year-toggle { top: 287px; }
   #top-right-controls {
     position: absolute;
     top: 24px;
@@ -161,6 +163,8 @@
   }
   #view-label { top: 142px; }
   #metric-label { top: 179px; }
+  #geography-label { top: 238px; }
+  #year-label { top: 275px; }
   .toggle-btn {
     padding: 7px 12px 6px;
     font-family: var(--font-ui);
@@ -395,7 +399,11 @@
     #view-toggle    { top: 136px; left: 14px; }
     #metric-label   { top: 162px; left: 16px; }
     #metric-toggle  { top: 172px; left: 14px; right: 14px; max-width: none; }
-    #country-toggle { top: 232px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
+    #geography-label { top: 214px; left: 16px; }
+    #geography-toggle { top: 224px; left: 14px; right: 14px; }
+    #year-label { top: 252px; left: 16px; }
+    #year-toggle { top: 262px; left: 14px; right: 14px; }
+    #country-toggle { top: 294px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
     #theme-toggle   { top: auto; right: auto; left: auto; }
     .toggle-btn     { padding: 4px 10px; font-size: .65rem; }
@@ -445,6 +453,16 @@
   <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
   <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
   <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
+</div>
+<div id="geography-label" class="control-title">Geography</div>
+<div id="geography-toggle">
+  <button id="geo-borough" class="toggle-btn metric-btn active" onclick="setGeography('borough')">Borough</button>
+  <button id="geo-msoa" class="toggle-btn metric-btn" onclick="setGeography('msoa')">MSOA</button>
+</div>
+<div id="year-label" class="control-title">Year</div>
+<div id="year-toggle">
+  <button id="year-2021" class="toggle-btn metric-btn" onclick="setYear(2021)">2021</button>
+  <button id="year-2024" class="toggle-btn metric-btn active" onclick="setYear(2024)">2024</button>
 </div>
 <div id="country-toggle">
   <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
@@ -824,11 +842,21 @@ const METRICS = {
   },
 };
 
+const SMALL_AREA_DENSITY = {
+  geography: "MSOA 2021",
+  years: [2021, 2024],
+  source: "ONS Middle layer Super Output Area population estimates (Accredited official statistics) joined to GLA MSOA 2021 boundaries",
+  sourceUrlPopulation: "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/middlesuperoutputareamidyearpopulationestimatesnationalstatistics",
+  sourceUrlBoundaries: "https://data.london.gov.uk/dataset/statistical-gis-boundary-files-for-london-20od9/",
+  note: "Density is computed from official mid-year population counts and MSOA polygon area",
+};
+
 function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme;
+let setGeography, setYear;
 
 async function init() {
   const bodyEl = document.body;
@@ -844,6 +872,10 @@ async function init() {
   const viewToggleEl = document.getElementById("view-toggle");
   const metricLabelEl = document.getElementById("metric-label");
   const metricToggleEl = document.getElementById("metric-toggle");
+  const geographyLabelEl = document.getElementById("geography-label");
+  const geographyToggleEl = document.getElementById("geography-toggle");
+  const yearLabelEl = document.getElementById("year-label");
+  const yearToggleEl = document.getElementById("year-toggle");
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
   const btnTubeMap = document.getElementById("btn-tube-map");
@@ -851,6 +883,14 @@ async function init() {
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
   );
+  const geographyButtons = {
+    borough: document.getElementById("geo-borough"),
+    msoa: document.getElementById("geo-msoa"),
+  };
+  const yearButtons = {
+    2021: document.getElementById("year-2021"),
+    2024: document.getElementById("year-2024"),
+  };
 
   let tooltipPinned = false;
   let pinnedCoord = null;
@@ -859,9 +899,12 @@ async function init() {
   let currentTheme = "day";
   let showStations = false;
   let boroughMetric = "density";
+  let activeGeography = "borough";
+  let activeYear = 2024;
   let selectedCountryBirth = "ALL";
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
+  let msoaGeoJSON = null;
   let highlightedFeature = null;
   let pinData = [];
   let currentMainLayer = null;
@@ -894,9 +937,10 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
+    fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -904,6 +948,7 @@ async function init() {
 
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
+  if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
   if (municipiGeoJSON?.features) {
     for (const feature of municipiGeoJSON.features) {
       const boroughName = feature.properties?.[NAME_FIELD];
@@ -919,9 +964,40 @@ async function init() {
     }
   }
 
+  function featureCollectionForAnalysis() {
+    if (currentDataset === "municipi" && boroughMetric === "density" && activeGeography === "msoa" && msoaGeoJSON?.features) {
+      return msoaGeoJSON;
+    }
+    return municipiGeoJSON;
+  }
+
+  function activeAnalysisFeatures() {
+    return featureCollectionForAnalysis()?.features || [];
+  }
+
+  function activeDensityField() {
+    return activeGeography === "msoa" ? `density_${activeYear}` : "density";
+  }
+
+  function activePopulationField() {
+    return activeGeography === "msoa" ? `population_${activeYear}` : POP_FIELD;
+  }
+
+  function analysisFeatureName(feature) {
+    if (!feature?.properties) return "London";
+    if (activeGeography === "msoa" && feature.properties.msoa_name) return feature.properties.msoa_name;
+    return feature.properties?.[NAME_FIELD] ?? "London";
+  }
+
+  function analysisParentName(feature) {
+    if (activeGeography === "msoa") return feature?.properties?.borough_name ?? "London";
+    return null;
+  }
+
   function boroughAt(lon, lat) {
-    if (!municipiGeoJSON?.features) return zoneAt(lon, lat);
-    for (const f of municipiGeoJSON.features) {
+    const boroughFeatures = municipiGeoJSON?.features;
+    if (!boroughFeatures) return zoneAt(lon, lat);
+    for (const f of boroughFeatures) {
       const geo = f.geometry;
       if (!geo) continue;
       const hit = geo.type === "Polygon"
@@ -947,6 +1023,30 @@ async function init() {
   const avgDensity = totalArea > 0 ? Math.round(totalPopulation / totalArea) : 0;
   const sectionDensityMax = Math.max(...sectionsGeoJSON.features.filter((f) => (f.properties.density ?? 0) <= OUTLIER_THRESHOLD).map((f) => f.properties.density));
   const boroughStats = {};
+  const msoaDensityStats = (() => {
+    if (!msoaGeoJSON?.features?.length) return {};
+    const build = (year) => {
+      const densityField = `density_${year}`;
+      const populationField = `population_${year}`;
+      const values = msoaGeoJSON.features
+        .map((feature) => feature.properties?.[densityField])
+        .filter((value) => Number.isFinite(value));
+      const weighted = msoaGeoJSON.features.reduce((acc, feature) => {
+        const density = feature.properties?.[densityField];
+        const weight = feature.properties?.[populationField] ?? 0;
+        if (!Number.isFinite(density) || !weight) return acc;
+        acc.total += density * weight;
+        acc.weight += weight;
+        return acc;
+      }, { total: 0, weight: 0 });
+      return {
+        min: Math.min(...values),
+        max: Math.max(...values),
+        avg: weighted.weight ? weighted.total / weighted.weight : values.reduce((sum, value) => sum + value, 0) / values.length,
+      };
+    };
+    return { 2021: build(2021), 2024: build(2024) };
+  })();
 
   function getNationalityMetricConfig() {
     if (selectedCountryBirth === "ALL") {
@@ -967,6 +1067,17 @@ async function init() {
   }
 
   function getMetricConfig(metricKey) {
+    if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return {
+        ...METRICS.density,
+        label: "Population density",
+        legendLabel: "Residents per km²",
+        year: String(activeYear),
+        source: SMALL_AREA_DENSITY.source,
+        geography: SMALL_AREA_DENSITY.geography,
+        note: SMALL_AREA_DENSITY.note,
+      };
+    }
     return metricKey === "country_of_birth_pct" ? getNationalityMetricConfig() : METRICS[metricKey];
   }
 
@@ -998,6 +1109,9 @@ async function init() {
   }
 
   function getMetricStats(metricKey, countrySelection = selectedCountryBirth) {
+    if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return msoaDensityStats[activeYear];
+    }
     if (metricKey === "country_of_birth_pct") {
       const values = municipiGeoJSON.features
         .map((feature) => metricValue(feature, metricKey, countrySelection))
@@ -1032,6 +1146,9 @@ async function init() {
   }
 
   function metricValue(feature, metricKey, countrySelection = selectedCountryBirth) {
+    if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return feature?.properties?.[activeDensityField()] ?? null;
+    }
     if (metricKey === "country_of_birth_pct") {
       if (countrySelection === "ALL") {
         return feature?.properties?.not_born_uk_share_pct ?? null;
@@ -1046,6 +1163,8 @@ async function init() {
     return {
       metricKey,
       countrySelection: selectedCountryBirth,
+      geography: activeGeography,
+      year: activeYear,
       metric: getMetricConfig(metricKey),
       stats: getMetricStats(metricKey, selectedCountryBirth),
       fillAlpha: boroughFillAlpha(),
@@ -1060,6 +1179,12 @@ async function init() {
   function metricAvailableInCurrentView(metricKey) {
     const currentView = currentDataset === "tube" ? "tube" : is3D ? "spikes" : currentDataset;
     return METRICS[metricKey].views.includes(currentView);
+  }
+
+  function geographyAvailableInCurrentView(geography) {
+    if (currentDataset !== "municipi" || boroughMetric !== "density") return geography === "borough";
+    if (geography === "borough") return true;
+    return geography === "msoa" && !!msoaGeoJSON?.features?.length;
   }
 
   function colorFor(feature, dataset) {
@@ -1128,9 +1253,10 @@ async function init() {
 
   function makeMunicipiLayer(metricState = getActiveMetricState()) {
     const fillAlpha = metricState.fillAlpha;
+    const data = featureCollectionForAnalysis() || { type: "FeatureCollection", features: [] };
     return new deck.GeoJsonLayer({
       id: "municipi",
-      data: municipiGeoJSON || { type: "FeatureCollection", features: [] },
+      data,
       filled: true, stroked: true, extruded: false,
       pickable: true, autoHighlight: true,
       highlightColor: [255, 255, 255, currentTheme === "night" ? 70 : 55],
@@ -1139,11 +1265,13 @@ async function init() {
         return [...colour.slice(0, 3), fillAlpha];
       },
       getLineColor: THEMES[currentTheme].municipiLine,
-      getLineWidth: 2, lineWidthMinPixels: 1,
+      getLineWidth: activeGeography === "msoa" ? 1 : 2, lineWidthMinPixels: activeGeography === "msoa" ? 0.5 : 1,
       updateTriggers: {
         getFillColor: [
           metricState.metricKey,
           metricState.countrySelection,
+          metricState.geography,
+          metricState.year,
           metricState.fillAlpha,
           metricState.theme,
           metricState.stats?.min ?? null,
@@ -1240,6 +1368,7 @@ async function init() {
   function zoneLabel(object, coordinate) {
     if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
     if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
+    if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
     if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
     if (object?.properties?.[NAME_FIELD] && currentDataset !== "sections") return object.properties[NAME_FIELD];
     if (coordinate) return currentDataset === "municipi" ? boroughAt(coordinate[0], coordinate[1]) : zoneAt(coordinate[0], coordinate[1]);
@@ -1279,12 +1408,15 @@ async function init() {
   function boroughMetricTooltipHtml(feature, pinned) {
     const metricKey = boroughMetric;
     const metric = getMetricConfig(metricKey);
-    const name = feature.properties?.[NAME_FIELD] ?? "London";
+    const name = analysisFeatureName(feature);
     const value = metricValue(feature, metricKey);
     const support = [];
     if (metricKey === "density") {
-      support.push(`${(feature.properties?.[POP_FIELD] ?? 0).toLocaleString()} residents`);
+      support.push(`${(feature.properties?.[activePopulationField()] ?? 0).toLocaleString()} residents`);
       support.push(`${(feature.properties?.area_km2 ?? 0).toFixed(1)} km²`);
+      if (activeGeography === "msoa") {
+        support.push(`Borough · ${analysisParentName(feature)}`);
+      }
     } else if (metricKey === "gender_balance_pp") {
       const male = feature.properties?.male_share_pct;
       const female = feature.properties?.female_share_pct;
@@ -1395,6 +1527,24 @@ async function init() {
     }
   }
 
+  function updateGeographyButtons() {
+    for (const [geography, button] of Object.entries(geographyButtons)) {
+      if (!button) continue;
+      const available = geographyAvailableInCurrentView(geography);
+      button.disabled = !available;
+      button.classList.toggle("active", activeGeography === geography && available);
+    }
+  }
+
+  function updateYearButtons() {
+    for (const [year, button] of Object.entries(yearButtons)) {
+      if (!button) continue;
+      const available = SMALL_AREA_DENSITY.years.includes(Number(year));
+      button.disabled = !available;
+      button.classList.toggle("active", activeYear === Number(year) && available);
+    }
+  }
+
   function updateModeButtons() {
     document.getElementById("btn-sections").classList.toggle("active", currentDataset === "sections");
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
@@ -1408,11 +1558,17 @@ async function init() {
     const sectionsMode = currentDataset === "sections";
     const boroughsMode = currentDataset === "municipi";
     const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct";
+    const geographyMode = boroughsMode && boroughMetric === "density";
+    const yearMode = geographyMode && activeGeography === "msoa";
 
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
+    geographyLabelEl.style.display = geographyMode ? "block" : "none";
+    geographyToggleEl.style.display = geographyMode ? "flex" : "none";
+    yearLabelEl.style.display = yearMode ? "block" : "none";
+    yearToggleEl.style.display = yearMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
@@ -1484,6 +1640,13 @@ async function init() {
   }
 
   function refreshMapState(nextViewState = null) {
+    if (currentDataset === "municipi") {
+      ACTIVE_FEATURES = activeAnalysisFeatures();
+    } else if (currentDataset === "sections") {
+      ACTIVE_FEATURES = sectionsGeoJSON.features;
+    } else {
+      ACTIVE_FEATURES = [];
+    }
     updateBoroughStyling();
     const props = { layers: getLayers() };
     if (nextViewState) props.initialViewState = nextViewState;
@@ -1491,6 +1654,8 @@ async function init() {
     updateModeButtons();
     updateControlVisibility();
     updateMetricButtons();
+    updateGeographyButtons();
+    updateYearButtons();
     updateCountrySelector();
     updateLegend();
   }
@@ -1664,6 +1829,7 @@ async function init() {
 
   setMetric = function(metricKey) {
     if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
+    if (metricKey !== "density") activeGeography = "borough";
     applyActiveMetric(metricKey);
   };
 
@@ -1674,6 +1840,23 @@ async function init() {
       refreshMapState();
     } else {
       updateCountrySelector();
+    }
+  };
+
+  setGeography = function(geography) {
+    if (!geographyAvailableInCurrentView(geography)) return;
+    activeGeography = geography;
+    refreshMapState();
+  };
+
+  setYear = function(year) {
+    const resolvedYear = Number(year);
+    if (!SMALL_AREA_DENSITY.years.includes(resolvedYear)) return;
+    activeYear = resolvedYear;
+    if (currentDataset === "municipi" && boroughMetric === "density" && activeGeography === "msoa") {
+      refreshMapState();
+    } else {
+      updateYearButtons();
     }
   };
 
