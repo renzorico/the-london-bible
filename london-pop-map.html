@@ -355,6 +355,119 @@
     letter-spacing: .1em;
     text-transform: none;
   }
+  #comparison-panel {
+    position: absolute;
+    right: 24px;
+    bottom: 74px;
+    z-index: 10;
+    display: none;
+    width: min(340px, calc(100vw - 48px));
+    padding: 14px 15px 13px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #comparison-panel .c-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #comparison-panel .c-title {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #comparison-panel .c-clear {
+    border: none;
+    background: transparent;
+    color: var(--legend-accent);
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0;
+  }
+  #comparison-panel .c-clear:hover { opacity: .76; }
+  #comparison-panel .c-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+  #comparison-panel .c-col {
+    min-width: 0;
+  }
+  #comparison-panel .c-tag {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 3px 7px 2px;
+    border-radius: 999px;
+    font-family: var(--font-ui);
+    font-size: .55rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  #comparison-panel .c-tag.a { background: #0b5c63; }
+  #comparison-panel .c-tag.b { background: #8c3751; }
+  #comparison-panel .c-name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.02;
+    letter-spacing: .03em;
+    color: var(--title);
+  }
+  #comparison-panel .c-val {
+    margin-top: 7px;
+    font-family: var(--font-ui);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--legend-accent);
+  }
+  #comparison-panel .c-mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 78px;
+    padding-top: 24px;
+  }
+  #comparison-panel .c-diff-label,
+  #comparison-panel .c-meta {
+    font-family: var(--font-ui);
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #comparison-panel .c-diff {
+    font-family: var(--font-ui);
+    font-size: .82rem;
+    font-weight: 800;
+    color: var(--title);
+    text-align: center;
+  }
+  #comparison-panel .c-state,
+  #comparison-panel .c-foot {
+    margin-top: 10px;
+    font-family: var(--font-ui);
+    font-size: .68rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #comparison-panel .c-foot { margin-top: 12px; }
   #credit {
     position: absolute;
     right: 24px;
@@ -455,6 +568,7 @@
     #legend         { bottom: 16px; left: 14px; }
     #hint           { display: none; }
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
+    #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
     #credit         { right: 14px; bottom: 82px; }
   }
 </style>
@@ -478,6 +592,7 @@
   <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
   <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
   <button id="btn-tube" class="toggle-btn" onclick="toggleStations()">Tube</button>
+  <button id="btn-compare" class="toggle-btn" onclick="toggleComparison()">Compare</button>
   <button id="btn-tube-map" class="toggle-btn" onclick="setMode('tube')">Only-tube</button>
 </div>
 <div id="view-label" class="control-title">View</div>
@@ -543,6 +658,14 @@
 <div id="tube-legend">
   <div class="llbl">Tube lines</div>
   <div id="tube-legend-items"></div>
+</div>
+
+<div id="comparison-panel">
+  <div class="c-head">
+    <div class="c-title">Borough comparison</div>
+    <button id="comparison-clear" class="c-clear" onclick="clearComparison()">Clear</button>
+  </div>
+  <div id="comparison-content"></div>
 </div>
 
 <div id="hint">
@@ -902,7 +1025,7 @@ function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
-let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme;
+let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison;
 let setGeography, setYear;
 
 async function init() {
@@ -914,6 +1037,8 @@ async function init() {
   const legendEl = document.getElementById("legend");
   const tubeLegendEl = document.getElementById("tube-legend");
   const tubeLegendItemsEl = document.getElementById("tube-legend-items");
+  const comparisonPanelEl = document.getElementById("comparison-panel");
+  const comparisonContentEl = document.getElementById("comparison-content");
   const countryToggleEl = document.getElementById("country-toggle");
   const viewLabelEl = document.getElementById("view-label");
   const viewToggleEl = document.getElementById("view-toggle");
@@ -926,6 +1051,7 @@ async function init() {
   const yearToggleEl = document.getElementById("year-toggle");
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
+  const btnCompare = document.getElementById("btn-compare");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
@@ -950,6 +1076,9 @@ async function init() {
   let activeGeography = "borough";
   let activeYear = 2024;
   let selectedCountryBirth = "ALL";
+  let comparisonEnabled = false;
+  let comparisonA = null;
+  let comparisonB = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
@@ -1114,6 +1243,27 @@ async function init() {
     };
   }
 
+  function getMetricConfigFor(metricKey, countrySelection = selectedCountryBirth) {
+    if (metricKey === "country_of_birth_pct") {
+      if (countrySelection === "ALL") {
+        return {
+          ...METRICS.country_of_birth_pct,
+          label: "Born outside the UK",
+          legendLabel: "Residents born outside the UK",
+          source: `${METRICS.country_of_birth_pct.source} · overview`,
+          note: "Tooltip shows both UK-born and not-UK-born shares",
+        };
+      }
+      return {
+        ...METRICS.country_of_birth_pct,
+        label: `${countrySelection}-born residents`,
+        legendLabel: `${countrySelection}-born residents`,
+        source: `${METRICS.country_of_birth_pct.source} · ${countrySelection}`,
+      };
+    }
+    return METRICS[metricKey];
+  }
+
   function getMetricConfig(metricKey) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return {
@@ -1126,7 +1276,7 @@ async function init() {
         note: SMALL_AREA_DENSITY.note,
       };
     }
-    return metricKey === "country_of_birth_pct" ? getNationalityMetricConfig() : METRICS[metricKey];
+    return getMetricConfigFor(metricKey, selectedCountryBirth);
   }
 
   function availableMetricValues(metricKey) {
@@ -1204,6 +1354,69 @@ async function init() {
       return feature?.properties?.country_birth?.[countrySelection] ?? null;
     }
     return feature?.properties?.[metricKey];
+  }
+
+  function comparisonAvailable() {
+    return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
+  function comparisonCountrySelection() {
+    return boroughMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth;
+  }
+
+  function comparisonFeature(name) {
+    if (!name || !municipiGeoJSON?.features) return null;
+    return municipiGeoJSON.features.find((feature) => feature.properties?.[NAME_FIELD] === name) || null;
+  }
+
+  function normalizeComparisonSelections() {
+    if (!comparisonA && comparisonB) {
+      comparisonA = comparisonB;
+      comparisonB = null;
+    }
+    if (comparisonA && comparisonB && comparisonA === comparisonB) {
+      comparisonB = null;
+    }
+  }
+
+  function comparisonMetricValue(feature) {
+    return metricValue(feature, boroughMetric, comparisonCountrySelection());
+  }
+
+  function comparisonMetricConfig() {
+    return getMetricConfigFor(boroughMetric, comparisonCountrySelection());
+  }
+
+  function formatMetricValueFor(metricKey, value, countrySelection = selectedCountryBirth) {
+    if (!Number.isFinite(value)) return "n/a";
+    return getMetricConfigFor(metricKey, countrySelection).formatter(value);
+  }
+
+  function comparisonDifferenceLabel(metricKey, delta) {
+    if (!Number.isFinite(delta)) return "n/a";
+    const sign = delta > 0 ? "+" : delta < 0 ? "−" : "±";
+    const absValue = Math.abs(delta);
+    return `${sign}${formatMetricValueFor(metricKey, absValue, comparisonCountrySelection())}`;
+  }
+
+  function comparisonSupportLine(feature) {
+    if (!feature) return "";
+    if (boroughMetric === "density") {
+      const population = feature.properties?.[POP_FIELD];
+      return Number.isFinite(population) ? `${population.toLocaleString()} residents` : "";
+    }
+    if (boroughMetric === "country_of_birth_pct") {
+      const notUk = feature.properties?.not_born_uk_share_pct;
+      const ukBorn = Number.isFinite(notUk) ? 100 - notUk : null;
+      if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) return `UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`;
+    }
+    return "";
+  }
+
+  function comparisonInstructionText() {
+    if (!comparisonA) return "Click a borough to set Borough A.";
+    if (!comparisonB) return "Click a second borough to set Borough B.";
+    return "Click another borough to replace Borough B, or click a selected borough to clear it.";
   }
 
   function getActiveMetricState() {
@@ -1568,6 +1781,24 @@ async function init() {
     });
   }
 
+  function makeComparisonSelectionLayer(feature, side) {
+    if (!feature || !comparisonAvailable()) return null;
+    const styles = side === "A"
+      ? { fill: currentTheme === "night" ? [11, 92, 99, 40] : [11, 92, 99, 34], line: [11, 92, 99, 255] }
+      : { fill: currentTheme === "night" ? [140, 55, 81, 42] : [140, 55, 81, 34], line: [140, 55, 81, 255] };
+    return new deck.GeoJsonLayer({
+      id: `comparison-${side.toLowerCase()}`,
+      data: { type: "FeatureCollection", features: [feature] },
+      filled: true,
+      stroked: true,
+      pickable: false,
+      getFillColor: styles.fill,
+      getLineColor: styles.line,
+      lineWidthUnits: "pixels",
+      getLineWidth: 4,
+    });
+  }
+
   function getLayers() {
     const layers = [];
     if (currentMainLayer) layers.push(currentMainLayer);
@@ -1579,6 +1810,10 @@ async function init() {
     if (tubeLines) layers.push(tubeLines);
     const stations = makeStationsLayer();
     if (stations) layers.push(stations);
+    const comparisonLayerA = makeComparisonSelectionLayer(comparisonFeature(comparisonA), "A");
+    if (comparisonLayerA) layers.push(comparisonLayerA);
+    const comparisonLayerB = makeComparisonSelectionLayer(comparisonFeature(comparisonB), "B");
+    if (comparisonLayerB) layers.push(comparisonLayerB);
     const hl = makeHighlightLayer(highlightedFeature);
     if (hl) layers.push(hl);
     const pin = makePinLayer(pinData);
@@ -1639,6 +1874,7 @@ async function init() {
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
+    btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
   }
@@ -1646,7 +1882,7 @@ async function init() {
   function updateControlVisibility() {
     const sectionsMode = currentDataset === "sections";
     const boroughsMode = currentDataset === "municipi";
-    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct";
+    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && !comparisonEnabled;
     const geographyMode = boroughsMode && boroughMetric === "density";
     const yearMode = geographyMode && activeGeography === "msoa";
 
@@ -1660,6 +1896,9 @@ async function init() {
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
+    btnCompare.style.display = boroughsMode ? "" : "none";
+    btnCompare.disabled = !comparisonAvailable();
+    btnCompare.title = comparisonAvailable() ? "Compare two boroughs" : "Comparison is available in borough geography only";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
@@ -1716,6 +1955,53 @@ async function init() {
     }).join("");
   }
 
+  function renderComparisonPanel() {
+    const visible = comparisonEnabled && comparisonAvailable();
+    comparisonPanelEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      comparisonContentEl.innerHTML = "";
+      return;
+    }
+
+    const featureA = comparisonFeature(comparisonA);
+    const featureB = comparisonFeature(comparisonB);
+    const metricKey = boroughMetric;
+    const metric = comparisonMetricConfig();
+    const valueA = featureA ? comparisonMetricValue(featureA) : null;
+    const valueB = featureB ? comparisonMetricValue(featureB) : null;
+    const diff = Number.isFinite(valueA) && Number.isFinite(valueB) ? valueB - valueA : null;
+
+    if (!featureA || !featureB) {
+      comparisonContentEl.innerHTML = `<div class="c-state">${comparisonInstructionText()}</div><div class="c-foot">${metric.label} · ${metric.source} · ${metric.year}</div>`;
+      return;
+    }
+
+    const supportA = comparisonSupportLine(featureA);
+    const supportB = comparisonSupportLine(featureB);
+    comparisonContentEl.innerHTML = `
+      <div class="c-grid">
+        <div class="c-col">
+          <span class="c-tag a">A</span>
+          <div class="c-name">${featureA.properties?.[NAME_FIELD] ?? "Borough A"}</div>
+          <div class="c-val">${formatMetricValueFor(metricKey, valueA, comparisonCountrySelection())}</div>
+          ${supportA ? `<div class="c-foot">${supportA}</div>` : ""}
+        </div>
+        <div class="c-mid">
+          <div class="c-diff-label">B − A</div>
+          <div class="c-diff">${comparisonDifferenceLabel(metricKey, diff)}</div>
+          <div class="c-meta">${metric.legendLabel}</div>
+        </div>
+        <div class="c-col">
+          <span class="c-tag b">B</span>
+          <div class="c-name">${featureB.properties?.[NAME_FIELD] ?? "Borough B"}</div>
+          <div class="c-val">${formatMetricValueFor(metricKey, valueB, comparisonCountrySelection())}</div>
+          ${supportB ? `<div class="c-foot">${supportB}</div>` : ""}
+        </div>
+      </div>
+      <div class="c-foot">${metric.source} · ${metric.year}</div>
+    `;
+  }
+
   function updateStopHoverBehavior() {
     return onlyTubeMode();
   }
@@ -1727,6 +2013,7 @@ async function init() {
   function updateLegend() {
     renderLegend();
     renderTubeLegend();
+    renderComparisonPanel();
   }
 
   function refreshMapState(nextViewState = null) {
@@ -1754,6 +2041,28 @@ async function init() {
 
   function applyActiveMetric(metricKey) {
     boroughMetric = metricKey;
+    refreshMapState();
+  }
+
+  function clearPinnedTooltip() {
+    tooltipPinned = false;
+    pinnedCoord = null;
+    tooltipEl.classList.remove("pinned");
+    tooltipEl.style.display = "none";
+  }
+
+  function handleComparisonSelection(feature) {
+    const boroughName = feature?.properties?.[NAME_FIELD];
+    if (!boroughName) return;
+
+    if (comparisonA === boroughName) comparisonA = null;
+    else if (comparisonB === boroughName) comparisonB = null;
+    else if (!comparisonA) comparisonA = boroughName;
+    else if (!comparisonB) comparisonB = boroughName;
+    else comparisonB = boroughName;
+
+    normalizeComparisonSelections();
+    clearPinnedTooltip();
     refreshMapState();
   }
 
@@ -1807,6 +2116,12 @@ async function init() {
 
     onClick: ({ object, coordinate, x, y }) => {
       if (!coordinate) return;
+
+      if (currentDataset === "municipi" && comparisonEnabled && comparisonAvailable() && object?.properties?.[NAME_FIELD]) {
+        handleComparisonSelection(object);
+        return;
+      }
+
       tooltipPinned = true;
       pinnedCoord = coordinate;
       tooltipEl.classList.add("pinned");
@@ -1922,6 +2237,7 @@ async function init() {
   setMetric = function(metricKey) {
     if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
     if (metricKey !== "density") activeGeography = "borough";
+    if (metricKey === "country_of_birth_pct" && comparisonEnabled) selectedCountryBirth = "ALL";
     applyActiveMetric(metricKey);
   };
 
@@ -1950,6 +2266,33 @@ async function init() {
     } else {
       updateYearButtons();
     }
+  };
+
+  toggleComparison = function() {
+    if (currentDataset !== "municipi") return;
+    if (!comparisonAvailable()) {
+      comparisonEnabled = false;
+      comparisonA = null;
+      comparisonB = null;
+      refreshMapState();
+      return;
+    }
+    comparisonEnabled = !comparisonEnabled;
+    if (!comparisonEnabled) {
+      comparisonA = null;
+      comparisonB = null;
+    } else if (boroughMetric === "country_of_birth_pct") {
+      selectedCountryBirth = "ALL";
+    }
+    clearPinnedTooltip();
+    refreshMapState();
+  };
+
+  clearComparison = function() {
+    comparisonEnabled = false;
+    comparisonA = null;
+    comparisonB = null;
+    refreshMapState();
   };
 
   setView = function(mode) {
