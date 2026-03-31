@@ -175,6 +175,8 @@
     z-index: 20;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 12px;
   }
   #theme-toggle {
@@ -1646,6 +1648,47 @@ async function init() {
     tooltipEl.style.top = (y + pad + th > innerHeight ? y - th - pad : y + pad) + "px";
   }
 
+  function refreshHighlightedFeature() {
+    if (!pinData.length) return;
+    const pin = pinData[0];
+    highlightedFeature = featureAt(pin.lon, pin.lat);
+  }
+
+  function renderPinnedTooltip() {
+    if (!tooltipPinned || !pinnedCoord) return;
+
+    const object = featureAt(pinnedCoord[0], pinnedCoord[1]);
+
+    if (currentDataset === "tube") {
+      tooltipPinned = false;
+      pinnedCoord = null;
+      tooltipEl.classList.remove("pinned");
+      tooltipEl.style.display = "none";
+      return;
+    }
+
+    if (currentDataset === "municipi" && object) {
+      tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
+      tooltipEl.style.display = "block";
+      updatePinnedPosition(viewState);
+      return;
+    }
+
+    if (currentDataset === "sections") {
+      const stats = statsAt(...pinnedCoord);
+      const zone = zoneAt(...pinnedCoord);
+      tooltipEl.innerHTML = densityTooltipHtml(zone, stats.population, stats.density, true);
+      tooltipEl.style.display = "block";
+      updatePinnedPosition(viewState);
+      return;
+    }
+
+    tooltipPinned = false;
+    pinnedCoord = null;
+    tooltipEl.classList.remove("pinned");
+    tooltipEl.style.display = "none";
+  }
+
   function stationTooltipHtml(station, pinned) {
     const enriched = onlyTubeMode();
     const lineItems = splitStationLines(station.properties.lines, station.properties.modes);
@@ -1992,6 +2035,8 @@ async function init() {
     updateYearButtons();
     updateCountrySelector();
     updateLegend();
+    refreshHighlightedFeature();
+    renderPinnedTooltip();
   }
 
   function applyActiveMetric(metricKey) {
