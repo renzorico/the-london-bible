@@ -154,6 +154,10 @@
     align-items: flex-start;
     gap: 6px;
   }
+  .metric-option-row.tools-row {
+    padding-bottom: 2px;
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 85%, transparent);
+  }
   .metric-option-row[hidden] { display: none !important; }
   .metric-option-label {
     font-family: var(--font-ui);
@@ -230,6 +234,10 @@
     letter-spacing: .16em;
     border-radius: 9px;
     box-shadow: 0 10px 24px rgba(79, 49, 38, 0.05);
+  }
+  .toggle-btn.tool-btn {
+    min-width: 112px;
+    justify-content: center;
   }
   #btn-home {
     min-width: 42px;
@@ -555,7 +563,7 @@
     #view-toggle    { top: 136px; left: 14px; }
     #metric-label   { top: 162px; left: 16px; }
     #metric-toggle  { top: 172px; left: 14px; right: 14px; max-width: none; }
-    #metric-options { top: 226px; left: 14px; right: 14px; min-width: 0; max-width: calc(100vw - 28px); }
+    #metric-options { top: 226px; left: 14px; right: 14px; min-width: 0; max-width: calc(100vw - 28px); gap: 9px; }
     #country-toggle { top: 226px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
     #theme-toggle   { top: auto; right: auto; left: auto; }
@@ -592,7 +600,6 @@
   <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
   <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
   <button id="btn-tube" class="toggle-btn" onclick="toggleStations()">Tube</button>
-  <button id="btn-compare" class="toggle-btn" onclick="toggleComparison()">Compare</button>
   <button id="btn-tube-map" class="toggle-btn" onclick="setMode('tube')">Only-tube</button>
 </div>
 <div id="view-label" class="control-title">View</div>
@@ -611,6 +618,12 @@
   <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
 </div>
 <div id="metric-options">
+  <div class="metric-option-row tools-row" id="compare-row">
+    <div class="metric-option-label">Tools</div>
+    <div class="metric-subtoggle">
+      <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
+    </div>
+  </div>
   <div class="metric-option-row" id="geography-row">
     <div class="metric-option-label">Geography</div>
     <div id="geography-toggle" class="metric-subtoggle">
@@ -1045,6 +1058,7 @@ async function init() {
   const metricLabelEl = document.getElementById("metric-label");
   const metricToggleEl = document.getElementById("metric-toggle");
   const metricOptionsEl = document.getElementById("metric-options");
+  const compareRowEl = document.getElementById("compare-row");
   const geographyToggleEl = document.getElementById("geography-toggle");
   const geographyRowEl = document.getElementById("geography-row");
   const yearRowEl = document.getElementById("year-row");
@@ -1885,21 +1899,30 @@ async function init() {
     const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && !comparisonEnabled;
     const geographyMode = boroughsMode && boroughMetric === "density";
     const yearMode = geographyMode && activeGeography === "msoa";
+    const compareMode = boroughsMode && comparisonAvailable();
+    const showMetricOptions = compareMode || geographyMode;
+    const mobile = window.innerWidth <= 540;
 
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
-    metricOptionsEl.style.display = geographyMode ? "flex" : "none";
+    metricOptionsEl.style.display = showMetricOptions ? "flex" : "none";
+    compareRowEl.hidden = !compareMode;
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
-    btnCompare.style.display = boroughsMode ? "" : "none";
+    btnCompare.style.display = compareMode ? "" : "none";
     btnCompare.disabled = !comparisonAvailable();
     btnCompare.title = comparisonAvailable() ? "Compare two boroughs" : "Comparison is available in borough geography only";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
+    if (countryMode) {
+      countryToggleEl.style.top = showMetricOptions ? (mobile ? "332px" : "404px") : (mobile ? "226px" : "256px");
+    } else {
+      countryToggleEl.style.top = "";
+    }
   }
 
   function updateCountrySelector() {
