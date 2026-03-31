@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough spotlight narratives
+
+- Upgraded the borough `Why here?` panel from fixed metric rows to 3–5 short, data-driven spotlight sentences using the existing borough metrics only.
+- Added simple ranking and above/below-average buckets so different boroughs now read as distinct profiles without adding new datasets.
+
 ## 2026-04-01 — Why here? spotlight & project changelog
 
 - Added a root changelog to track major user-facing atlas changes and borough analysis milestones.

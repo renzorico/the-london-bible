@@ -387,6 +387,15 @@
     letter-spacing: .03em;
     color: var(--title);
   }
+  #spotlight-panel .s-lens {
+    margin-top: 4px;
+    font-family: var(--font-ui);
+    font-size: .61rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
   #spotlight-panel .s-helper,
   #spotlight-panel .s-foot {
     font-family: var(--font-ui);
@@ -395,46 +404,24 @@
     color: var(--hint);
   }
   #spotlight-panel .s-helper { margin-top: 2px; }
-  #spotlight-panel .s-grid {
+  #spotlight-panel .s-story-list {
     display: grid;
     gap: 8px;
     margin-top: 12px;
   }
-  #spotlight-panel .s-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px;
-    align-items: baseline;
-    padding-top: 8px;
+  #spotlight-panel .s-story {
+    padding-top: 9px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
+    font-family: var(--font-ui);
+    font-size: .72rem;
+    line-height: 1.56;
+    color: var(--title);
   }
-  #spotlight-panel .s-row:first-child {
+  #spotlight-panel .s-story:first-child {
     padding-top: 0;
     border-top: none;
   }
-  #spotlight-panel .s-label {
-    font-family: var(--font-ui);
-    font-size: .58rem;
-    font-weight: 800;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-  }
-  #spotlight-panel .s-note {
-    margin-top: 4px;
-    font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.45;
-    color: var(--hint);
-  }
-  #spotlight-panel .s-value {
-    text-align: right;
-    font-family: var(--font-ui);
-    font-size: .84rem;
-    font-weight: 700;
-    color: var(--title);
-  }
-  #spotlight-panel .s-value strong {
+  #spotlight-panel .s-story strong {
     color: var(--legend-accent);
     font-weight: 800;
   }
@@ -1672,24 +1659,136 @@ async function init() {
     return `${pct}% ${delta > 0 ? "above" : "below"} avg`;
   }
 
-  function spotlightRows(feature) {
+  function spotlightBucket(metricKey, value, average) {
+    if (!Number.isFinite(value) || !Number.isFinite(average) || !average) return "missing";
+    if (metricKey === "density") {
+      const ratio = value / average;
+      if (ratio >= 1.6) return "much-higher";
+      if (ratio >= 1.15) return "higher";
+      if (ratio <= 0.7) return "much-lower";
+      if (ratio <= 0.9) return "lower";
+      return "similar";
+    }
+    if (metricKey === "house_price_proxy_gbp") {
+      const ratio = value / average;
+      if (ratio >= 1.35) return "much-higher";
+      if (ratio >= 1.1) return "higher";
+      if (ratio <= 0.72) return "much-lower";
+      if (ratio <= 0.9) return "lower";
+      return "similar";
+    }
+    if (metricKey === "median_weekly_earnings_gbp") {
+      const ratio = value / average;
+      if (ratio >= 1.15) return "much-higher";
+      if (ratio >= 1.05) return "higher";
+      if (ratio <= 0.88) return "much-lower";
+      if (ratio <= 0.95) return "lower";
+      return "similar";
+    }
+    if (metricKey === "children_share_pct" || metricKey === "country_of_birth_pct") {
+      const delta = value - average;
+      if (delta >= 5) return "much-higher";
+      if (delta >= 2) return "higher";
+      if (delta <= -5) return "much-lower";
+      if (delta <= -2) return "lower";
+      return "similar";
+    }
+    return "similar";
+  }
+
+  function spotlightRankInfo(metricKey, value, countrySelection = selectedCountryBirth) {
+    const values = municipiGeoJSON.features
+      .map((feature) => metricValue(feature, metricKey, countrySelection))
+      .filter((entry) => Number.isFinite(entry))
+      .sort((a, b) => b - a);
+    if (!values.length || !Number.isFinite(value)) return { bucket: "middle", rank: null, total: values.length };
+    const rank = values.findIndex((entry) => value >= entry) + 1 || values.length;
+    if (rank <= 5) return { bucket: "top-5", rank, total: values.length };
+    if (rank <= Math.ceil(values.length / 3)) return { bucket: "top-third", rank, total: values.length };
+    if (rank >= values.length - 4) return { bucket: "bottom-5", rank, total: values.length };
+    if (rank > Math.floor((values.length * 2) / 3)) return { bucket: "bottom-third", rank, total: values.length };
+    return { bucket: "middle", rank, total: values.length };
+  }
+
+  function formatDiffAgainstAverage(metricKey, value, average, countrySelection = selectedCountryBirth) {
+    if (!Number.isFinite(value) || !Number.isFinite(average)) return "";
+    if (metricKey === "density") {
+      return `about ${(value / average).toFixed(1)}× the London average`;
+    }
+    if (metricKey === "house_price_proxy_gbp" || metricKey === "median_weekly_earnings_gbp") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${formatMetricValueFor(metricKey, delta, countrySelection)} ${direction} the London average`;
+    }
+    if (metricKey === "children_share_pct" || metricKey === "country_of_birth_pct") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${delta.toFixed(1)} pp ${direction} the London average`;
+    }
+    return spotlightDeltaText(metricKey, value, average, countrySelection);
+  }
+
+  function buildSpotlightStory(feature, metricKey, countrySelection = selectedCountryBirth) {
+    const value = metricValue(feature, metricKey, countrySelection);
+    const stats = getMetricStats(metricKey, countrySelection);
+    if (!Number.isFinite(value) || !Number.isFinite(stats?.avg)) return null;
+
+    const name = feature.properties?.[NAME_FIELD] ?? "This borough";
+    const bucket = spotlightBucket(metricKey, value, stats.avg);
+    const rank = spotlightRankInfo(metricKey, value, countrySelection).bucket;
+    const diff = formatDiffAgainstAverage(metricKey, value, stats.avg, countrySelection);
+
+    if (metricKey === "density") {
+      if (bucket === "much-higher" || rank === "top-5") return `One of the densest boroughs in London, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "higher") return `Denser than London overall, at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "much-lower" || rank === "bottom-5") return `Far less dense than inner London, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, only ${diff}.`;
+      if (bucket === "lower") return `Less dense than London overall, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      return `Density sits close to the London norm at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+    }
+
+    if (metricKey === "house_price_proxy_gbp") {
+      if (bucket === "much-higher" || rank === "top-5") return `House prices are among the highest, with a typical sale price around <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "higher") return `Housing costs sit above the London average, with a typical sale price near <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      if (bucket === "much-lower" || rank === "bottom-5") return `House prices are well below London’s priciest boroughs, with a typical sale price around <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      if (bucket === "lower") return `House prices are a little below the London average at about <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      return `House prices are broadly in line with London, at roughly <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+    }
+
+    if (metricKey === "median_weekly_earnings_gbp") {
+      if (bucket === "much-higher") return `Weekly earnings are notably strong at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "higher") return `Earnings run above the London average, with typical weekly pay around <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      if (bucket === "much-lower") return `Weekly earnings lag the London average at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "lower") return `Earnings are slightly below the London average, at around <strong>${formatMetricValueFor(metricKey, value)}</strong> a week.`;
+      return `Earnings are close to the London average, at about <strong>${formatMetricValueFor(metricKey, value)}</strong> a week.`;
+    }
+
+    if (metricKey === "children_share_pct") {
+      if (bucket === "much-higher") return `Younger than London overall, with children making up <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "higher") return `A relatively family-heavy borough, with children accounting for <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      if (bucket === "much-lower") return `Less family-oriented than London overall, with children at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
+      if (bucket === "lower") return `The share of children is slightly below London overall, at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+      return `Its child population looks close to the London average, at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+    }
+
+    if (metricKey === "country_of_birth_pct") {
+      if (bucket === "much-higher" || rank === "top-5") return `More international than average, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> of residents born outside the UK, ${diff}.`;
+      if (bucket === "higher") return `A more internationally mixed borough than London overall, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK.`;
+      if (bucket === "much-lower" || rank === "bottom-5") return `Less internationally mixed than many boroughs, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK, ${diff}.`;
+      if (bucket === "lower") return `The share of residents born outside the UK is a little below London overall, at <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong>.`;
+      return `Its international mix is close to the London average, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK.`;
+    }
+
+    return null;
+  }
+
+  function buildSpotlightNarrative(feature) {
     return [
-      { key: "density", label: "Density" },
-      { key: "house_price_proxy_gbp", label: "House prices" },
-      { key: "median_weekly_earnings_gbp", label: "Earnings" },
-      { key: "children_share_pct", label: "Children" },
-      { key: "country_of_birth_pct", label: "Not UK-born", countrySelection: "ALL" },
-    ].map(({ key, label, countrySelection }) => {
-      const value = metricValue(feature, key, countrySelection ?? selectedCountryBirth);
-      const stats = getMetricStats(key, countrySelection ?? selectedCountryBirth);
-      return {
-        key,
-        label,
-        value,
-        formatted: formatMetricValueFor(key, value, countrySelection ?? selectedCountryBirth),
-        delta: spotlightDeltaText(key, value, stats?.avg, countrySelection ?? selectedCountryBirth),
-      };
-    });
+      buildSpotlightStory(feature, "density"),
+      buildSpotlightStory(feature, "house_price_proxy_gbp"),
+      buildSpotlightStory(feature, "median_weekly_earnings_gbp"),
+      buildSpotlightStory(feature, "children_share_pct"),
+      buildSpotlightStory(feature, "country_of_birth_pct", "ALL"),
+    ].filter(Boolean).slice(0, 5);
   }
 
   function comparisonSupportLine(feature) {
@@ -2349,22 +2448,22 @@ async function init() {
     }
 
     const currentMetric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
-    const rows = spotlightRows(feature);
+    const stories = buildSpotlightNarrative(feature);
+    if (!stories.length) {
+      spotlightContentEl.innerHTML = `
+        <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+        <div class="s-lens">Current lens · ${currentMetric.label}</div>
+        <div class="s-helper">No reliable borough-level spotlight summary is available from the current metric set.</div>
+      `;
+      return;
+    }
     spotlightContentEl.innerHTML = `
       <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
-      <div class="s-helper">Current lens · ${currentMetric.label}</div>
-      <div class="s-grid">
-        ${rows.map((row) => `
-          <div class="s-row">
-            <div>
-              <div class="s-label">${row.label}</div>
-              <div class="s-note">${row.delta}</div>
-            </div>
-            <div class="s-value"><strong>${row.formatted}</strong></div>
-          </div>
-        `).join("")}
+      <div class="s-lens">Current lens · ${currentMetric.label}</div>
+      <div class="s-story-list">
+        ${stories.map((story) => `<div class="s-story">${story}</div>`).join("")}
       </div>
-      <div class="s-foot">Compared with London borough averages using the current atlas metrics.</div>
+      <div class="s-foot">Built from the current borough metrics only, using London-wide averages and simple ranking buckets.</div>
     `;
   }
 
