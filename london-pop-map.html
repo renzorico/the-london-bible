@@ -824,6 +824,129 @@ const METRICS = {
   },
 };
 
+// Future atlas expansion plan:
+// - default next small-area geography: MSOA
+// - later specialist layer: LSOA for denser housing / population detail
+// - time dimension should be resolved from metric + geography, not hardcoded in the UI
+const GEOGRAPHY_PLAN = {
+  recommendedSmallArea: "msoa",
+  options: {
+    borough: { label: "Borough", polygonCountLondon: 33, status: "current" },
+    ward: { label: "Ward", polygonCountLondon: 625, status: "fallback" },
+    msoa: { label: "MSOA", polygonCountLondon: 983, status: "recommended" },
+    lsoa: { label: "LSOA", polygonCountLondon: 4835, status: "later-detail" },
+    postcodeSector: { label: "Postcode sector", polygonCountLondon: null, status: "not-recommended" },
+  },
+};
+
+const METRIC_SERIES_PLAN = {
+  density: {
+    key: "density",
+    label: "Population density",
+    geographies: {
+      borough: {
+        years: [2024],
+        sourceName: "Current borough aggregation",
+        sourceUrl: "",
+        caveats: "Current app layer only",
+      },
+      msoa: {
+        years: [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        sourceName: "ONS small area population estimates",
+        sourceUrl: "https://www.ons.gov.uk/releases/populationestimatesbyoutputareaselectoralhealthandothergeographiesenglandandwalesmid2023andmid2024revisedmid2022",
+        caveats: "Population is annual; density is computed from population plus polygon area",
+      },
+      lsoa: {
+        years: [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        sourceName: "ONS small area population estimates",
+        sourceUrl: "https://www.ons.gov.uk/releases/populationestimatesbyoutputareaselectoralhealthandothergeographiesenglandandwalesmid2023andmid2024revisedmid2022",
+        caveats: "Likely future detail layer rather than first default",
+      },
+    },
+  },
+  house_price_proxy_gbp: {
+    key: "house_price_proxy_gbp",
+    label: "House prices",
+    geographies: {
+      borough: {
+        years: [2017],
+        sourceName: "Current borough proxy",
+        sourceUrl: "",
+        caveats: "Current app uses a borough median sale-price proxy",
+      },
+      msoa: {
+        years: [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        sourceName: "ONS median house prices by MSOA",
+        sourceUrl: "https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/medianhousepricesbymiddlelayersuperoutputarea",
+        caveats: "Rolling annual series in current publication format",
+      },
+      lsoa: {
+        years: [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        sourceName: "ONS median house prices by LSOA",
+        sourceUrl: "https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/medianpricepaidbylowerlayersuperoutputareahpssadataset46",
+        caveats: "Best used as a later detailed housing layer",
+      },
+    },
+  },
+  median_weekly_earnings_gbp: {
+    key: "median_weekly_earnings_gbp",
+    label: "Income / earnings proxy",
+    geographies: {
+      borough: {
+        years: [2024],
+        sourceName: "Current ASHE borough layer",
+        sourceUrl: "",
+        caveats: "Resident-based median weekly earnings",
+      },
+      msoa: {
+        years: [2018, 2020, 2023],
+        sourceName: "ONS income estimates for small areas",
+        sourceUrl: "https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/bulletins/smallareamodelbasedincomeestimates/financialyearending2023",
+        caveats: "Model-based household income proxy, not direct median earnings",
+      },
+    },
+  },
+  gender_balance_pp: {
+    key: "gender_balance_pp",
+    label: "Gender balance",
+    geographies: {
+      borough: { years: [2014], sourceName: "Current borough layer", sourceUrl: "", caveats: "Current app layer only" },
+      msoa: {
+        years: [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        sourceName: "ONS small area population estimates by sex",
+        sourceUrl: "https://www.ons.gov.uk/releases/populationestimatesbyoutputareaselectoralhealthandothergeographiesenglandandwalesmid2023andmid2024revisedmid2022",
+        caveats: "Derived from annual sex shares rather than a standalone gender dataset",
+      },
+    },
+  },
+  children_share_pct: {
+    key: "children_share_pct",
+    label: "Children / families",
+    geographies: {
+      borough: { years: [2015], sourceName: "Current borough layer", sourceUrl: "", caveats: "Current app layer only" },
+      msoa: {
+        years: [2011, 2021],
+        sourceName: "2011 and 2021 Census household / dependent-children tables",
+        sourceUrl: "https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families/datasets/householdscontainingdependentchildrencensus2021",
+        caveats: "Decennial comparison rather than annual series",
+      },
+    },
+  },
+  country_of_birth_pct: {
+    key: "country_of_birth_pct",
+    label: "Country of birth",
+    geographies: {
+      borough: { years: [2011, 2021], sourceName: "Current borough overview from Census tables", sourceUrl: "", caveats: "Current app borough layer" },
+      msoa: {
+        years: [2011, 2021],
+        sourceName: "ONS Census 2021 TS004 + Nomis 2011 KS204EW",
+        sourceUrl: "https://www.ons.gov.uk/datasets/TS004",
+        caveats: "Decennial only; use UK-born vs not-UK-born plus selected-country slices",
+      },
+    },
+  },
+};
+
 function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
@@ -860,6 +983,7 @@ async function init() {
   let showStations = false;
   let boroughMetric = "density";
   let selectedCountryBirth = "ALL";
+  let activeYear = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let highlightedFeature = null;
@@ -869,6 +993,32 @@ async function init() {
   const OUTLIER_THRESHOLD = 50000;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
+
+  function activeAtlasGeography() {
+    if (currentDataset === "municipi") return "borough";
+    if (currentDataset === "sections") return is3D ? "hexes" : "hexes";
+    if (currentDataset === "tube") return "transport";
+    return "borough";
+  }
+
+  function getMetricSeriesPlan(metricKey = boroughMetric, geography = activeAtlasGeography()) {
+    return METRIC_SERIES_PLAN[metricKey]?.geographies?.[geography] ?? null;
+  }
+
+  function getAvailableYearsForMetric(metricKey = boroughMetric, geography = activeAtlasGeography()) {
+    return getMetricSeriesPlan(metricKey, geography)?.years ?? [];
+  }
+
+  function getResolvedActiveYear(metricKey = boroughMetric, geography = activeAtlasGeography()) {
+    const years = getAvailableYearsForMetric(metricKey, geography);
+    if (!years.length) return null;
+    return years.includes(activeYear) ? activeYear : years[years.length - 1];
+  }
+
+  // Future slider hook:
+  // - a year slider should call setActiveYear(year)
+  // - setActiveYear should update activeYear and then refreshMapState()
+  // - legend/source text and the active layer should both resolve the same year via getResolvedActiveYear()
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
