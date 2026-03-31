@@ -119,7 +119,7 @@
     color: var(--subtitle);
   }
 
-  #layer-toggle, #view-toggle, #metric-toggle, #geography-toggle, #year-toggle {
+  #layer-toggle, #view-toggle, #metric-toggle {
     position: absolute; left: 24px;
     z-index: 10; display: flex; gap: 4px;
   }
@@ -128,11 +128,46 @@
   #metric-toggle {
     top: 191px;
     flex-wrap: wrap;
-    max-width: 520px;
+    max-width: 500px;
     gap: 6px;
   }
-  #geography-toggle { top: 250px; }
-  #year-toggle { top: 287px; }
+  #metric-options {
+    position: absolute;
+    top: 256px;
+    left: 24px;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 258px;
+    max-width: 338px;
+    padding: 11px 12px 12px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 95%, transparent), color-mix(in srgb, var(--panel) 92%, transparent));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  .metric-option-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .metric-option-row[hidden] { display: none !important; }
+  .metric-option-label {
+    font-family: var(--font-ui);
+    font-size: .55rem;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--title) 74%, var(--subtitle) 26%);
+  }
+  .metric-subtoggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
   #top-right-controls {
     position: absolute;
     top: 24px;
@@ -163,8 +198,6 @@
   }
   #view-label { top: 142px; }
   #metric-label { top: 179px; }
-  #geography-label { top: 238px; }
-  #year-label { top: 275px; }
   .toggle-btn {
     padding: 7px 12px 6px;
     font-family: var(--font-ui);
@@ -187,6 +220,14 @@
     padding-left: 10px;
     padding-right: 10px;
     letter-spacing: .14em;
+  }
+  .toggle-btn.secondary-btn {
+    padding: 6px 10px 5px;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    border-radius: 9px;
+    box-shadow: 0 10px 24px rgba(79, 49, 38, 0.05);
   }
   #btn-home {
     min-width: 42px;
@@ -290,7 +331,7 @@
   #country-toggle {
     position: absolute;
     left: 24px;
-    top: 286px;
+    top: 256px;
     z-index: 10;
     display: none;
     flex-direction: column;
@@ -399,14 +440,12 @@
     #view-toggle    { top: 136px; left: 14px; }
     #metric-label   { top: 162px; left: 16px; }
     #metric-toggle  { top: 172px; left: 14px; right: 14px; max-width: none; }
-    #geography-label { top: 214px; left: 16px; }
-    #geography-toggle { top: 224px; left: 14px; right: 14px; }
-    #year-label { top: 252px; left: 16px; }
-    #year-toggle { top: 262px; left: 14px; right: 14px; }
-    #country-toggle { top: 294px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
+    #metric-options { top: 226px; left: 14px; right: 14px; min-width: 0; max-width: calc(100vw - 28px); }
+    #country-toggle { top: 226px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
     #theme-toggle   { top: auto; right: auto; left: auto; }
     .toggle-btn     { padding: 4px 10px; font-size: .65rem; }
+    .toggle-btn.secondary-btn { padding: 5px 9px 4px; font-size: .58rem; }
 
     #search-wrap    { flex: 1; width: auto; }
     #search-input   { flex: 1; width: auto; }
@@ -454,15 +493,21 @@
   <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
   <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
 </div>
-<div id="geography-label" class="control-title">Geography</div>
-<div id="geography-toggle">
-  <button id="geo-borough" class="toggle-btn metric-btn active" onclick="setGeography('borough')">Borough</button>
-  <button id="geo-msoa" class="toggle-btn metric-btn" onclick="setGeography('msoa')">MSOA</button>
-</div>
-<div id="year-label" class="control-title">Year</div>
-<div id="year-toggle">
-  <button id="year-2021" class="toggle-btn metric-btn" onclick="setYear(2021)">2021</button>
-  <button id="year-2024" class="toggle-btn metric-btn active" onclick="setYear(2024)">2024</button>
+<div id="metric-options">
+  <div class="metric-option-row" id="geography-row">
+    <div class="metric-option-label">Geography</div>
+    <div id="geography-toggle" class="metric-subtoggle">
+      <button id="geo-borough" class="toggle-btn secondary-btn active" onclick="setGeography('borough')">Borough</button>
+      <button id="geo-msoa" class="toggle-btn secondary-btn" onclick="setGeography('msoa')">MSOA</button>
+    </div>
+  </div>
+  <div class="metric-option-row" id="year-row">
+    <div class="metric-option-label">Year</div>
+    <div id="year-toggle" class="metric-subtoggle">
+      <button id="year-2021" class="toggle-btn secondary-btn" onclick="setYear(2021)">2021</button>
+      <button id="year-2024" class="toggle-btn secondary-btn active" onclick="setYear(2024)">2024</button>
+    </div>
+  </div>
 </div>
 <div id="country-toggle">
   <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
@@ -872,9 +917,10 @@ async function init() {
   const viewToggleEl = document.getElementById("view-toggle");
   const metricLabelEl = document.getElementById("metric-label");
   const metricToggleEl = document.getElementById("metric-toggle");
-  const geographyLabelEl = document.getElementById("geography-label");
+  const metricOptionsEl = document.getElementById("metric-options");
   const geographyToggleEl = document.getElementById("geography-toggle");
-  const yearLabelEl = document.getElementById("year-label");
+  const geographyRowEl = document.getElementById("geography-row");
+  const yearRowEl = document.getElementById("year-row");
   const yearToggleEl = document.getElementById("year-toggle");
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
@@ -1565,9 +1611,10 @@ async function init() {
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
-    geographyLabelEl.style.display = geographyMode ? "block" : "none";
+    metricOptionsEl.style.display = geographyMode ? "flex" : "none";
+    geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
-    yearLabelEl.style.display = yearMode ? "block" : "none";
+    yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
