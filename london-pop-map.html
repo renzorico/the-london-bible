@@ -348,10 +348,14 @@
   #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
   #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
   #spotlight-panel {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-46%);
+    z-index: 10;
     display: none;
-    width: min(320px, calc(100vw - 48px));
-    padding: 14px 15px 13px;
+    width: min(344px, calc(100vw - 48px));
+    padding: 15px 16px 14px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
@@ -470,11 +474,11 @@
   #comparison-panel {
     position: absolute;
     right: 24px;
-    bottom: 82px;
+    bottom: 92px;
     z-index: 10;
     display: none;
-    width: min(356px, calc(100vw - 48px));
-    padding: 15px 16px 14px;
+    width: min(388px, calc(100vw - 48px));
+    padding: 17px 18px 16px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
@@ -486,7 +490,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
   #comparison-panel .c-title {
     font-family: var(--font-ui);
@@ -497,7 +501,7 @@
     color: var(--subtitle);
   }
   #comparison-panel .c-kicker {
-    margin-bottom: 11px;
+    margin-bottom: 12px;
     font-family: var(--font-ui);
     font-size: .63rem;
     font-weight: 700;
@@ -520,7 +524,7 @@
   #comparison-panel .c-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 12px;
+    gap: 16px;
     align-items: start;
   }
   #comparison-panel .c-col {
@@ -544,7 +548,7 @@
   #comparison-panel .c-tag.b { background: #844a5c; }
   #comparison-panel .c-name {
     font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-size: 1.12rem;
     line-height: 1.01;
     letter-spacing: .03em;
     color: var(--title);
@@ -561,12 +565,12 @@
   #comparison-panel .c-val {
     margin-top: 3px;
     font-family: var(--font-ui);
-    font-size: .98rem;
+    font-size: 1.03rem;
     font-weight: 800;
     color: var(--legend-accent);
   }
   #comparison-panel .c-support {
-    margin-top: 8px;
+    margin-top: 9px;
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.5;
@@ -577,9 +581,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-width: 92px;
-    padding-top: 28px;
+    gap: 8px;
+    min-width: 108px;
+    padding-top: 30px;
   }
   #comparison-panel .c-diff-label,
   #comparison-panel .c-meta {
@@ -592,7 +596,7 @@
   }
   #comparison-panel .c-diff {
     font-family: var(--font-ui);
-    font-size: .95rem;
+    font-size: 1rem;
     font-weight: 800;
     color: var(--title);
     text-align: center;
@@ -619,12 +623,12 @@
   #comparison-panel .c-state-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
     margin-top: 2px;
   }
   #comparison-panel .c-state-slot {
     min-width: 0;
-    padding: 9px 10px 10px;
+    padding: 10px 11px 11px;
     border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
     border-radius: 12px;
     background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
@@ -754,10 +758,10 @@
     #search-input   { flex: 1; width: auto; }
 
     #bottom-left-stack { left: 14px; right: 14px; bottom: 16px; max-width: calc(100vw - 28px); }
-    #legend,
-    #spotlight-panel { width: 100%; max-width: 320px; }
+    #legend { width: 100%; max-width: 320px; }
     #hint           { display: none; }
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
+    #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
     #credit         { right: 14px; bottom: 82px; }
   }
@@ -856,14 +860,6 @@
 <div id="tooltip"></div>
 
 <div id="bottom-left-stack">
-  <div id="spotlight-panel">
-    <div class="s-head">
-      <div class="s-title">Why here?</div>
-      <div class="s-kicker">Borough spotlight</div>
-    </div>
-    <div id="spotlight-content"></div>
-  </div>
-
   <div id="legend">
     <div class="llbl">Residents per km²</div>
     <div class="lbar"></div>
@@ -871,6 +867,14 @@
     <div class="lavg" id="legend-avg">London avg · 0 res/km²</div>
     <div class="lmeta" id="legend-meta"></div>
   </div>
+</div>
+
+<div id="spotlight-panel">
+  <div class="s-head">
+    <div class="s-title">Why here?</div>
+    <div class="s-kicker">Borough spotlight</div>
+  </div>
+  <div id="spotlight-content"></div>
 </div>
 
 <div id="tube-legend">
@@ -1335,6 +1339,7 @@ async function init() {
       pinnedCoord = null;
       tooltipEl.classList.remove("pinned");
       tooltipEl.style.display = "none";
+      renderSpotlightPanel();
     }
   });
 
@@ -2515,6 +2520,7 @@ async function init() {
     pinnedCoord = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
+    renderSpotlightPanel();
   }
 
   function handleComparisonSelection(feature) {
@@ -2596,12 +2602,14 @@ async function init() {
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        renderSpotlightPanel();
         return;
       }
       if (object?.layer?.id === "tube-lines") {
         tooltipEl.innerHTML = lineTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        renderSpotlightPanel();
         return;
       }
 
@@ -2609,6 +2617,7 @@ async function init() {
         tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        renderSpotlightPanel();
         return;
       }
 
@@ -2618,6 +2627,7 @@ async function init() {
       tooltipEl.innerHTML = densityTooltipHtml(zone, pop, dens, true);
       tooltipEl.style.display = "block";
       positionTooltip(x, y);
+      renderSpotlightPanel();
     },
   });
 

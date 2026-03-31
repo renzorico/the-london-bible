@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Spotlight panel placement & comparison spacing
+
+- Moved the borough `Why here?` spotlight out of the left control stack into its own centre-right analysis card and fixed first-click spotlight refresh on borough selection.
+- Loosened the borough comparison card layout so A/B values, names, and `B − A` are easier to scan without crowding the bottom-right corner.
+
 ## 2026-04-01 — Borough spotlight narratives
 
 - Upgraded the borough `Why here?` panel from fixed metric rows to 3–5 short, data-driven spotlight sentences using the existing borough metrics only.
