@@ -1,0 +1,21 @@
+# Changelog
+
+## 2026-04-01 — Why here? spotlight & project changelog
+
+- Added a root changelog to track major user-facing atlas changes and borough analysis milestones.
+- Added a borough-only `Why here?` spotlight scaffold that compares a selected borough with London averages across the existing in-app metrics.
+
+## 2026-04-01 — Comparison polish & layout hardening
+
+- Refined the borough comparison panel with clearer A/B hierarchy, stronger onboarding states, and a more readable `B − A` summary.
+- Moved comparison into borough-only tools and refactored the left control stack so borough panels flow naturally without fragile vertical offsets.
+
+## 2026-04-01 — Borough comparison & MSOA density
+
+- Added side-by-side borough comparison for the active borough metric, including A/B highlights and a compact comparison card.
+- Added year-aware MSOA density rendering with 2021 and 2024 support while keeping borough metrics intact.
+
+## 2026-04-01 — Borough controls & state stability
+
+- Polished the borough density geography/year controls into a compact secondary options panel under `Metric`.
+- Stabilized pinned tooltip and search-highlight behavior so metric, geography, year, and view changes stay in sync.

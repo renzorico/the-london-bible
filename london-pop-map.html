@@ -319,9 +319,20 @@
   }
   #tooltip .tclose:hover { color: var(--legend-accent); }
 
+  #bottom-left-stack {
+    position: absolute;
+    bottom: 26px;
+    left: 24px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: min(340px, calc(100vw - 48px));
+    pointer-events: none;
+  }
   #legend {
-    position: absolute; bottom: 26px; left: 24px;
-    z-index: 10; pointer-events: none;
+    position: relative;
     min-width: 248px;
     padding: 18px 18px 17px;
     border: 1px solid var(--panel-border);
@@ -336,6 +347,102 @@
   #legend .lends { display: flex; justify-content: space-between; font-size: .81rem; color: var(--legend-text); gap: 12px; }
   #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
   #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
+  #spotlight-panel {
+    position: relative;
+    display: none;
+    width: min(320px, calc(100vw - 48px));
+    padding: 14px 15px 13px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #spotlight-panel .s-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #spotlight-panel .s-title {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #spotlight-panel .s-kicker {
+    font-family: var(--font-ui);
+    font-size: .59rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--legend-accent);
+  }
+  #spotlight-panel .s-name {
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    line-height: 1.02;
+    letter-spacing: .03em;
+    color: var(--title);
+  }
+  #spotlight-panel .s-helper,
+  #spotlight-panel .s-foot {
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #spotlight-panel .s-helper { margin-top: 2px; }
+  #spotlight-panel .s-grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #spotlight-panel .s-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: baseline;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
+  }
+  #spotlight-panel .s-row:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+  #spotlight-panel .s-label {
+    font-family: var(--font-ui);
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #spotlight-panel .s-note {
+    margin-top: 4px;
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.45;
+    color: var(--hint);
+  }
+  #spotlight-panel .s-value {
+    text-align: right;
+    font-family: var(--font-ui);
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--title);
+  }
+  #spotlight-panel .s-value strong {
+    color: var(--legend-accent);
+    font-weight: 800;
+  }
+  #spotlight-panel .s-foot {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+  }
 
   #tube-legend {
     position: absolute; top: 50%; right: 24px;
@@ -659,7 +766,9 @@
     #search-wrap    { flex: 1; width: auto; }
     #search-input   { flex: 1; width: auto; }
 
-    #legend         { bottom: 16px; left: 14px; }
+    #bottom-left-stack { left: 14px; right: 14px; bottom: 16px; max-width: calc(100vw - 28px); }
+    #legend,
+    #spotlight-panel { width: 100%; max-width: 320px; }
     #hint           { display: none; }
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
@@ -718,6 +827,7 @@
       <div class="metric-option-label">Tools</div>
       <div class="metric-subtoggle">
         <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
+        <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
       </div>
     </div>
     <div class="metric-option-row" id="geography-row">
@@ -758,12 +868,22 @@
 </div>
 <div id="tooltip"></div>
 
-<div id="legend">
-  <div class="llbl">Residents per km²</div>
-  <div class="lbar"></div>
-  <div class="lends"><span>sparse</span><span>dense</span></div>
-  <div class="lavg" id="legend-avg">London avg · 0 res/km²</div>
-  <div class="lmeta" id="legend-meta"></div>
+<div id="bottom-left-stack">
+  <div id="spotlight-panel">
+    <div class="s-head">
+      <div class="s-title">Why here?</div>
+      <div class="s-kicker">Borough spotlight</div>
+    </div>
+    <div id="spotlight-content"></div>
+  </div>
+
+  <div id="legend">
+    <div class="llbl">Residents per km²</div>
+    <div class="lbar"></div>
+    <div class="lends"><span>sparse</span><span>dense</span></div>
+    <div class="lavg" id="legend-avg">London avg · 0 res/km²</div>
+    <div class="lmeta" id="legend-meta"></div>
+  </div>
 </div>
 
 <div id="tube-legend">
@@ -1136,7 +1256,7 @@ function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
-let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison;
+let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
 let setGeography, setYear;
 
 async function init() {
@@ -1150,6 +1270,8 @@ async function init() {
   const tubeLegendItemsEl = document.getElementById("tube-legend-items");
   const comparisonPanelEl = document.getElementById("comparison-panel");
   const comparisonContentEl = document.getElementById("comparison-content");
+  const spotlightPanelEl = document.getElementById("spotlight-panel");
+  const spotlightContentEl = document.getElementById("spotlight-content");
   const countryToggleEl = document.getElementById("country-toggle");
   const viewGroupEl = document.getElementById("view-group");
   const viewLabelEl = document.getElementById("view-label");
@@ -1166,6 +1288,7 @@ async function init() {
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
+  const btnSpotlight = document.getElementById("btn-spotlight");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
@@ -1193,6 +1316,7 @@ async function init() {
   let comparisonEnabled = false;
   let comparisonA = null;
   let comparisonB = null;
+  let spotlightEnabled = false;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
@@ -1474,6 +1598,16 @@ async function init() {
     return currentDataset === "municipi" && activeGeography === "borough";
   }
 
+  function spotlightAvailable() {
+    return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
+  function spotlightFeature() {
+    if (!spotlightEnabled || !spotlightAvailable() || comparisonEnabled || !tooltipPinned || !pinnedCoord) return null;
+    const feature = featureAt(...pinnedCoord);
+    return feature?.properties?.[NAME_FIELD] ? feature : null;
+  }
+
   function comparisonCountrySelection() {
     return boroughMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth;
   }
@@ -1521,6 +1655,41 @@ async function init() {
   function comparisonDifferenceNote(delta) {
     if (!Number.isFinite(delta) || delta === 0) return "No meaningful gap";
     return delta > 0 ? "B higher than A" : "B lower than A";
+  }
+
+  function spotlightDeltaText(metricKey, value, average, countrySelection = selectedCountryBirth) {
+    if (!Number.isFinite(value) || !Number.isFinite(average)) return "No London baseline";
+    const delta = value - average;
+    const absDelta = Math.abs(delta);
+    if (metricKey.endsWith("_pct") || metricKey === "gender_balance_pp") {
+      if (absDelta < 0.1) return "Near London average";
+      const sign = delta > 0 ? "above" : "below";
+      return `${absDelta.toFixed(1)} pp ${sign} avg`;
+    }
+    if (!average) return "No London baseline";
+    const pct = Math.round((absDelta / average) * 100);
+    if (pct < 1) return "Near London average";
+    return `${pct}% ${delta > 0 ? "above" : "below"} avg`;
+  }
+
+  function spotlightRows(feature) {
+    return [
+      { key: "density", label: "Density" },
+      { key: "house_price_proxy_gbp", label: "House prices" },
+      { key: "median_weekly_earnings_gbp", label: "Earnings" },
+      { key: "children_share_pct", label: "Children" },
+      { key: "country_of_birth_pct", label: "Not UK-born", countrySelection: "ALL" },
+    ].map(({ key, label, countrySelection }) => {
+      const value = metricValue(feature, key, countrySelection ?? selectedCountryBirth);
+      const stats = getMetricStats(key, countrySelection ?? selectedCountryBirth);
+      return {
+        key,
+        label,
+        value,
+        formatted: formatMetricValueFor(key, value, countrySelection ?? selectedCountryBirth),
+        delta: spotlightDeltaText(key, value, stats?.avg, countrySelection ?? selectedCountryBirth),
+      };
+    });
   }
 
   function comparisonSupportLine(feature) {
@@ -2005,6 +2174,7 @@ async function init() {
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
     btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
+    btnSpotlight.classList.toggle("active", currentDataset === "municipi" && spotlightEnabled && !comparisonEnabled);
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
   }
@@ -2034,6 +2204,11 @@ async function init() {
     btnCompare.style.display = compareMode ? "" : "none";
     btnCompare.disabled = !comparisonAvailable();
     btnCompare.title = comparisonAvailable() ? "Compare two boroughs" : "Comparison is available in borough geography only";
+    btnSpotlight.style.display = compareMode ? "" : "none";
+    btnSpotlight.disabled = !spotlightAvailable() || comparisonEnabled;
+    btnSpotlight.title = comparisonEnabled
+      ? "Disable comparison to use the borough spotlight"
+      : (spotlightAvailable() ? "Explain how the selected borough stands out" : "Spotlight is available in borough geography only");
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
@@ -2156,6 +2331,43 @@ async function init() {
     `;
   }
 
+  function renderSpotlightPanel() {
+    const feature = spotlightFeature();
+    const visible = spotlightEnabled && spotlightAvailable() && !comparisonEnabled;
+    spotlightPanelEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      spotlightContentEl.innerHTML = "";
+      return;
+    }
+
+    if (!feature) {
+      spotlightContentEl.innerHTML = `
+        <div class="s-helper">Select a borough to see how it differs from London borough averages.</div>
+        <div class="s-foot">Uses current borough metrics only. Compare mode hides the spotlight.</div>
+      `;
+      return;
+    }
+
+    const currentMetric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
+    const rows = spotlightRows(feature);
+    spotlightContentEl.innerHTML = `
+      <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+      <div class="s-helper">Current lens · ${currentMetric.label}</div>
+      <div class="s-grid">
+        ${rows.map((row) => `
+          <div class="s-row">
+            <div>
+              <div class="s-label">${row.label}</div>
+              <div class="s-note">${row.delta}</div>
+            </div>
+            <div class="s-value"><strong>${row.formatted}</strong></div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="s-foot">Compared with London borough averages using the current atlas metrics.</div>
+    `;
+  }
+
   function updateStopHoverBehavior() {
     return onlyTubeMode();
   }
@@ -2168,6 +2380,7 @@ async function init() {
     renderLegend();
     renderTubeLegend();
     renderComparisonPanel();
+    renderSpotlightPanel();
   }
 
   function refreshMapState(nextViewState = null) {
@@ -2437,6 +2650,9 @@ async function init() {
       comparisonB = null;
     } else if (boroughMetric === "country_of_birth_pct") {
       selectedCountryBirth = "ALL";
+      spotlightEnabled = false;
+    } else {
+      spotlightEnabled = false;
     }
     clearPinnedTooltip();
     refreshMapState();
@@ -2446,6 +2662,16 @@ async function init() {
     comparisonEnabled = false;
     comparisonA = null;
     comparisonB = null;
+    refreshMapState();
+  };
+
+  toggleSpotlight = function() {
+    if (!spotlightAvailable() || comparisonEnabled) {
+      spotlightEnabled = false;
+      refreshMapState();
+      return;
+    }
+    spotlightEnabled = !spotlightEnabled;
     refreshMapState();
   };
 
