@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>London · Demographic Analysis Map</title>
+
+<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/deck.gl@9.0.27/dist.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+
+<style>
+  :root {
+    --font-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+    --font-ui: "Public Sans", system-ui, sans-serif;
+
+    --bg: #f4efe8;
+    --panel: rgba(249, 245, 239, 0.92);
+    --panel-strong: rgba(255, 251, 247, 0.97);
+    --panel-border: rgba(115, 76, 64, 0.16);
+    --panel-shadow: 0 14px 34px rgba(79, 49, 38, 0.08);
+    --title: #17212b;
+    --subtitle: #7b6c61;
+    --button-text: #3f332c;
+    --button-bg: rgba(255, 252, 249, 0.86);
+    --button-border: rgba(93, 65, 56, 0.18);
+    --button-hover: rgba(255, 255, 255, 0.98);
+    --button-active: #0b5c63;
+    --button-active-border: #0b5c63;
+    --button-active-text: #ffffff;
+    --tooltip-bg: rgba(254, 251, 247, 0.98);
+    --tooltip-border: rgba(93, 65, 56, 0.18);
+    --tooltip-text: #2a241f;
+    --tooltip-subtle: #7b6c61;
+    --legend-text: #8a786c;
+    --legend-accent: #6a2038;
+    --hint: #b3a396;
+    --attrib-bg: rgba(249, 245, 239, 0.82);
+    --attrib-text: #a48f82;
+    --search-focus: rgba(11, 92, 99, 0.45);
+    --thames: 30, 120, 200, 220;
+    --highlight-fill: 30, 120, 200, 70;
+    --highlight-line: 30, 120, 200, 255;
+    --pin-fill: 30, 120, 200, 255;
+  }
+
+  body[data-theme="night"] {
+    --bg: #0b1217;
+    --panel: rgba(16, 22, 30, 0.82);
+    --panel-strong: rgba(20, 27, 36, 0.92);
+    --panel-border: rgba(163, 184, 204, 0.14);
+    --panel-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+    --title: #eef2f6;
+    --subtitle: #91a0af;
+    --button-text: #dbe5ef;
+    --button-bg: rgba(15, 22, 30, 0.82);
+    --button-border: rgba(150, 170, 190, 0.16);
+    --button-hover: rgba(24, 33, 44, 0.96);
+    --button-active: #7b61ff;
+    --button-active-border: #7b61ff;
+    --button-active-text: #ffffff;
+    --tooltip-bg: rgba(17, 24, 32, 0.96);
+    --tooltip-border: rgba(163, 184, 204, 0.14);
+    --tooltip-text: #edf2f7;
+    --tooltip-subtle: #9fb0c0;
+    --legend-text: #a7b7c6;
+    --legend-accent: #f0c572;
+    --hint: #788796;
+    --attrib-bg: rgba(16, 22, 30, 0.84);
+    --attrib-text: #93a1af;
+    --search-focus: rgba(123, 97, 255, 0.45);
+    --thames: 90, 164, 255, 230;
+    --highlight-fill: 123, 97, 255, 70;
+    --highlight-line: 169, 146, 255, 255;
+    --pin-fill: 255, 199, 107, 255;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); font-family: var(--font-ui); overflow: hidden; color: var(--title); }
+  #map { width: 100vw; height: 100vh; }
+
+  .maplibregl-ctrl-attrib {
+    background: var(--attrib-bg) !important;
+    font-size: .56rem !important; color: var(--attrib-text) !important;
+    font-family: var(--font-ui) !important;
+  }
+  .maplibregl-ctrl-attrib-button { display: none !important; }
+
+  #title {
+    position: absolute; top: 22px; left: 24px;
+    pointer-events: none; z-index: 10;
+    padding: 14px 16px 12px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+    border-radius: 14px;
+  }
+  #title h1 {
+    font-family: var(--font-display);
+    font-size: 2.15rem;
+    line-height: .94;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--title);
+  }
+  #title p  {
+    margin-top: 7px;
+    font-family: var(--font-ui);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+
+  #layer-toggle, #view-toggle, #metric-toggle {
+    position: absolute; left: 24px;
+    z-index: 10; display: flex; gap: 4px;
+  }
+  #layer-toggle { top: 117px; }
+  #view-toggle  { top: 154px; }
+  #metric-toggle {
+    top: 191px;
+    flex-wrap: wrap;
+    max-width: 520px;
+    gap: 6px;
+  }
+  #top-right-controls {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #theme-toggle {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 20;
+    flex: 0 0 auto;
+  }
+  .control-title {
+    position: absolute;
+    left: 26px;
+    z-index: 10;
+    font-family: var(--font-ui);
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--title) 68%, var(--subtitle) 32%);
+    pointer-events: none;
+  }
+  #view-label { top: 142px; }
+  #metric-label { top: 179px; }
+  .toggle-btn {
+    padding: 7px 12px 6px;
+    font-family: var(--font-ui);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    background: var(--button-bg);
+    border: 1px solid var(--button-border);
+    border-radius: 10px;
+    color: var(--button-text);
+    cursor: pointer; transition: all .15s;
+    backdrop-filter: blur(14px);
+    box-shadow: var(--panel-shadow);
+  }
+  .toggle-btn:hover:not(:disabled) { background: var(--button-hover); border-color: rgba(83, 66, 58, .34); transform: translateY(-1px); }
+  .toggle-btn.active { background: var(--button-active); color: var(--button-active-text); border-color: var(--button-active-border); }
+  .toggle-btn:disabled { opacity: .4; cursor: default; }
+  .toggle-btn.metric-btn {
+    padding-left: 10px;
+    padding-right: 10px;
+    letter-spacing: .14em;
+  }
+  #btn-home {
+    min-width: 42px;
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: .82rem;
+  }
+
+  #search-wrap {
+    position: relative; top: auto; right: auto; z-index: 20;
+    display: flex; border-radius: 9px; overflow: hidden;
+    box-shadow: var(--panel-shadow);
+  }
+  #search-input {
+    width: 260px; padding: 11px 14px 10px;
+    font-family: var(--font-ui); font-size: .82rem; font-weight: 500;
+    background: var(--panel-strong);
+    border: 1px solid var(--panel-border); border-right: none;
+    border-radius: 11px 0 0 11px; color: var(--tooltip-text); outline: none;
+    backdrop-filter: blur(14px);
+  }
+  #search-input::placeholder { color: var(--subtitle); }
+  #search-input:focus { border-color: var(--search-focus); }
+  #search-btn {
+    padding: 11px 14px 10px; background: var(--button-active); color: #fff;
+    border: none; cursor: pointer; font-size: .9rem;
+    border-radius: 0 11px 11px 0; transition: background .15s;
+    font-family: var(--font-ui);
+  }
+  #search-btn:hover { filter: brightness(0.92); }
+
+  .spin {
+    display: inline-block; width: 12px; height: 12px;
+    border: 1.5px solid rgba(140,50,40,.15); border-top-color: var(--button-active);
+    border-radius: 50%; animation: spin .7s linear infinite;
+    vertical-align: middle; margin-left: 5px;
+  }
+
+  #tooltip {
+    position: absolute; z-index: 20;
+    background: var(--tooltip-bg);
+    border: 1px solid var(--tooltip-border);
+    border-radius: 12px; padding: 10px 14px;
+    font-family: var(--font-ui);
+    font-size: .78rem; line-height: 1.6; color: var(--tooltip-text);
+    display: none; white-space: nowrap;
+    box-shadow: var(--panel-shadow);
+    pointer-events: none;
+    backdrop-filter: blur(14px);
+  }
+  #tooltip.pinned { pointer-events: all; }
+  #tooltip .ttag {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--legend-accent);
+  }
+  #tooltip .tarea  { color: var(--tooltip-text); font-size: .92rem; font-weight: 700; }
+  #tooltip .tval   { color: var(--legend-accent); font-weight: 700; }
+  #tooltip .tsub   { color: var(--tooltip-subtle); font-size: .66rem; letter-spacing: .03em; }
+  #tooltip .tclose {
+    float: right; margin-left: 10px; cursor: pointer;
+    color: var(--subtitle); font-size: .7rem; line-height: 1;
+  }
+  #tooltip .tclose:hover { color: var(--legend-accent); }
+
+  #legend {
+    position: absolute; bottom: 26px; left: 24px;
+    z-index: 10; pointer-events: none;
+    min-width: 248px;
+    padding: 18px 18px 17px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #legend .llbl { font-family: var(--font-ui); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--subtitle); margin-bottom: 12px; }
+  #legend .lbar { width: 196px; height: 12px; border-radius: 999px; margin-bottom: 10px;
+    background: linear-gradient(to right, rgba(253,228,140,.9), #f4a350, #d55e58, #a52674, #560b6b, #0e0430); }
+  #legend .lends { display: flex; justify-content: space-between; font-size: .81rem; color: var(--legend-text); gap: 12px; }
+  #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
+  #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
+
+  #tube-legend {
+    position: absolute; top: 50%; right: 24px;
+    transform: translateY(-50%);
+    z-index: 10;
+    max-width: 260px;
+    padding: 11px 13px 10px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+    display: none;
+  }
+  #country-toggle {
+    position: absolute;
+    left: 24px;
+    top: 286px;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    max-width: 230px;
+    padding: 12px 13px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  .country-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 7px 10px 6px;
+    font-size: .64rem;
+    letter-spacing: .1em;
+    text-transform: none;
+  }
+  #credit {
+    position: absolute;
+    right: 24px;
+    bottom: 26px;
+    z-index: 10;
+    padding: 7px 11px 6px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 999px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #credit a {
+    font-family: var(--font-ui);
+    font-size: .64rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+    text-decoration: none;
+  }
+  #credit a:hover { color: var(--legend-accent); }
+  #tube-legend .llbl {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+    margin-bottom: 9px;
+  }
+  #tube-legend-items {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .tube-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    color: var(--legend-text);
+    font-family: var(--font-ui);
+    font-size: .7rem;
+    line-height: 1.2;
+  }
+  .tube-legend-swatch {
+    width: 14px;
+    height: 7px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.32);
+  }
+  .tube-legend-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #hint {
+    position: absolute; bottom: 26px; right: 24px;
+    z-index: 10; pointer-events: none; text-align: right;
+    font-size: .63rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--hint); line-height: 2;
+    font-family: var(--font-ui);
+  }
+
+  #loading {
+    position: absolute; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 100; transition: opacity .5s ease;
+  }
+  #loading h2 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; letter-spacing: .18em; color: var(--title); margin-bottom: 20px; text-transform: uppercase; }
+  #loading .lspinner { width: 32px; height: 32px; border: 2px solid rgba(140,50,40,.12); border-top-color: var(--button-active); border-radius: 50%; animation: spin .85s linear infinite; }
+  #loading .lstatus  { margin-top: 14px; font-size: .68rem; letter-spacing: .17em; text-transform: uppercase; color: var(--subtitle); font-family: var(--font-ui); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 540px) {
+    #title          { top: 14px; left: 14px; }
+    #title h1       { font-size: 1.52rem; }
+    #title p        { font-size: .6rem; }
+
+    #layer-toggle   { top: 98px;  left: 14px; }
+    #view-label     { top: 126px; left: 16px; }
+    #view-toggle    { top: 136px; left: 14px; }
+    #metric-label   { top: 162px; left: 16px; }
+    #metric-toggle  { top: 172px; left: 14px; right: 14px; max-width: none; }
+    #country-toggle { top: 232px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
+    #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
+    #theme-toggle   { top: auto; right: auto; left: auto; }
+    .toggle-btn     { padding: 4px 10px; font-size: .65rem; }
+
+    #search-wrap    { flex: 1; width: auto; }
+    #search-input   { flex: 1; width: auto; }
+
+    #legend         { bottom: 16px; left: 14px; }
+    #hint           { display: none; }
+    #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
+    #credit         { right: 14px; bottom: 82px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <h2>London</h2>
+  <div class="lspinner"></div>
+  <div class="lstatus" id="load-status">Loading…</div>
+</div>
+
+<div id="map"></div>
+
+<div id="title">
+  <h1>London</h1>
+  <p>Demographic Analysis Atlas · Borough Metrics</p>
+</div>
+
+<div id="layer-toggle">
+  <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
+  <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
+  <button id="btn-tube" class="toggle-btn" onclick="toggleStations()">Tube</button>
+  <button id="btn-tube-map" class="toggle-btn" onclick="setMode('tube')">Only-tube</button>
+</div>
+<div id="view-label" class="control-title">View</div>
+<div id="view-toggle">
+  <button id="btn-flat" class="toggle-btn active" onclick="setView('flat')">Flat map</button>
+  <button id="btn-3d"   class="toggle-btn" onclick="setView('3d')">Spikes</button>
+  <button id="btn-home" class="toggle-btn" style="margin-left:4px" onclick="resetView()" title="Reset to overview">⌂</button>
+</div>
+<div id="metric-label" class="control-title">Metric</div>
+<div id="metric-toggle">
+  <button id="metric-density" class="toggle-btn metric-btn active" onclick="setMetric('density')">Density</button>
+  <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn" onclick="setMetric('house_price_proxy_gbp')">House prices</button>
+  <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
+  <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
+  <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
+  <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
+</div>
+<div id="country-toggle">
+  <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
+  <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
+</div>
+<div id="top-right-controls">
+  <div id="theme-toggle">
+    <button id="btn-theme" class="toggle-btn" onclick="toggleTheme()">☾ Night</button>
+  </div>
+
+  <div id="search-wrap">
+    <input id="search-input" type="text" placeholder="Search an address in London…" autocomplete="off" />
+    <button id="search-btn">→</button>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<div id="legend">
+  <div class="llbl">Residents per km²</div>
+  <div class="lbar"></div>
+  <div class="lends"><span>sparse</span><span>dense</span></div>
+  <div class="lavg" id="legend-avg">London avg · 0 res/km²</div>
+  <div class="lmeta" id="legend-meta"></div>
+</div>
+
+<div id="tube-legend">
+  <div class="llbl">Tube lines</div>
+  <div id="tube-legend-items"></div>
+</div>
+
+<div id="hint">
+  Drag · scroll to zoom<br>
+  Flat map · Spikes to switch<br>
+  Click for address
+</div>
+
+<div id="credit"><a href="https://www.linkedin.com/in/renzorico" target="_blank" rel="noopener noreferrer">by renzorico</a></div>
+
+<script>
+const POP_FIELD = "population";
+const NAME_FIELD = "name";
+const DAY_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+const NIGHT_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const TFL_STATIONS_URL = "https://services1.arcgis.com/YswvgzOodUvqkoCN/arcgis/rest/services/TfL_stations/FeatureServer/1/query?where=1%3D1&outFields=NAME,LINES,MODES,NIGHT_TUBE&outSR=4326&f=geojson";
+const TUBE_LINES_URL = "https://raw.githubusercontent.com/vega/vega-datasets/main/data/londonTubeLines.json";
+
+const PALETTE = [
+  [244, 239, 231, 205],
+  [225, 207, 186, 222],
+  [202, 167, 146, 236],
+  [164, 126, 126, 244],
+  [118, 86, 97, 250],
+  [74, 52, 67, 255],
+];
+const COLOUR_GAMMA = 0.4;
+function lerp(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function hexColor(t, gamma = COLOUR_GAMMA) {
+  const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
+  const n = PALETTE.length - 1, s = tg * n;
+  const lo = Math.floor(s), hi = Math.min(lo + 1, n);
+  return lerp(PALETTE[lo], PALETTE[hi], s - lo);
+}
+function mixRgb(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+
+const ZONES = [
+  { name: "City of London", lon: -0.0923, lat: 51.5155, r: 0.020 },
+  { name: "Westminster", lon: -0.1357, lat: 51.4975, r: 0.025 },
+  { name: "Canary Wharf", lon: -0.0235, lat: 51.5054, r: 0.018 },
+  { name: "Shoreditch", lon: -0.0773, lat: 51.5227, r: 0.015 },
+  { name: "Brixton", lon: -0.1132, lat: 51.4613, r: 0.018 },
+  { name: "Camden", lon: -0.1426, lat: 51.5390, r: 0.020 },
+  { name: "Hackney", lon: -0.0553, lat: 51.5450, r: 0.022 },
+  { name: "Islington", lon: -0.1031, lat: 51.5416, r: 0.018 },
+  { name: "Southwark", lon: -0.0877, lat: 51.5015, r: 0.022 },
+  { name: "Tower Hamlets", lon: -0.0366, lat: 51.5150, r: 0.022 },
+  { name: "Lambeth", lon: -0.1168, lat: 51.4745, r: 0.022 },
+  { name: "Wandsworth", lon: -0.1920, lat: 51.4567, r: 0.025 },
+  { name: "Hammersmith", lon: -0.2246, lat: 51.4927, r: 0.020 },
+  { name: "Notting Hill", lon: -0.2058, lat: 51.5108, r: 0.015 },
+  { name: "Kensington", lon: -0.1939, lat: 51.4990, r: 0.018 },
+  { name: "Paddington", lon: -0.1759, lat: 51.5154, r: 0.015 },
+  { name: "Elephant & Castle", lon: -0.1001, lat: 51.4943, r: 0.015 },
+  { name: "Greenwich", lon: 0.0098, lat: 51.4769, r: 0.022 },
+  { name: "Stratford", lon: 0.0038, lat: 51.5416, r: 0.018 },
+  { name: "Peckham", lon: -0.0694, lat: 51.4741, r: 0.016 },
+];
+
+const THEMES = {
+  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4 },
+  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2 },
+};
+
+const TUBE_LINE_COLOURS = {
+  bakerloo: [179, 98, 5],
+  central: [220, 36, 31],
+  circle: [255, 211, 41],
+  district: [0, 114, 41],
+  "hammersmith & city": [244, 169, 190],
+  jubilee: [161, 165, 167],
+  metropolitan: [155, 0, 88],
+  northern: [30, 36, 42],
+  piccadilly: [0, 15, 159],
+  victoria: [0, 160, 226],
+  waterloo: [147, 206, 186],
+  overground: [233, 106, 16],
+  dlr: [0, 175, 173],
+  tramlink: [132, 189, 0],
+  "elizabeth line": [105, 26, 143],
+  "tfl rail": [105, 26, 143],
+  "london overground": [233, 106, 16],
+  rail: [102, 119, 136],
+};
+
+const BOROUGH_METRIC_DATA = {"City of London":{"house_price_proxy_gbp":835000,"median_weekly_earnings_gbp":null,"male_share_pct":55.76,"female_share_pct":44.24,"children_share_pct":8,"not_born_uk_share_pct":36.7},"Barking and Dagenham":{"house_price_proxy_gbp":300000,"median_weekly_earnings_gbp":744.1,"male_share_pct":48.88,"female_share_pct":51.12,"children_share_pct":26.12,"not_born_uk_share_pct":31.26},"Barnet":{"house_price_proxy_gbp":533500,"median_weekly_earnings_gbp":862.4,"male_share_pct":49.09,"female_share_pct":50.91,"children_share_pct":20.87,"not_born_uk_share_pct":39.08},"Bexley":{"house_price_proxy_gbp":342500,"median_weekly_earnings_gbp":849.1,"male_share_pct":48.18,"female_share_pct":51.82,"children_share_pct":20.22,"not_born_uk_share_pct":14.11},"Brent":{"house_price_proxy_gbp":499950,"median_weekly_earnings_gbp":747.6,"male_share_pct":50.64,"female_share_pct":49.36,"children_share_pct":20.6,"not_born_uk_share_pct":55.18},"Bromley":{"house_price_proxy_gbp":440000,"median_weekly_earnings_gbp":958.2,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":19.7,"not_born_uk_share_pct":14.5},"Camden":{"house_price_proxy_gbp":760000,"median_weekly_earnings_gbp":864.8,"male_share_pct":49.73,"female_share_pct":50.27,"children_share_pct":15.41,"not_born_uk_share_pct":42.52},"Croydon":{"house_price_proxy_gbp":365000,"median_weekly_earnings_gbp":829.8,"male_share_pct":48.54,"female_share_pct":51.46,"children_share_pct":21.73,"not_born_uk_share_pct":29.66},"Ealing":{"house_price_proxy_gbp":485000,"median_weekly_earnings_gbp":784.9,"male_share_pct":50.18,"female_share_pct":49.82,"children_share_pct":20.81,"not_born_uk_share_pct":48.29},"Enfield":{"house_price_proxy_gbp":402500,"median_weekly_earnings_gbp":838.4,"male_share_pct":48.6,"female_share_pct":51.4,"children_share_pct":22.09,"not_born_uk_share_pct":35.11},"Greenwich":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":852.1,"male_share_pct":50.1,"female_share_pct":49.9,"children_share_pct":21.81,"not_born_uk_share_pct":31.11},"Hackney":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":882,"male_share_pct":49.67,"female_share_pct":50.33,"children_share_pct":20.38,"not_born_uk_share_pct":39.12},"Hammersmith and Fulham":{"house_price_proxy_gbp":777475,"median_weekly_earnings_gbp":862.4,"male_share_pct":48.93,"female_share_pct":51.07,"children_share_pct":16.79,"not_born_uk_share_pct":42.81},"Haringey":{"house_price_proxy_gbp":540000,"median_weekly_earnings_gbp":814.5,"male_share_pct":50.12,"female_share_pct":49.88,"children_share_pct":19.4,"not_born_uk_share_pct":44.69},"Harrow":{"house_price_proxy_gbp":500000,"median_weekly_earnings_gbp":853.8,"male_share_pct":49.66,"female_share_pct":50.34,"children_share_pct":20.28,"not_born_uk_share_pct":44.8},"Havering":{"house_price_proxy_gbp":350000,"median_weekly_earnings_gbp":822.5,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":18.88,"not_born_uk_share_pct":10.36},"Hillingdon":{"house_price_proxy_gbp":415000,"median_weekly_earnings_gbp":804.1,"male_share_pct":49.89,"female_share_pct":50.11,"children_share_pct":21.11,"not_born_uk_share_pct":30},"Hounslow":{"house_price_proxy_gbp":395000,"median_weekly_earnings_gbp":766.6,"male_share_pct":50.6,"female_share_pct":49.4,"children_share_pct":20.92,"not_born_uk_share_pct":43.34},"Islington":{"house_price_proxy_gbp":615000,"median_weekly_earnings_gbp":935,"male_share_pct":49.79,"female_share_pct":50.21,"children_share_pct":15.89,"not_born_uk_share_pct":35.44},"Kensington and Chelsea":{"house_price_proxy_gbp":1315000,"median_weekly_earnings_gbp":988,"male_share_pct":49.46,"female_share_pct":50.54,"children_share_pct":15.69,"not_born_uk_share_pct":51.61},"Kingston upon Thames":{"house_price_proxy_gbp":487250,"median_weekly_earnings_gbp":844,"male_share_pct":49.08,"female_share_pct":50.92,"children_share_pct":19.28,"not_born_uk_share_pct":28.28},"Lambeth":{"house_price_proxy_gbp":518110,"median_weekly_earnings_gbp":883.5,"male_share_pct":50.14,"female_share_pct":49.86,"children_share_pct":17.81,"not_born_uk_share_pct":38.89},"Lewisham":{"house_price_proxy_gbp":430000,"median_weekly_earnings_gbp":843,"male_share_pct":49.16,"female_share_pct":50.84,"children_share_pct":20.68,"not_born_uk_share_pct":33.82},"Merton":{"house_price_proxy_gbp":470000,"median_weekly_earnings_gbp":876.3,"male_share_pct":49.12,"female_share_pct":50.88,"children_share_pct":20.59,"not_born_uk_share_pct":37.79},"Newham":{"house_price_proxy_gbp":390500,"median_weekly_earnings_gbp":758.8,"male_share_pct":52.17,"female_share_pct":47.83,"children_share_pct":22.21,"not_born_uk_share_pct":53.61},"Redbridge":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":820.1,"male_share_pct":49.54,"female_share_pct":50.46,"children_share_pct":22.9,"not_born_uk_share_pct":37.05},"Richmond upon Thames":{"house_price_proxy_gbp":650000,"median_weekly_earnings_gbp":962,"male_share_pct":48.58,"female_share_pct":51.42,"children_share_pct":20.49,"not_born_uk_share_pct":24.29},"Southwark":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":880.4,"male_share_pct":49.57,"female_share_pct":50.43,"children_share_pct":18.5,"not_born_uk_share_pct":39.49},"Sutton":{"house_price_proxy_gbp":367000,"median_weekly_earnings_gbp":853.2,"male_share_pct":48.71,"female_share_pct":51.29,"children_share_pct":20.38,"not_born_uk_share_pct":19.89},"Tower Hamlets":{"house_price_proxy_gbp":490000,"median_weekly_earnings_gbp":882.2,"male_share_pct":51.74,"female_share_pct":48.26,"children_share_pct":19.59,"not_born_uk_share_pct":43.16},"Waltham Forest":{"house_price_proxy_gbp":445000,"median_weekly_earnings_gbp":839.7,"male_share_pct":49.95,"female_share_pct":50.05,"children_share_pct":22,"not_born_uk_share_pct":38.64},"Wandsworth":{"house_price_proxy_gbp":654000,"median_weekly_earnings_gbp":921.1,"male_share_pct":48.06,"female_share_pct":51.94,"children_share_pct":17.59,"not_born_uk_share_pct":35.43},"Westminster":{"house_price_proxy_gbp":1025000,"median_weekly_earnings_gbp":958.2,"male_share_pct":51.64,"female_share_pct":48.36,"children_share_pct":14.71,"not_born_uk_share_pct":53.32}};
+const COUNTRY_BIRTH_SHORTLIST = ["ALL", "India", "Poland", "Romania", "Nigeria", "Pakistan", "Bangladesh"];
+const BOROUGH_COUNTRY_BIRTH_DATA = {"Barking and Dagenham":{"India":3.05,"Poland":1.06,"Romania":4.3,"Nigeria":4.31,"Pakistan":3.32,"Bangladesh":4.24,"top_country":"Nigeria","top_country_pct":4.31},"Barnet":{"India":2.91,"Poland":1.94,"Romania":3.45,"Nigeria":0.99,"Pakistan":0.78,"Bangladesh":0.33,"top_country":"Romania","top_country_pct":3.45},"Bexley":{"India":2.23,"Poland":0.84,"Romania":0.98,"Nigeria":3.58,"Pakistan":0.28,"Bangladesh":0.34,"top_country":"Nigeria","top_country_pct":3.58},"Brent":{"India":10.36,"Poland":2.13,"Romania":5.22,"Nigeria":0.75,"Pakistan":1.94,"Bangladesh":0.28,"top_country":"India","top_country_pct":10.36},"Bromley":{"India":2.07,"Poland":0.86,"Romania":0.74,"Nigeria":1.07,"Pakistan":0.25,"Bangladesh":0.22,"top_country":"India","top_country_pct":2.07},"Camden":{"India":1.56,"Poland":0.9,"Romania":0.53,"Nigeria":0.51,"Pakistan":0.37,"Bangladesh":2.77,"top_country":"Bangladesh","top_country_pct":2.77},"City of London":{"India":2.04,"Poland":1.53,"Romania":0.58,"Nigeria":0.24,"Pakistan":0.19,"Bangladesh":1.36,"top_country":"India","top_country_pct":2.04},"Croydon":{"India":3.92,"Poland":2.17,"Romania":1.32,"Nigeria":1.68,"Pakistan":1.9,"Bangladesh":0.4,"top_country":"India","top_country_pct":3.92},"Ealing":{"India":8.14,"Poland":4.82,"Romania":1.28,"Nigeria":0.41,"Pakistan":1.99,"Bangladesh":0.54,"top_country":"India","top_country_pct":8.14},"Enfield":{"India":1.13,"Poland":1.79,"Romania":2.06,"Nigeria":1.17,"Pakistan":0.45,"Bangladesh":1.07,"top_country":"Romania","top_country_pct":2.06},"Greenwich":{"India":1.99,"Poland":1.19,"Romania":1.66,"Nigeria":4.97,"Pakistan":0.55,"Bangladesh":0.36,"top_country":"Nigeria","top_country_pct":4.97},"Hackney":{"India":1.21,"Poland":1.36,"Romania":0.47,"Nigeria":2.02,"Pakistan":0.39,"Bangladesh":0.97,"top_country":"Nigeria","top_country_pct":2.02},"Hammersmith and Fulham":{"India":1.09,"Poland":1.39,"Romania":0.65,"Nigeria":0.51,"Pakistan":0.5,"Bangladesh":0.3,"top_country":"Poland","top_country_pct":1.39},"Haringey":{"India":0.81,"Poland":2.73,"Romania":2.4,"Nigeria":0.9,"Pakistan":0.37,"Bangladesh":0.81,"top_country":"Poland","top_country_pct":2.73},"Harrow":{"India":10.1,"Poland":1.38,"Romania":8.07,"Nigeria":0.46,"Pakistan":1.72,"Bangladesh":0.31,"top_country":"India","top_country_pct":10.1},"Havering":{"India":1.76,"Poland":0.71,"Romania":2.06,"Nigeria":1.58,"Pakistan":0.96,"Bangladesh":0.73,"top_country":"Romania","top_country_pct":2.06},"Hillingdon":{"India":9.07,"Poland":2.09,"Romania":1.82,"Nigeria":0.49,"Pakistan":2.11,"Bangladesh":0.63,"top_country":"India","top_country_pct":9.07},"Hounslow":{"India":13.2,"Poland":3.85,"Romania":1.89,"Nigeria":0.42,"Pakistan":2.86,"Bangladesh":0.48,"top_country":"India","top_country_pct":13.2},"Islington":{"India":0.85,"Poland":0.83,"Romania":0.57,"Nigeria":0.68,"Pakistan":0.21,"Bangladesh":1.1,"top_country":"Bangladesh","top_country_pct":1.1},"Kensington and Chelsea":{"India":1.18,"Poland":0.81,"Romania":0.56,"Nigeria":0.39,"Pakistan":0.44,"Bangladesh":0.41,"top_country":"India","top_country_pct":1.18},"Kingston upon Thames":{"India":2.2,"Poland":1.53,"Romania":0.69,"Nigeria":0.27,"Pakistan":1.18,"Bangladesh":0.26,"top_country":"India","top_country_pct":2.2},"Lambeth":{"India":0.78,"Poland":1.52,"Romania":0.49,"Nigeria":1.62,"Pakistan":0.51,"Bangladesh":0.32,"top_country":"Nigeria","top_country_pct":1.62},"Lewisham":{"India":0.85,"Poland":1.28,"Romania":1.31,"Nigeria":3.09,"Pakistan":0.34,"Bangladesh":0.26,"top_country":"Nigeria","top_country_pct":3.09},"Merton":{"India":2.18,"Poland":3.22,"Romania":1.36,"Nigeria":0.62,"Pakistan":2.29,"Bangladesh":0.51,"top_country":"Poland","top_country_pct":3.22},"Newham":{"India":6.22,"Poland":1.22,"Romania":4.97,"Nigeria":1.66,"Pakistan":3.94,"Bangladesh":7.65,"top_country":"Bangladesh","top_country_pct":7.65},"Redbridge":{"India":7.62,"Poland":0.83,"Romania":3.58,"Nigeria":0.75,"Pakistan":5.96,"Bangladesh":4.54,"top_country":"India","top_country_pct":7.62},"Richmond upon Thames":{"India":1.69,"Poland":1.27,"Romania":0.48,"Nigeria":0.19,"Pakistan":0.4,"Bangladesh":0.22,"top_country":"India","top_country_pct":1.69},"Southwark":{"India":0.98,"Poland":0.92,"Romania":0.57,"Nigeria":3.63,"Pakistan":0.31,"Bangladesh":0.71,"top_country":"Nigeria","top_country_pct":3.63},"Sutton":{"India":3.29,"Poland":1.63,"Romania":0.9,"Nigeria":0.55,"Pakistan":1.48,"Bangladesh":0.4,"top_country":"India","top_country_pct":3.29},"Tower Hamlets":{"India":2.04,"Poland":0.99,"Romania":0.89,"Nigeria":0.47,"Pakistan":0.5,"Bangladesh":14.04,"top_country":"Bangladesh","top_country_pct":14.04},"Waltham Forest":{"India":1.2,"Poland":1.97,"Romania":3.96,"Nigeria":0.73,"Pakistan":3.96,"Bangladesh":0.82,"top_country":"Romania","top_country_pct":3.96},"Wandsworth":{"India":1.31,"Poland":1.74,"Romania":0.53,"Nigeria":0.49,"Pakistan":1.99,"Bangladesh":0.23,"top_country":"Pakistan","top_country_pct":1.99},"Westminster":{"India":2.18,"Poland":0.95,"Romania":0.7,"Nigeria":0.55,"Pakistan":0.61,"Bangladesh":1.56,"top_country":"India","top_country_pct":2.18}};
+
+function zoneAt(lon, lat) {
+  let best = null, bestD = Infinity;
+  for (const z of ZONES) {
+    const d = Math.hypot(z.lon - lon, z.lat - lat);
+    if (d < (z.r ?? 0.01) && d < bestD) { bestD = d; best = z.name; }
+  }
+  if (best) return best;
+  for (const z of ZONES) {
+    const d = Math.hypot(z.lon - lon, z.lat - lat);
+    if (d < bestD) { bestD = d; best = z.name; }
+  }
+  return best ?? "London";
+}
+
+let ACTIVE_FEATURES = [];
+
+function pointInPolygon(lon, lat, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    if (((yi > lat) !== (yj > lat)) &&
+        (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi))
+      inside = !inside;
+  }
+  return inside;
+}
+
+function featureAt(lon, lat) {
+  for (const f of ACTIVE_FEATURES) {
+    const geo = f.geometry;
+    if (!geo) continue;
+    const hit = geo.type === "Polygon"
+      ? pointInPolygon(lon, lat, geo.coordinates[0])
+      : geo.type === "MultiPolygon"
+        ? geo.coordinates.some((p) => pointInPolygon(lon, lat, p[0]))
+        : false;
+    if (hit) return f;
+  }
+  return null;
+}
+
+function statsAt(lon, lat) {
+  const f = featureAt(lon, lat);
+  if (!f) return { density: 0, population: 0 };
+  return {
+    density: f.properties.density ?? 0,
+    population: f.properties[POP_FIELD] ?? 0,
+  };
+}
+
+async function forwardGeocode(q) {
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ", London")}&format=json&limit=1&countrycodes=gb&accept-language=en`,
+      { headers: { "User-Agent": "LondonPopMap/1.0" } }
+    );
+    const d = await r.json();
+    if (!d.length) return null;
+    return { lon: parseFloat(d[0].lon), lat: parseFloat(d[0].lat), name: d[0].display_name.split(",")[0] };
+  } catch { return null; }
+}
+
+function pickTubeColour(lines, theme) {
+  const tokens = (lines || "").toLowerCase().split(/[,/]/).map((s) => s.trim()).filter(Boolean);
+  let selected = null;
+  for (const [key, rgb] of Object.entries(TUBE_LINE_COLOURS)) {
+    if (tokens.some((token) => token.includes(key))) { selected = rgb; break; }
+  }
+  selected = selected || [50, 104, 111];
+  return theme === "night" ? mixRgb(selected, [255, 255, 255], 0.16) : selected;
+}
+
+function transformStations(raw) {
+  return {
+    type: "FeatureCollection",
+    features: (raw.features || []).map((feature) => {
+      const lines = feature.properties?.LINES || feature.properties?.MODES || "";
+      return {
+        type: "Feature",
+        geometry: feature.geometry,
+        properties: {
+          stationName: feature.properties?.NAME || "Station",
+          lines,
+          modes: feature.properties?.MODES || "",
+          nightTube: feature.properties?.NIGHT_TUBE || "",
+          markerDay: pickTubeColour(lines, "day"),
+          markerNight: pickTubeColour(lines, "night"),
+        },
+      };
+    }),
+  };
+}
+
+function normalizeLineName(name) {
+  return (name || "")
+    .toLowerCase()
+    .replace(/[_-]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/ line$/, "")
+    .trim();
+}
+
+function transformTubeLines(raw) {
+  const collection = topojson.feature(raw, raw.objects.line);
+  return {
+    type: "FeatureCollection",
+    features: (collection.features || []).map((feature) => {
+      const lineName = feature.id || feature.properties?.name || "Tube";
+      return {
+        type: "Feature",
+        geometry: feature.geometry,
+        properties: {
+          lineName,
+          markerDay: pickTubeColour(lineName, "day"),
+          markerNight: pickTubeColour(lineName, "night"),
+          lineKey: normalizeLineName(lineName),
+        },
+      };
+    }),
+  };
+}
+
+function formatLineLabel(name) {
+  return (name || "Tube")
+    .replace(/\bHammersmith & city\b/i, "Hammersmith & City")
+    .replace(/\bTfl\b/i, "TfL")
+    .replace(/\bDlr\b/i, "DLR")
+    .replace(/\bLu\b/i, "LU");
+}
+
+function splitStationLines(lines, modes) {
+  const raw = (lines || modes || "")
+    .split(/[,/]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const seen = new Set();
+  const cleaned = [];
+  for (const item of raw) {
+    const key = normalizeLineName(item);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    cleaned.push({ key, name: formatLineLabel(item) });
+  }
+  return cleaned;
+}
+
+const METRIC_PALETTES = {
+  density: [[253, 228, 140, 210], [244, 163, 80, 235], [213, 94, 88, 250], [165, 38, 116, 255], [86, 11, 107, 255], [14, 4, 48, 255]],
+  house_price_proxy_gbp: [[245, 236, 225, 220], [224, 181, 143, 232], [199, 132, 84, 242], [149, 74, 45, 252], [88, 34, 27, 255]],
+  median_weekly_earnings_gbp: [[229, 245, 243, 220], [172, 220, 214, 232], [106, 186, 177, 242], [41, 129, 137, 250], [14, 70, 87, 255]],
+  children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
+  country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
+};
+
+const METRICS = {
+  density: {
+    key: "density",
+    label: "Population density",
+    button: "Density",
+    legendLabel: "Residents per km²",
+    unit: "res/km²",
+    year: "2024",
+    source: "Kontur Population clipped to GLA borough boundaries",
+    geography: "Hexes and boroughs",
+    scale: "sequential",
+    paletteKey: "density",
+    views: ["sections", "spikes", "municipi"],
+    formatter: (v) => `${Math.round(v).toLocaleString()} res/km²`,
+    summaryLabel: "London avg",
+    tooltipTag: "Density",
+  },
+  house_price_proxy_gbp: {
+    key: "house_price_proxy_gbp",
+    label: "House prices",
+    button: "House prices",
+    legendLabel: "Median house price",
+    unit: "GBP",
+    year: "2017",
+    source: "GLA / Land Registry Average House Prices by Borough",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "house_price_proxy_gbp",
+    views: ["municipi"],
+    formatter: (v) => `£${Math.round(v).toLocaleString()}`,
+    summaryLabel: "Borough avg",
+    tooltipTag: "Housing",
+    note: "Proxy for £/m² using median sale price by borough",
+  },
+  median_weekly_earnings_gbp: {
+    key: "median_weekly_earnings_gbp",
+    label: "Median earnings",
+    button: "Earnings",
+    legendLabel: "Weekly earnings",
+    unit: "GBP / week",
+    year: "2024",
+    source: "ONS ASHE via London Datastore, resident-based full-time median weekly pay",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "median_weekly_earnings_gbp",
+    views: ["municipi"],
+    formatter: (v) => `£${v.toFixed(1)}/wk`,
+    summaryLabel: "Borough avg",
+    tooltipTag: "Earnings",
+  },
+  gender_balance_pp: {
+    key: "gender_balance_pp",
+    label: "Gender balance",
+    button: "Gender balance",
+    legendLabel: "Gender balance",
+    unit: "pp from parity",
+    year: "2014",
+    source: "ONS Population Estimates, Borough and Ward",
+    geography: "Borough",
+    scale: "diverging",
+    views: ["municipi"],
+    center: 0,
+    formatter: (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} pp`,
+    summaryLabel: "London avg",
+    tooltipTag: "Gender",
+    note: "Positive values indicate a higher male share",
+  },
+  children_share_pct: {
+    key: "children_share_pct",
+    label: "Children aged 0–15",
+    button: "Children",
+    legendLabel: "Residents aged 0–15",
+    unit: "%",
+    year: "2015",
+    source: "GLA Ward Profiles and Atlas, population-weighted to boroughs",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "children_share_pct",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(1)}%`,
+    summaryLabel: "London avg",
+    tooltipTag: "Children",
+    note: "Used as the first-phase family / children metric",
+  },
+  country_of_birth_pct: {
+    key: "country_of_birth_pct",
+    label: "Country of birth",
+    button: "Country of birth",
+    legendLabel: "Country of birth",
+    unit: "%",
+    year: "2021",
+    source: "GLA Country of Birth 2021 tool derived from Census 2021 borough tables",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "country_of_birth_pct",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(1)}%`,
+    summaryLabel: "London avg",
+    tooltipTag: "Country of birth",
+  },
+};
+
+function paletteGradient(stops) {
+  return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
+}
+
+let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme;
+
+async function init() {
+  const bodyEl = document.body;
+  const statusEl = document.getElementById("load-status");
+  const tooltipEl = document.getElementById("tooltip");
+  const legendAvgEl = document.getElementById("legend-avg");
+  const legendMetaEl = document.getElementById("legend-meta");
+  const legendEl = document.getElementById("legend");
+  const tubeLegendEl = document.getElementById("tube-legend");
+  const tubeLegendItemsEl = document.getElementById("tube-legend-items");
+  const countryToggleEl = document.getElementById("country-toggle");
+  const viewLabelEl = document.getElementById("view-label");
+  const viewToggleEl = document.getElementById("view-toggle");
+  const metricLabelEl = document.getElementById("metric-label");
+  const metricToggleEl = document.getElementById("metric-toggle");
+  const btnTheme = document.getElementById("btn-theme");
+  const btnTube = document.getElementById("btn-tube");
+  const btnTubeMap = document.getElementById("btn-tube-map");
+  const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
+  const countryButtons = Object.fromEntries(
+    [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
+  );
+
+  let tooltipPinned = false;
+  let pinnedCoord = null;
+  let currentDataset = "sections";
+  let is3D = false;
+  let currentTheme = "day";
+  let showStations = false;
+  let boroughMetric = "density";
+  let selectedCountryBirth = "ALL";
+  let stationsGeoJSON = null;
+  let tubeLinesGeoJSON = null;
+  let highlightedFeature = null;
+  let pinData = [];
+  let currentMainLayer = null;
+  let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
+  const OUTLIER_THRESHOLD = 50000;
+  const OUTLIER_COLOR = [0, 0, 0, 0];
+  const TARGET_HEIGHT_M = 18000;
+
+  function updatePinnedPosition(vs) {
+    if (!tooltipPinned || !pinnedCoord) return;
+    try {
+      const vp = new deck.WebMercatorViewport({ width: innerWidth, height: innerHeight, ...vs });
+      const [sx, sy] = vp.project(pinnedCoord);
+      if (sx < 0 || sx > innerWidth || sy < 0 || sy > innerHeight) {
+        tooltipEl.style.display = "none";
+      } else {
+        tooltipEl.style.display = "block";
+        positionTooltip(sx, sy);
+      }
+    } catch (e) {}
+  }
+
+  tooltipEl.addEventListener("click", (e) => {
+    if (e.target.classList.contains("tclose")) {
+      tooltipPinned = false;
+      pinnedCoord = null;
+      tooltipEl.classList.remove("pinned");
+      tooltipEl.style.display = "none";
+    }
+  });
+
+  statusEl.textContent = "Loading map data…";
+  const [sectionsGeoJSON, municipiGeoJSON, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+    fetch("london_hexes.geojson").then((r) => r.json()),
+    fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
+    fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
+    fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
+    fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
+  ]);
+
+  if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
+  if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
+  if (municipiGeoJSON?.features) {
+    for (const feature of municipiGeoJSON.features) {
+      const boroughName = feature.properties?.[NAME_FIELD];
+      const metrics = BOROUGH_METRIC_DATA[boroughName];
+      const countryBirth = BOROUGH_COUNTRY_BIRTH_DATA[boroughName];
+      if (!metrics) continue;
+      Object.assign(feature.properties, metrics, {
+        gender_balance_pp: metrics.male_share_pct != null ? +(metrics.male_share_pct - 50).toFixed(2) : null,
+        country_birth: countryBirth || null,
+        country_birth_top_country: countryBirth?.top_country || null,
+        country_birth_top_country_pct: countryBirth?.top_country_pct ?? null,
+      });
+    }
+  }
+
+  function boroughAt(lon, lat) {
+    if (!municipiGeoJSON?.features) return zoneAt(lon, lat);
+    for (const f of municipiGeoJSON.features) {
+      const geo = f.geometry;
+      if (!geo) continue;
+      const hit = geo.type === "Polygon"
+        ? pointInPolygon(lon, lat, geo.coordinates[0])
+        : geo.type === "MultiPolygon"
+          ? geo.coordinates.some((p) => pointInPolygon(lon, lat, p[0]))
+          : false;
+      if (hit) return f.properties[NAME_FIELD] ?? "London";
+    }
+    return zoneAt(lon, lat);
+  }
+
+  ACTIVE_FEATURES = sectionsGeoJSON.features;
+
+  if (!municipiGeoJSON) {
+    const btn = document.getElementById("btn-municipi");
+    btn.disabled = true;
+    btn.title = "Borough data unavailable";
+  }
+
+  const totalPopulation = sectionsGeoJSON.features.reduce((sum, f) => sum + (f.properties[POP_FIELD] ?? 0), 0);
+  const totalArea = sectionsGeoJSON.features.reduce((sum, f) => sum + (f.properties.area_km2 ?? 0), 0);
+  const avgDensity = totalArea > 0 ? Math.round(totalPopulation / totalArea) : 0;
+  const sectionDensityMax = Math.max(...sectionsGeoJSON.features.filter((f) => (f.properties.density ?? 0) <= OUTLIER_THRESHOLD).map((f) => f.properties.density));
+  const boroughStats = {};
+
+  function getNationalityMetricConfig() {
+    if (selectedCountryBirth === "ALL") {
+      return {
+        ...METRICS.country_of_birth_pct,
+        label: "Born outside the UK",
+        legendLabel: "Residents born outside the UK",
+        source: `${METRICS.country_of_birth_pct.source} · overview`,
+        note: "Tooltip shows both UK-born and not-UK-born shares",
+      };
+    }
+    return {
+      ...METRICS.country_of_birth_pct,
+      label: `${selectedCountryBirth}-born residents`,
+      legendLabel: `${selectedCountryBirth}-born residents`,
+      source: `${METRICS.country_of_birth_pct.source} · ${selectedCountryBirth}`,
+    };
+  }
+
+  function getMetricConfig(metricKey) {
+    return metricKey === "country_of_birth_pct" ? getNationalityMetricConfig() : METRICS[metricKey];
+  }
+
+  function availableMetricValues(metricKey) {
+    if (!municipiGeoJSON?.features) return [];
+    return municipiGeoJSON.features
+      .map((feature) => metricValue(feature, metricKey))
+      .filter((value) => Number.isFinite(value));
+  }
+
+  for (const [metricKey, metric] of Object.entries(METRICS)) {
+    if (!metric.views.includes("municipi")) continue;
+    const values = availableMetricValues(metricKey);
+    if (!values.length) continue;
+    const populationWeighted = municipiGeoJSON.features.reduce((acc, feature) => {
+      const value = metricValue(feature, metricKey);
+      const weight = feature.properties?.[POP_FIELD] ?? 0;
+      if (!Number.isFinite(value) || !weight) return acc;
+      acc.total += value * weight;
+      acc.weight += weight;
+      return acc;
+    }, { total: 0, weight: 0 });
+    boroughStats[metricKey] = {
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: populationWeighted.weight ? populationWeighted.total / populationWeighted.weight : values.reduce((sum, value) => sum + value, 0) / values.length,
+      maxAbs: metric.scale === "diverging" ? Math.max(...values.map((value) => Math.abs(value - (metric.center ?? 0)))) : null,
+    };
+  }
+
+  function getMetricStats(metricKey, countrySelection = selectedCountryBirth) {
+    if (metricKey === "country_of_birth_pct") {
+      const values = municipiGeoJSON.features
+        .map((feature) => metricValue(feature, metricKey, countrySelection))
+        .filter((value) => Number.isFinite(value));
+      const populationWeighted = municipiGeoJSON.features.reduce((acc, feature) => {
+        const value = metricValue(feature, metricKey, countrySelection);
+        const weight = feature.properties?.[POP_FIELD] ?? 0;
+        if (!Number.isFinite(value) || !weight) return acc;
+        acc.total += value * weight;
+        acc.weight += weight;
+        return acc;
+      }, { total: 0, weight: 0 });
+      return {
+        min: Math.min(...values),
+        max: Math.max(...values),
+        avg: populationWeighted.weight ? populationWeighted.total / populationWeighted.weight : 0,
+      };
+    }
+    return boroughStats[metricKey];
+  }
+
+  function metricGradientCss(metricKey) {
+    if (metricKey === "gender_balance_pp") {
+      return "linear-gradient(to right, rgba(34,94,168,.95), rgba(238,242,247,.92), rgba(175,40,77,.95))";
+    }
+    return paletteGradient(METRIC_PALETTES[metricKey] || METRIC_PALETTES.density);
+  }
+
+  function interpolatedMetricColor(metricKey, t) {
+    const palette = METRIC_PALETTES[metricKey] || METRIC_PALETTES.density;
+    return lerp(palette[Math.floor(Math.min(Math.max(t, 0), 1) * (palette.length - 1))], palette[Math.min(Math.floor(Math.min(Math.max(t, 0), 1) * (palette.length - 1)) + 1, palette.length - 1)], (Math.min(Math.max(t, 0), 1) * (palette.length - 1)) % 1);
+  }
+
+  function metricValue(feature, metricKey, countrySelection = selectedCountryBirth) {
+    if (metricKey === "country_of_birth_pct") {
+      if (countrySelection === "ALL") {
+        return feature?.properties?.not_born_uk_share_pct ?? null;
+      }
+      return feature?.properties?.country_birth?.[countrySelection] ?? null;
+    }
+    return feature?.properties?.[metricKey];
+  }
+
+  function getActiveMetricState() {
+    const metricKey = boroughMetric;
+    return {
+      metricKey,
+      countrySelection: selectedCountryBirth,
+      metric: getMetricConfig(metricKey),
+      stats: getMetricStats(metricKey, selectedCountryBirth),
+      fillAlpha: boroughFillAlpha(),
+      theme: currentTheme,
+    };
+  }
+
+  function effectiveMetricKey() {
+    return currentDataset === "municipi" ? boroughMetric : "density";
+  }
+
+  function metricAvailableInCurrentView(metricKey) {
+    const currentView = currentDataset === "tube" ? "tube" : is3D ? "spikes" : currentDataset;
+    return METRICS[metricKey].views.includes(currentView);
+  }
+
+  function colorFor(feature, dataset) {
+    const density = feature.properties.density ?? 0;
+    if (dataset === "sections" && density > OUTLIER_THRESHOLD) return OUTLIER_COLOR;
+    return hexColor(Math.min(density / sectionDensityMax, 1));
+  }
+
+  function boroughMetricColor(feature, metricState = getActiveMetricState()) {
+    const { metricKey, metric, countrySelection, stats, fillAlpha, theme } = metricState;
+    const value = metricValue(feature, metricKey, countrySelection);
+    if (!Number.isFinite(value)) return theme === "night" ? [70, 78, 88, fillAlpha] : [206, 211, 216, fillAlpha];
+    if (metric.scale === "diverging") {
+      const spread = stats?.maxAbs || 1;
+      const t = ((value - (metric.center ?? 0)) / (spread || 1) + 1) / 2;
+      const rgb = t < 0.5
+        ? lerp([34, 94, 168, 255], [238, 242, 247, 255], t / 0.5)
+        : lerp([238, 242, 247, 255], [175, 40, 77, 255], (t - 0.5) / 0.5);
+      return [...rgb.slice(0, 3), fillAlpha];
+    }
+    const t = stats && stats.max > stats.min ? (value - stats.min) / (stats.max - stats.min) : 0;
+    return [...interpolatedMetricColor(metricKey, t).slice(0, 3), fillAlpha];
+  }
+
+  function elevationFor(feature, dataset) {
+    const density = feature.properties.density ?? 0;
+    return (Math.min(density, sectionDensityMax) / sectionDensityMax) * TARGET_HEIGHT_M;
+  }
+
+  function transportOverlayVisible() {
+    return currentDataset === "tube" || (currentDataset === "municipi" && showStations);
+  }
+
+  function onlyTubeMode() {
+    return currentDataset === "tube";
+  }
+
+  function tubeLegendVisible() {
+    return currentDataset === "tube" || (currentDataset === "municipi" && showStations);
+  }
+
+  function boroughFillAlpha() {
+    if (onlyTubeMode()) return THEMES[currentTheme].tubeContextFillAlpha;
+    if (currentDataset === "municipi" && showStations) return THEMES[currentTheme].municipiTubeFillAlpha;
+    return THEMES[currentTheme].municipiFillAlpha;
+  }
+
+  function tubeZoomFactor() {
+    return Math.max(0.92, Math.min(1.28, 0.86 + (viewState.zoom - 10) * 0.08));
+  }
+
+  function makeSectionsLayer() {
+    if (onlyTubeMode()) return null;
+    return new deck.GeoJsonLayer({
+      id: "sections",
+      data: sectionsGeoJSON,
+      filled: true, stroked: false,
+      extruded: is3D, wireframe: false,
+      pickable: true, autoHighlight: true,
+      highlightColor: [255, 255, 255, currentTheme === "night" ? 58 : 40],
+      getFillColor: (f) => colorFor(f, "sections"),
+      getElevation: (f) => elevationFor(f, "sections"),
+      opacity: is3D ? (currentTheme === "night" ? 0.94 : 0.9) : (currentTheme === "night" ? 0.84 : 0.78),
+    });
+  }
+
+  function makeMunicipiLayer(metricState = getActiveMetricState()) {
+    const fillAlpha = metricState.fillAlpha;
+    return new deck.GeoJsonLayer({
+      id: "municipi",
+      data: municipiGeoJSON || { type: "FeatureCollection", features: [] },
+      filled: true, stroked: true, extruded: false,
+      pickable: true, autoHighlight: true,
+      highlightColor: [255, 255, 255, currentTheme === "night" ? 70 : 55],
+      getFillColor: (f) => {
+        const colour = boroughMetricColor(f, metricState);
+        return [...colour.slice(0, 3), fillAlpha];
+      },
+      getLineColor: THEMES[currentTheme].municipiLine,
+      getLineWidth: 2, lineWidthMinPixels: 1,
+      updateTriggers: {
+        getFillColor: [
+          metricState.metricKey,
+          metricState.countrySelection,
+          metricState.fillAlpha,
+          metricState.theme,
+          metricState.stats?.min ?? null,
+          metricState.stats?.max ?? null,
+          metricState.stats?.maxAbs ?? null,
+        ],
+      },
+      opacity: 1,
+    });
+  }
+
+  function makeTubeContextLayer() {
+    if (!onlyTubeMode() || !municipiGeoJSON) return null;
+    return new deck.GeoJsonLayer({
+      id: "tube-context",
+      data: municipiGeoJSON,
+      filled: true, stroked: true, extruded: false,
+      pickable: false,
+      getFillColor: [130, 140, 150, THEMES[currentTheme].tubeContextFillAlpha],
+      getLineColor: THEMES[currentTheme].tubeContextLine,
+      getLineWidth: 1.3,
+      lineWidthMinPixels: 1,
+      opacity: 1,
+    });
+  }
+
+  function makeThamesLayer() {
+    if (!thamesGeoJSON) return null;
+    return new deck.GeoJsonLayer({
+      id: "thames",
+      data: thamesGeoJSON,
+      stroked: true, filled: false, pickable: false,
+      getLineColor: THEMES[currentTheme].thames,
+      getLineWidth: onlyTubeMode() ? (currentTheme === "night" ? 14 : 12) : (currentTheme === "night" ? 20 : 18),
+      lineWidthMinPixels: 3,
+    });
+  }
+
+  function makeStationsLayer() {
+    if (!transportOverlayVisible() || !stationsGeoJSON) return null;
+    return new deck.ScatterplotLayer({
+      id: "stations",
+      data: stationsGeoJSON.features,
+      pickable: updateStopHoverBehavior(),
+      stroked: true,
+      filled: true,
+      radiusUnits: "meters",
+      radiusMinPixels: onlyTubeMode() ? THEMES[currentTheme].stationRadiusMin + 1 : THEMES[currentTheme].stationRadiusMin,
+      radiusMaxPixels: onlyTubeMode() ? THEMES[currentTheme].stationRadiusMax + 1.8 : THEMES[currentTheme].stationRadiusMax,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: () => onlyTubeMode() ? THEMES[currentTheme].stationRadiusMeters * 1.15 : THEMES[currentTheme].stationRadiusMeters,
+      getFillColor: (f) => [...(currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay), Math.round(255 * THEMES[currentTheme].stationOpacity)],
+      getLineColor: THEMES[currentTheme].stationStroke,
+      lineWidthMinPixels: 1.2,
+      getLineWidth: () => 1.2,
+      opacity: 1,
+    });
+  }
+
+  function makeTubeLineCaseLayer() {
+    if (!transportOverlayVisible() || !tubeLinesGeoJSON) return null;
+    return new deck.GeoJsonLayer({
+      id: "tube-lines-case",
+      data: tubeLinesGeoJSON,
+      stroked: true,
+      filled: false,
+      pickable: false,
+      lineWidthUnits: "pixels",
+      getLineColor: THEMES[currentTheme].lineCase,
+      getLineWidth: () => (onlyTubeMode() ? THEMES[currentTheme].lineCaseWidthOnly : THEMES[currentTheme].lineCaseWidthMixed) * tubeZoomFactor(),
+      lineCapRounded: true,
+      lineJointRounded: true,
+      opacity: 1,
+    });
+  }
+
+  function makeTubeLineLayer() {
+    if (!transportOverlayVisible() || !tubeLinesGeoJSON) return null;
+    return new deck.GeoJsonLayer({
+      id: "tube-lines",
+      data: tubeLinesGeoJSON,
+      stroked: true,
+      filled: false,
+      pickable: false,
+      lineWidthUnits: "pixels",
+      getLineColor: (f) => [...(currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay), 235],
+      getLineWidth: () => (onlyTubeMode() ? THEMES[currentTheme].lineWidthOnly : THEMES[currentTheme].lineWidthMixed) * tubeZoomFactor(),
+      lineCapRounded: true,
+      lineJointRounded: true,
+      opacity: 1,
+    });
+  }
+
+  function zoneLabel(object, coordinate) {
+    if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
+    if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
+    if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
+    if (object?.properties?.[NAME_FIELD] && currentDataset !== "sections") return object.properties[NAME_FIELD];
+    if (coordinate) return currentDataset === "municipi" ? boroughAt(coordinate[0], coordinate[1]) : zoneAt(coordinate[0], coordinate[1]);
+    const geo = object?.geometry;
+    let ring;
+    if (geo?.type === "Polygon") ring = geo.coordinates[0];
+    else if (geo?.type === "MultiPolygon") ring = geo.coordinates[0]?.[0];
+    const cx = ring ? ring.reduce((s, p) => s + p[0], 0) / ring.length : -0.118;
+    const cy = ring ? ring.reduce((s, p) => s + p[1], 0) / ring.length : 51.505;
+    return currentDataset === "municipi" ? boroughAt(cx, cy) : zoneAt(cx, cy);
+  }
+
+  function positionTooltip(x, y) {
+    const pad = 14, tw = tooltipEl.offsetWidth, th = tooltipEl.offsetHeight;
+    tooltipEl.style.left = (x + pad + tw > innerWidth ? x - tw - pad : x + pad) + "px";
+    tooltipEl.style.top = (y + pad + th > innerHeight ? y - th - pad : y + pad) + "px";
+  }
+
+  function stationTooltipHtml(station, pinned) {
+    const enriched = onlyTubeMode();
+    const lineItems = splitStationLines(station.properties.lines, station.properties.modes);
+    const lineHtml = enriched && lineItems.length
+      ? `<span class="tsub">${lineItems.map((line) => line.name).join(" · ")}</span>`
+      : `<span class="tsub">${station.properties.modes || "TfL"}</span>`;
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Tube</span><br><span class="tarea">${station.properties.stationName}</span><br>${lineHtml}`;
+  }
+
+  function lineTooltipHtml(line, pinned) {
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Line</span><br><span class="tarea">${line.properties.lineName}</span>`;
+  }
+
+  function formatMetricValue(metricKey, value) {
+    if (!Number.isFinite(value)) return "No data";
+    return getMetricConfig(metricKey).formatter(value);
+  }
+
+  function boroughMetricTooltipHtml(feature, pinned) {
+    const metricKey = boroughMetric;
+    const metric = getMetricConfig(metricKey);
+    const name = feature.properties?.[NAME_FIELD] ?? "London";
+    const value = metricValue(feature, metricKey);
+    const support = [];
+    if (metricKey === "density") {
+      support.push(`${(feature.properties?.[POP_FIELD] ?? 0).toLocaleString()} residents`);
+      support.push(`${(feature.properties?.area_km2 ?? 0).toFixed(1)} km²`);
+    } else if (metricKey === "gender_balance_pp") {
+      const male = feature.properties?.male_share_pct;
+      const female = feature.properties?.female_share_pct;
+      if (Number.isFinite(male) && Number.isFinite(female)) support.push(`Men ${male.toFixed(1)}% · Women ${female.toFixed(1)}%`);
+    } else if (metricKey === "country_of_birth_pct") {
+      if (selectedCountryBirth === "ALL") {
+        const notUk = feature.properties?.not_born_uk_share_pct;
+        const ukBorn = Number.isFinite(notUk) ? 100 - notUk : null;
+        if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) support.push(`UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`);
+      } else {
+        const topCountry = feature.properties?.country_birth_top_country;
+        const topPct = feature.properties?.country_birth_top_country_pct;
+        if (topCountry && Number.isFinite(topPct)) support.push(`Top shortlist country: ${topCountry} · ${topPct.toFixed(1)}%`);
+      }
+    } else if (metricKey === "children_share_pct") {
+      support.push("Share of residents aged 0–15");
+    } else if (metricKey === "median_weekly_earnings_gbp") {
+      support.push("Resident-based, full-time median pay");
+    } else if (metricKey === "house_price_proxy_gbp") {
+      support.push("Median sale price proxy");
+    }
+    const supportHtml = support.length ? `<br><span class="tsub">${support.join("<br>")}</span>` : "";
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
+  }
+
+  function densityTooltipHtml(zone, pop, dens, pinned) {
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${currentDataset === "municipi" ? "Borough" : "Density"}</span><br><span class="tarea">${zone}</span><br><span class="tval">${pop.toLocaleString()}</span><span class="tsub"> residents</span><br><span class="tsub">${dens.toLocaleString()} res/km²</span>`;
+  }
+
+  function rebuildMainLayer() {
+    if (currentDataset === "sections") currentMainLayer = makeSectionsLayer();
+    else if (currentDataset === "municipi") currentMainLayer = makeMunicipiLayer(getActiveMetricState());
+    else currentMainLayer = makeTubeContextLayer();
+  }
+
+  function makeHighlightLayer(feature) {
+    if (!feature) return null;
+    return new deck.GeoJsonLayer({
+      id: "highlight",
+      data: { type: "FeatureCollection", features: [feature] },
+      filled: true, stroked: true, pickable: false,
+      getFillColor: THEMES[currentTheme].highlightFill,
+      getLineColor: THEMES[currentTheme].highlightLine,
+      lineWidthUnits: "pixels",
+      getLineWidth: 5,
+    });
+  }
+
+  function makePinLayer(data) {
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "pin", data,
+      getPosition: (d) => [d.lon, d.lat],
+      radiusUnits: "pixels",
+      getRadius: 8,
+      getFillColor: THEMES[currentTheme].pinFill,
+      getLineColor: [255, 255, 255, 255],
+      lineWidthMinPixels: 2,
+      stroked: true, pickable: false,
+    });
+  }
+
+  function getLayers() {
+    const layers = [];
+    if (currentMainLayer) layers.push(currentMainLayer);
+    const thames = makeThamesLayer();
+    if (thames) layers.push(thames);
+    const tubeCase = makeTubeLineCaseLayer();
+    if (tubeCase) layers.push(tubeCase);
+    const tubeLines = makeTubeLineLayer();
+    if (tubeLines) layers.push(tubeLines);
+    const stations = makeStationsLayer();
+    if (stations) layers.push(stations);
+    const hl = makeHighlightLayer(highlightedFeature);
+    if (hl) layers.push(hl);
+    const pin = makePinLayer(pinData);
+    if (pin) layers.push(pin);
+    return layers;
+  }
+
+  function activeTubeLegendLines() {
+    if (!tubeLinesGeoJSON) return [];
+    const seen = new Set();
+    const lines = [];
+    for (const feature of tubeLinesGeoJSON.features) {
+      const key = feature.properties.lineKey;
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      lines.push({
+        key,
+        name: formatLineLabel(feature.properties.lineName),
+        color: currentTheme === "night" ? feature.properties.markerNight : feature.properties.markerDay,
+      });
+    }
+    return lines.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function updateMetricButtons() {
+    for (const [metricKey, button] of Object.entries(metricButtons)) {
+      if (!button) continue;
+      const available = metricAvailableInCurrentView(metricKey);
+      button.disabled = !available;
+      button.classList.toggle("active", effectiveMetricKey() === metricKey && available && currentDataset === "municipi");
+    }
+    if (metricButtons.density) {
+      metricButtons.density.classList.toggle("active", currentDataset !== "municipi" || boroughMetric === "density");
+      metricButtons.density.disabled = false;
+    }
+  }
+
+  function updateModeButtons() {
+    document.getElementById("btn-sections").classList.toggle("active", currentDataset === "sections");
+    document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
+    btnTubeMap.classList.toggle("active", currentDataset === "tube");
+    btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
+    document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
+    document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
+  }
+
+  function updateControlVisibility() {
+    const sectionsMode = currentDataset === "sections";
+    const boroughsMode = currentDataset === "municipi";
+    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct";
+
+    viewLabelEl.style.display = sectionsMode ? "block" : "none";
+    viewToggleEl.style.display = sectionsMode ? "flex" : "none";
+    metricLabelEl.style.display = boroughsMode ? "block" : "none";
+    metricToggleEl.style.display = boroughsMode ? "flex" : "none";
+    btnTube.style.display = boroughsMode ? "" : "none";
+    countryToggleEl.style.display = countryMode ? "flex" : "none";
+  }
+
+  function updateCountrySelector() {
+    for (const [country, button] of Object.entries(countryButtons)) {
+      if (!button) continue;
+      button.classList.toggle("active", selectedCountryBirth === country);
+    }
+  }
+
+  function renderLegend() {
+    if (onlyTubeMode()) {
+      legendEl.style.display = "none";
+      return;
+    }
+    legendEl.style.display = "block";
+    const metricKey = effectiveMetricKey();
+    const metric = getMetricConfig(metricKey);
+    const metricStats = getMetricStats(metricKey);
+    const legendLabelEl = legendEl.querySelector(".llbl");
+    const legendBarEl = legendEl.querySelector(".lbar");
+    const legendEnds = legendEl.querySelectorAll(".lends span");
+    legendLabelEl.textContent = metric.legendLabel;
+    legendBarEl.style.background = metricGradientCss(metricKey);
+
+    if (metricKey === "density" && currentDataset !== "municipi") {
+      legendEnds[0].textContent = "sparse";
+      legendEnds[1].textContent = "dense";
+      legendAvgEl.textContent = `London avg · ${avgDensity.toLocaleString()} res/km²`;
+    } else {
+      if (metric.scale === "diverging") {
+        legendEnds[0].textContent = "more women";
+        legendEnds[1].textContent = "more men";
+      } else {
+        legendEnds[0].textContent = formatMetricValue(metricKey, metricStats.min);
+        legendEnds[1].textContent = formatMetricValue(metricKey, metricStats.max);
+      }
+      legendAvgEl.textContent = `${metric.summaryLabel} · ${formatMetricValue(metricKey, metricStats.avg)}`;
+    }
+    legendMetaEl.textContent = `${metric.source} · ${metric.year} · ${metric.geography}${metric.note ? ` · ${metric.note}` : ""}`;
+  }
+
+  function renderTubeLegend() {
+    const visible = tubeLegendVisible();
+    tubeLegendEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      tubeLegendItemsEl.innerHTML = "";
+      return;
+    }
+    const items = activeTubeLegendLines();
+    tubeLegendItemsEl.innerHTML = items.map((item) => {
+      const swatch = `rgb(${item.color[0]}, ${item.color[1]}, ${item.color[2]})`;
+      return `<div class="tube-legend-item"><span class="tube-legend-swatch" style="background:${swatch}"></span><span class="tube-legend-name">${item.name}</span></div>`;
+    }).join("");
+  }
+
+  function updateStopHoverBehavior() {
+    return onlyTubeMode();
+  }
+
+  function updateBoroughStyling() {
+    rebuildMainLayer();
+  }
+
+  function updateLegend() {
+    renderLegend();
+    renderTubeLegend();
+  }
+
+  function refreshMapState(nextViewState = null) {
+    updateBoroughStyling();
+    const props = { layers: getLayers() };
+    if (nextViewState) props.initialViewState = nextViewState;
+    deckgl.setProps(props);
+    updateModeButtons();
+    updateControlVisibility();
+    updateMetricButtons();
+    updateCountrySelector();
+    updateLegend();
+  }
+
+  function applyActiveMetric(metricKey) {
+    boroughMetric = metricKey;
+    refreshMapState();
+  }
+
+  const deckgl = new deck.DeckGL({
+    container: "map",
+    mapStyle: THEMES[currentTheme].mapStyle,
+    initialViewState: viewState,
+    controller: { scrollZoom: { smooth: true, speed: 0.02 }, inertia: 0, doubleClickZoom: false },
+    layers: [],
+    onViewStateChange: ({ viewState: vs, oldViewState }) => {
+      if (oldViewState) {
+        const delta = vs.zoom - oldViewState.zoom;
+        if (Math.abs(delta) > 0.4) vs = { ...vs, zoom: oldViewState.zoom + Math.sign(delta) * 0.4 };
+      }
+      viewState = vs;
+      updatePinnedPosition(vs);
+    },
+
+    onHover: ({ object, coordinate, x, y }) => {
+      if (tooltipPinned) return;
+      if (!object) { tooltipEl.style.display = "none"; return; }
+      tooltipEl.classList.remove("pinned");
+
+      if (object.layer?.id === "stations") {
+        tooltipEl.innerHTML = stationTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+      if (object.layer?.id === "tube-lines") {
+        tooltipEl.innerHTML = lineTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+
+      if (currentDataset === "municipi") {
+        tooltipEl.innerHTML = boroughMetricTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+
+      const zone = zoneLabel(object, coordinate);
+      const pop = object.properties?.[POP_FIELD] ?? 0;
+      const dens = object.properties?.density ?? 0;
+      tooltipEl.innerHTML = densityTooltipHtml(zone, pop, dens, false);
+      tooltipEl.style.display = "block";
+      positionTooltip(x, y);
+    },
+
+    onClick: ({ object, coordinate, x, y }) => {
+      if (!coordinate) return;
+      tooltipPinned = true;
+      pinnedCoord = coordinate;
+      tooltipEl.classList.add("pinned");
+
+      if (object?.layer?.id === "stations") {
+        tooltipEl.innerHTML = stationTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+      if (object?.layer?.id === "tube-lines") {
+        tooltipEl.innerHTML = lineTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+
+      if (currentDataset === "municipi" && object) {
+        tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
+
+      const pop = object?.properties?.[POP_FIELD] ?? statsAt(...coordinate).population;
+      const dens = object?.properties?.density ?? statsAt(...coordinate).density;
+      const zone = zoneLabel(object, coordinate);
+      tooltipEl.innerHTML = densityTooltipHtml(zone, pop, dens, true);
+      tooltipEl.style.display = "block";
+      positionTooltip(x, y);
+    },
+  });
+
+  refreshMapState();
+
+  function restoreAfterStyleChange() {
+    refreshMapState({ ...viewState, transitionDuration: 0 });
+    applyBasemapThemeStyles();
+  }
+
+  function getBaseMap() {
+    return deckgl.getMapboxMap?.() || deckgl.map || deckgl._map || null;
+  }
+
+  function applyBasemapThemeStyles() {
+    const map = getBaseMap();
+    if (!map) return;
+
+    const tuneStyle = () => {
+      const layers = map.getStyle?.().layers || [];
+      for (const layer of layers) {
+        try {
+          const id = layer.id.toLowerCase();
+          if (layer.type === "background") {
+            map.setPaintProperty(layer.id, "background-color", currentTheme === "night" ? "#0b1217" : "#f3f4f5");
+          }
+          if (layer.type === "fill") {
+            if (id.includes("water")) {
+              map.setPaintProperty(layer.id, "fill-color", currentTheme === "night" ? "#19232c" : "#dce3e7");
+              map.setPaintProperty(layer.id, "fill-opacity", currentTheme === "night" ? 0.78 : 0.62);
+            } else if (id.includes("landuse") || id.includes("landcover") || id.includes("park") || id.includes("building")) {
+              map.setPaintProperty(layer.id, "fill-color", currentTheme === "night" ? "#121920" : "#f5f5f4");
+              map.setPaintProperty(layer.id, "fill-opacity", currentTheme === "night" ? 0.28 : 0.35);
+            }
+          }
+          if (layer.type === "line" && (id.includes("road") || id.includes("street") || id.includes("highway"))) {
+            map.setPaintProperty(layer.id, "line-color", currentTheme === "night" ? "#2b3540" : "#d5dade");
+            map.setPaintProperty(layer.id, "line-opacity", currentTheme === "night" ? 0.34 : 0.42);
+          }
+          if (layer.type === "symbol" && id.includes("label")) {
+            map.setPaintProperty(layer.id, "text-color", currentTheme === "night" ? "#8b98a6" : "#91979e");
+            map.setPaintProperty(layer.id, "text-halo-color", currentTheme === "night" ? "#0d1319" : "#f7f7f6");
+            map.setPaintProperty(layer.id, "text-halo-width", currentTheme === "night" ? 0.35 : 0.55);
+          }
+        } catch (err) {}
+      }
+    };
+
+    if (map.isStyleLoaded?.()) tuneStyle();
+    map.once?.("styledata", tuneStyle);
+  }
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    bodyEl.dataset.theme = theme === "night" ? "night" : "";
+    btnTheme.textContent = THEMES[theme].themeLabel;
+    deckgl.setProps({
+      mapStyle: THEMES[theme].mapStyle,
+      layers: getLayers(),
+      initialViewState: { ...viewState, transitionDuration: 0 },
+    });
+    updateMetricButtons();
+    updateCountrySelector();
+    updateLegend();
+    requestAnimationFrame(() => restoreAfterStyleChange());
+  }
+
+  setMode = function(mode) {
+    if (mode === "sections") {
+      currentDataset = "sections";
+      ACTIVE_FEATURES = sectionsGeoJSON.features;
+    } else if (mode === "municipi") {
+      if (!municipiGeoJSON) return;
+      currentDataset = "municipi";
+      ACTIVE_FEATURES = municipiGeoJSON.features;
+    } else {
+      currentDataset = "tube";
+      ACTIVE_FEATURES = [];
+    }
+    refreshMapState();
+  };
+
+  setMetric = function(metricKey) {
+    if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
+    applyActiveMetric(metricKey);
+  };
+
+  setCountryMetric = function(country) {
+    if (!COUNTRY_BIRTH_SHORTLIST.includes(country)) return;
+    selectedCountryBirth = country;
+    if (boroughMetric === "country_of_birth_pct" && currentDataset === "municipi") {
+      refreshMapState();
+    } else {
+      updateCountrySelector();
+    }
+  };
+
+  setView = function(mode) {
+    is3D = mode === "3d";
+    refreshMapState({
+      ...viewState,
+      pitch: is3D ? 50 : 0,
+      bearing: is3D ? (viewState.bearing || -15) : 0,
+      transitionDuration: 500,
+    });
+    document.getElementById("btn-3d").classList.toggle("active", is3D);
+    document.getElementById("btn-flat").classList.toggle("active", !is3D);
+  };
+
+  toggleStations = function() {
+    if (currentDataset !== "municipi") return;
+    showStations = !showStations;
+    refreshMapState();
+  };
+
+  toggleTheme = function() {
+    applyTheme(currentTheme === "day" ? "night" : "day");
+  };
+
+  resetView = function() {
+    highlightedFeature = null;
+    pinData = [];
+    tooltipPinned = false;
+    pinnedCoord = null;
+    tooltipEl.classList.remove("pinned");
+    tooltipEl.style.display = "none";
+    refreshMapState({
+      longitude: -0.118, latitude: 51.505, zoom: 10.5,
+      pitch: is3D ? 50 : 0, bearing: is3D ? -15 : 0,
+      transitionDuration: 700,
+    });
+  };
+
+  async function search() {
+    const input = document.getElementById("search-input");
+    const q = input.value.trim();
+    if (!q) return;
+
+    const geo = await forwardGeocode(q);
+    if (!geo) {
+      input.style.borderColor = "rgba(188,48,80,.8)";
+      const prev = input.placeholder;
+      input.placeholder = "Address not found";
+      input.value = "";
+      setTimeout(() => { input.style.borderColor = ""; input.placeholder = prev; }, 2000);
+      return;
+    }
+    highlightedFeature = featureAt(geo.lon, geo.lat);
+    pinData = [geo];
+    is3D = false;
+    tooltipPinned = false;
+    tooltipEl.style.display = "none";
+    document.getElementById("btn-3d").classList.remove("active");
+    document.getElementById("btn-flat").classList.add("active");
+    refreshMapState({
+      longitude: geo.lon, latitude: geo.lat,
+      zoom: 14, pitch: 0, bearing: 0, transitionDuration: 800,
+    });
+  }
+
+  document.getElementById("search-btn").onclick = search;
+  document.getElementById("search-input").onkeydown = (e) => { if (e.key === "Enter") search(); };
+
+  applyTheme("day");
+  refreshMapState();
+
+  const loadEl = document.getElementById("loading");
+  loadEl.style.opacity = "0";
+  setTimeout(() => loadEl.style.display = "none", 500);
+}
+
+init();
+</script>
+</body>
+</html>
