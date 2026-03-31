@@ -376,11 +376,11 @@
   #comparison-panel {
     position: absolute;
     right: 24px;
-    bottom: 74px;
+    bottom: 82px;
     z-index: 10;
     display: none;
-    width: min(340px, calc(100vw - 48px));
-    padding: 14px 15px 13px;
+    width: min(356px, calc(100vw - 48px));
+    padding: 15px 16px 14px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
@@ -396,11 +396,19 @@
   }
   #comparison-panel .c-title {
     font-family: var(--font-ui);
-    font-size: .62rem;
+    font-size: .64rem;
     font-weight: 800;
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--subtitle);
+  }
+  #comparison-panel .c-kicker {
+    margin-bottom: 11px;
+    font-family: var(--font-ui);
+    font-size: .63rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--legend-accent);
   }
   #comparison-panel .c-clear {
     border: none;
@@ -418,12 +426,14 @@
   #comparison-panel .c-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 10px;
+    gap: 12px;
     align-items: start;
   }
   #comparison-panel .c-col {
     min-width: 0;
   }
+  #comparison-panel .c-col.a { border-top: 2px solid rgba(17, 95, 99, .32); padding-top: 8px; }
+  #comparison-panel .c-col.b { border-top: 2px solid rgba(132, 74, 92, .32); padding-top: 8px; }
   #comparison-panel .c-tag {
     display: inline-block;
     margin-bottom: 6px;
@@ -436,35 +446,51 @@
     text-transform: uppercase;
     color: #fff;
   }
-  #comparison-panel .c-tag.a { background: #0b5c63; }
-  #comparison-panel .c-tag.b { background: #8c3751; }
+  #comparison-panel .c-tag.a { background: #115f63; }
+  #comparison-panel .c-tag.b { background: #844a5c; }
   #comparison-panel .c-name {
     font-family: var(--font-display);
-    font-size: 1rem;
-    line-height: 1.02;
+    font-size: 1.05rem;
+    line-height: 1.01;
     letter-spacing: .03em;
     color: var(--title);
   }
-  #comparison-panel .c-val {
+  #comparison-panel .c-value-label {
     margin-top: 7px;
     font-family: var(--font-ui);
-    font-size: .9rem;
+    font-size: .56rem;
     font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #comparison-panel .c-val {
+    margin-top: 3px;
+    font-family: var(--font-ui);
+    font-size: .98rem;
+    font-weight: 800;
     color: var(--legend-accent);
+  }
+  #comparison-panel .c-support {
+    margin-top: 8px;
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.5;
+    color: var(--hint);
   }
   #comparison-panel .c-mid {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    min-width: 78px;
-    padding-top: 24px;
+    gap: 7px;
+    min-width: 92px;
+    padding-top: 28px;
   }
   #comparison-panel .c-diff-label,
   #comparison-panel .c-meta {
     font-family: var(--font-ui);
-    font-size: .58rem;
+    font-size: .56rem;
     font-weight: 700;
     letter-spacing: .16em;
     text-transform: uppercase;
@@ -472,17 +498,72 @@
   }
   #comparison-panel .c-diff {
     font-family: var(--font-ui);
-    font-size: .82rem;
+    font-size: .95rem;
     font-weight: 800;
     color: var(--title);
+    text-align: center;
+  }
+  #comparison-panel .c-diff.positive { color: #115f63; }
+  #comparison-panel .c-diff.negative { color: #844a5c; }
+  #comparison-panel .c-diff.neutral { color: var(--title); }
+  #comparison-panel .c-diff-note {
+    max-width: 92px;
+    font-family: var(--font-ui);
+    font-size: .64rem;
+    line-height: 1.4;
+    color: var(--hint);
     text-align: center;
   }
   #comparison-panel .c-state,
   #comparison-panel .c-foot {
     margin-top: 10px;
     font-family: var(--font-ui);
-    font-size: .68rem;
+    font-size: .7rem;
     line-height: 1.55;
+    color: var(--hint);
+  }
+  #comparison-panel .c-state-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 2px;
+  }
+  #comparison-panel .c-state-slot {
+    min-width: 0;
+    padding: 9px 10px 10px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
+  }
+  #comparison-panel .c-state-slot.pending {
+    border-style: dashed;
+    background: color-mix(in srgb, var(--panel) 86%, transparent);
+  }
+  #comparison-panel .c-state-label {
+    font-family: var(--font-ui);
+    font-size: .54rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #comparison-panel .c-state-name {
+    margin-top: 6px;
+    font-family: var(--font-display);
+    font-size: .93rem;
+    line-height: 1.02;
+    color: var(--title);
+  }
+  #comparison-panel .c-state-name.pending {
+    color: var(--hint);
+  }
+  #comparison-panel .c-state-help {
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 85%, transparent);
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.56;
     color: var(--hint);
   }
   #comparison-panel .c-foot { margin-top: 12px; }
@@ -1432,6 +1513,16 @@ async function init() {
     return `${sign}${formatMetricValueFor(metricKey, absValue, comparisonCountrySelection())}`;
   }
 
+  function comparisonDifferenceTone(delta) {
+    if (!Number.isFinite(delta) || delta === 0) return "neutral";
+    return delta > 0 ? "positive" : "negative";
+  }
+
+  function comparisonDifferenceNote(delta) {
+    if (!Number.isFinite(delta) || delta === 0) return "No meaningful gap";
+    return delta > 0 ? "B higher than A" : "B lower than A";
+  }
+
   function comparisonSupportLine(feature) {
     if (!feature) return "";
     if (boroughMetric === "density") {
@@ -1447,8 +1538,8 @@ async function init() {
   }
 
   function comparisonInstructionText() {
-    if (!comparisonA) return "Click a borough to set Borough A.";
-    if (!comparisonB) return "Click a second borough to set Borough B.";
+    if (!comparisonA) return "Click a borough to start a side-by-side comparison.";
+    if (!comparisonB) return "Select a second borough to compare against Borough A.";
     return "Click another borough to replace Borough B, or click a selected borough to clear it.";
   }
 
@@ -1817,8 +1908,14 @@ async function init() {
   function makeComparisonSelectionLayer(feature, side) {
     if (!feature || !comparisonAvailable()) return null;
     const styles = side === "A"
-      ? { fill: currentTheme === "night" ? [11, 92, 99, 40] : [11, 92, 99, 34], line: [11, 92, 99, 255] }
-      : { fill: currentTheme === "night" ? [140, 55, 81, 42] : [140, 55, 81, 34], line: [140, 55, 81, 255] };
+      ? {
+          fill: currentTheme === "night" ? [17, 95, 99, 44] : [17, 95, 99, 30],
+          line: currentTheme === "night" ? [126, 222, 214, 255] : [17, 95, 99, 255],
+        }
+      : {
+          fill: currentTheme === "night" ? [132, 74, 92, 48] : [132, 74, 92, 32],
+          line: currentTheme === "night" ? [232, 175, 193, 255] : [132, 74, 92, 255],
+        };
     return new deck.GeoJsonLayer({
       id: `comparison-${side.toLowerCase()}`,
       data: { type: "FeatureCollection", features: [feature] },
@@ -1828,7 +1925,7 @@ async function init() {
       getFillColor: styles.fill,
       getLineColor: styles.line,
       lineWidthUnits: "pixels",
-      getLineWidth: 4,
+      getLineWidth: side === "A" ? 5 : 4,
     });
   }
 
@@ -2008,32 +2105,51 @@ async function init() {
     const valueA = featureA ? comparisonMetricValue(featureA) : null;
     const valueB = featureB ? comparisonMetricValue(featureB) : null;
     const diff = Number.isFinite(valueA) && Number.isFinite(valueB) ? valueB - valueA : null;
+    const metricKicker = `<div class="c-kicker">${metric.label}</div>`;
 
     if (!featureA || !featureB) {
-      comparisonContentEl.innerHTML = `<div class="c-state">${comparisonInstructionText()}</div><div class="c-foot">${metric.label} · ${metric.source} · ${metric.year}</div>`;
+      comparisonContentEl.innerHTML = `
+        ${metricKicker}
+        <div class="c-state-grid">
+          <div class="c-state-slot ${featureA ? "" : "pending"}">
+            <div class="c-state-label">Borough A</div>
+            <div class="c-state-name ${featureA ? "" : "pending"}">${featureA?.properties?.[NAME_FIELD] ?? "Awaiting selection"}</div>
+          </div>
+          <div class="c-state-slot ${featureB ? "" : "pending"}">
+            <div class="c-state-label">Borough B</div>
+            <div class="c-state-name ${featureB ? "" : "pending"}">${featureB?.properties?.[NAME_FIELD] ?? "Awaiting selection"}</div>
+          </div>
+        </div>
+        <div class="c-state-help">${comparisonInstructionText()}</div>
+        <div class="c-foot">${metric.source} · ${metric.year}</div>
+      `;
       return;
     }
 
     const supportA = comparisonSupportLine(featureA);
     const supportB = comparisonSupportLine(featureB);
     comparisonContentEl.innerHTML = `
+      ${metricKicker}
       <div class="c-grid">
-        <div class="c-col">
+        <div class="c-col a">
           <span class="c-tag a">A</span>
           <div class="c-name">${featureA.properties?.[NAME_FIELD] ?? "Borough A"}</div>
+          <div class="c-value-label">Active metric</div>
           <div class="c-val">${formatMetricValueFor(metricKey, valueA, comparisonCountrySelection())}</div>
-          ${supportA ? `<div class="c-foot">${supportA}</div>` : ""}
+          ${supportA ? `<div class="c-support">${supportA}</div>` : ""}
         </div>
         <div class="c-mid">
           <div class="c-diff-label">B − A</div>
-          <div class="c-diff">${comparisonDifferenceLabel(metricKey, diff)}</div>
+          <div class="c-diff ${comparisonDifferenceTone(diff)}">${comparisonDifferenceLabel(metricKey, diff)}</div>
+          <div class="c-diff-note">${comparisonDifferenceNote(diff)}</div>
           <div class="c-meta">${metric.legendLabel}</div>
         </div>
-        <div class="c-col">
+        <div class="c-col b">
           <span class="c-tag b">B</span>
           <div class="c-name">${featureB.properties?.[NAME_FIELD] ?? "Borough B"}</div>
+          <div class="c-value-label">Active metric</div>
           <div class="c-val">${formatMetricValueFor(metricKey, valueB, comparisonCountrySelection())}</div>
-          ${supportB ? `<div class="c-foot">${supportB}</div>` : ""}
+          ${supportB ? `<div class="c-support">${supportB}</div>` : ""}
         </div>
       </div>
       <div class="c-foot">${metric.source} · ${metric.year}</div>
