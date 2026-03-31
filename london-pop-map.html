@@ -477,8 +477,9 @@
     bottom: 92px;
     z-index: 10;
     display: none;
-    width: min(388px, calc(100vw - 48px));
-    padding: 17px 18px 16px;
+    width: clamp(420px, 33vw, 640px);
+    max-width: calc(100vw - 48px);
+    padding: 18px 20px 17px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
@@ -523,15 +524,21 @@
   #comparison-panel .c-clear:hover { opacity: .76; }
   #comparison-panel .c-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 16px;
+    grid-template-columns: minmax(0, 1.08fr) minmax(120px, .72fr) minmax(0, 1.08fr);
+    gap: 18px;
     align-items: start;
   }
   #comparison-panel .c-col {
     min-width: 0;
   }
-  #comparison-panel .c-col.a { border-top: 2px solid rgba(17, 95, 99, .32); padding-top: 8px; }
-  #comparison-panel .c-col.b { border-top: 2px solid rgba(132, 74, 92, .32); padding-top: 8px; }
+  #comparison-panel .c-col.a,
+  #comparison-panel .c-col.b {
+    padding: 10px 12px 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
+  }
+  #comparison-panel .c-col.a { border-top: 2px solid rgba(17, 95, 99, .32); }
+  #comparison-panel .c-col.b { border-top: 2px solid rgba(132, 74, 92, .32); }
   #comparison-panel .c-tag {
     display: inline-block;
     margin-bottom: 6px;
@@ -549,7 +556,7 @@
   #comparison-panel .c-name {
     font-family: var(--font-display);
     font-size: 1.12rem;
-    line-height: 1.01;
+    line-height: 1.04;
     letter-spacing: .03em;
     color: var(--title);
   }
@@ -581,9 +588,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-width: 108px;
-    padding-top: 30px;
+    gap: 9px;
+    min-width: 0;
+    padding: 18px 6px 0;
   }
   #comparison-panel .c-diff-label,
   #comparison-panel .c-meta {
@@ -605,7 +612,7 @@
   #comparison-panel .c-diff.negative { color: #844a5c; }
   #comparison-panel .c-diff.neutral { color: var(--title); }
   #comparison-panel .c-diff-note {
-    max-width: 92px;
+    max-width: 120px;
     font-family: var(--font-ui);
     font-size: .64rem;
     line-height: 1.4;
@@ -763,6 +770,8 @@
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
     #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
+    #comparison-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
+    #comparison-panel .c-mid { padding-top: 0; }
     #credit         { right: 14px; bottom: 82px; }
   }
 </style>
@@ -1733,67 +1742,119 @@ async function init() {
     return spotlightDeltaText(metricKey, value, average, countrySelection);
   }
 
-  function buildSpotlightStory(feature, metricKey, countrySelection = selectedCountryBirth) {
+  function spotlightMetricContext(feature, metricKey, countrySelection = selectedCountryBirth) {
     const value = metricValue(feature, metricKey, countrySelection);
     const stats = getMetricStats(metricKey, countrySelection);
     if (!Number.isFinite(value) || !Number.isFinite(stats?.avg)) return null;
+    return {
+      key: metricKey,
+      value,
+      stats,
+      bucket: spotlightBucket(metricKey, value, stats.avg),
+      rank: spotlightRankInfo(metricKey, value, countrySelection).bucket,
+      diff: formatDiffAgainstAverage(metricKey, value, stats.avg, countrySelection),
+      countrySelection,
+      formatted: formatMetricValueFor(metricKey, value, countrySelection),
+      ratio: stats.avg ? value / stats.avg : null,
+      delta: value - stats.avg,
+    };
+  }
 
-    const name = feature.properties?.[NAME_FIELD] ?? "This borough";
-    const bucket = spotlightBucket(metricKey, value, stats.avg);
-    const rank = spotlightRankInfo(metricKey, value, countrySelection).bucket;
-    const diff = formatDiffAgainstAverage(metricKey, value, stats.avg, countrySelection);
+  function makeInsight(sentence, score, key) {
+    return { sentence, score, key };
+  }
 
-    if (metricKey === "density") {
-      if (bucket === "much-higher" || rank === "top-5") return `One of the densest boroughs in London, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "higher") return `Denser than London overall, at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "much-lower" || rank === "bottom-5") return `Far less dense than inner London, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, only ${diff}.`;
-      if (bucket === "lower") return `Less dense than London overall, with <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      return `Density sits close to the London norm at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+  function buildSpotlightMetricInsight(context) {
+    if (!context) return null;
+    const { key, bucket, rank, diff, formatted } = context;
+
+    if (key === "density") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`One of the densest boroughs in London, with <strong>${formatted}</strong>, ${diff}.`, 88, key);
+      if (bucket === "higher") return makeInsight(`Denser than London overall, at <strong>${formatted}</strong>, ${diff}.`, 70, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Far less dense than inner London, with <strong>${formatted}</strong>, only ${diff}.`, 86, key);
+      if (bucket === "lower") return makeInsight(`Less dense than London overall, with <strong>${formatted}</strong>, ${diff}.`, 68, key);
+      return makeInsight(`Density sits close to the London norm at <strong>${formatted}</strong>.`, 32, key);
     }
 
-    if (metricKey === "house_price_proxy_gbp") {
-      if (bucket === "much-higher" || rank === "top-5") return `House prices are among the highest, with a typical sale price around <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "higher") return `Housing costs sit above the London average, with a typical sale price near <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      if (bucket === "much-lower" || rank === "bottom-5") return `House prices are well below London’s priciest boroughs, with a typical sale price around <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      if (bucket === "lower") return `House prices are a little below the London average at about <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      return `House prices are broadly in line with London, at roughly <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+    if (key === "house_price_proxy_gbp") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`House prices are among the highest, with a typical sale price around <strong>${formatted}</strong>, ${diff}.`, 84, key);
+      if (bucket === "higher") return makeInsight(`Housing costs sit above the London average, with a typical sale price near <strong>${formatted}</strong>.`, 68, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`House prices are well below London’s priciest boroughs, with a typical sale price around <strong>${formatted}</strong>.`, 82, key);
+      if (bucket === "lower") return makeInsight(`House prices are a little below the London average at about <strong>${formatted}</strong>.`, 62, key);
+      return makeInsight(`House prices are broadly in line with London, at roughly <strong>${formatted}</strong>.`, 30, key);
     }
 
-    if (metricKey === "median_weekly_earnings_gbp") {
-      if (bucket === "much-higher") return `Weekly earnings are notably strong at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "higher") return `Earnings run above the London average, with typical weekly pay around <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      if (bucket === "much-lower") return `Weekly earnings lag the London average at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "lower") return `Earnings are slightly below the London average, at around <strong>${formatMetricValueFor(metricKey, value)}</strong> a week.`;
-      return `Earnings are close to the London average, at about <strong>${formatMetricValueFor(metricKey, value)}</strong> a week.`;
+    if (key === "median_weekly_earnings_gbp") {
+      if (bucket === "much-higher") return makeInsight(`Weekly earnings are notably strong at <strong>${formatted}</strong>, ${diff}.`, 76, key);
+      if (bucket === "higher") return makeInsight(`Earnings run above the London average, with typical weekly pay around <strong>${formatted}</strong>.`, 60, key);
+      if (bucket === "much-lower") return makeInsight(`Weekly earnings lag the London average at <strong>${formatted}</strong>, ${diff}.`, 74, key);
+      if (bucket === "lower") return makeInsight(`Earnings are slightly below the London average, at around <strong>${formatted}</strong> a week.`, 56, key);
+      return makeInsight(`Earnings are close to the London average, at about <strong>${formatted}</strong> a week.`, 28, key);
     }
 
-    if (metricKey === "children_share_pct") {
-      if (bucket === "much-higher") return `Younger than London overall, with children making up <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "higher") return `A relatively family-heavy borough, with children accounting for <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      if (bucket === "much-lower") return `Less family-oriented than London overall, with children at <strong>${formatMetricValueFor(metricKey, value)}</strong>, ${diff}.`;
-      if (bucket === "lower") return `The share of children is slightly below London overall, at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
-      return `Its child population looks close to the London average, at <strong>${formatMetricValueFor(metricKey, value)}</strong>.`;
+    if (key === "children_share_pct") {
+      if (bucket === "much-higher") return makeInsight(`Younger than London overall, with children making up <strong>${formatted}</strong>, ${diff}.`, 66, key);
+      if (bucket === "higher") return makeInsight(`A relatively family-heavy borough, with children accounting for <strong>${formatted}</strong>.`, 54, key);
+      if (bucket === "much-lower") return makeInsight(`Less family-oriented than London overall, with children at <strong>${formatted}</strong>, ${diff}.`, 66, key);
+      if (bucket === "lower") return makeInsight(`The share of children is slightly below London overall, at <strong>${formatted}</strong>.`, 50, key);
+      return makeInsight(`Its child population looks close to the London average, at <strong>${formatted}</strong>.`, 24, key);
     }
 
-    if (metricKey === "country_of_birth_pct") {
-      if (bucket === "much-higher" || rank === "top-5") return `More international than average, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> of residents born outside the UK, ${diff}.`;
-      if (bucket === "higher") return `A more internationally mixed borough than London overall, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK.`;
-      if (bucket === "much-lower" || rank === "bottom-5") return `Less internationally mixed than many boroughs, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK, ${diff}.`;
-      if (bucket === "lower") return `The share of residents born outside the UK is a little below London overall, at <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong>.`;
-      return `Its international mix is close to the London average, with <strong>${formatMetricValueFor(metricKey, value, countrySelection)}</strong> born outside the UK.`;
+    if (key === "country_of_birth_pct") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`More international than average, with <strong>${formatted}</strong> of residents born outside the UK, ${diff}.`, 80, key);
+      if (bucket === "higher") return makeInsight(`A more internationally mixed borough than London overall, with <strong>${formatted}</strong> born outside the UK.`, 60, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Less internationally mixed than many boroughs, with <strong>${formatted}</strong> born outside the UK, ${diff}.`, 78, key);
+      if (bucket === "lower") return makeInsight(`The share of residents born outside the UK is a little below London overall, at <strong>${formatted}</strong>.`, 56, key);
+      return makeInsight(`Its international mix is close to the London average, with <strong>${formatted}</strong> born outside the UK.`, 26, key);
     }
 
     return null;
   }
 
   function buildSpotlightNarrative(feature) {
-    return [
-      buildSpotlightStory(feature, "density"),
-      buildSpotlightStory(feature, "house_price_proxy_gbp"),
-      buildSpotlightStory(feature, "median_weekly_earnings_gbp"),
-      buildSpotlightStory(feature, "children_share_pct"),
-      buildSpotlightStory(feature, "country_of_birth_pct", "ALL"),
-    ].filter(Boolean).slice(0, 5);
+    const densityCtx = spotlightMetricContext(feature, "density");
+    const priceCtx = spotlightMetricContext(feature, "house_price_proxy_gbp");
+    const earningsCtx = spotlightMetricContext(feature, "median_weekly_earnings_gbp");
+    const childrenCtx = spotlightMetricContext(feature, "children_share_pct");
+    const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
+
+    const insights = [
+      buildSpotlightMetricInsight(densityCtx),
+      buildSpotlightMetricInsight(priceCtx),
+      buildSpotlightMetricInsight(earningsCtx),
+      buildSpotlightMetricInsight(childrenCtx),
+      buildSpotlightMetricInsight(internationalCtx),
+    ].filter(Boolean);
+
+    if (priceCtx && earningsCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (earningsCtx.bucket === "similar" || earningsCtx.bucket === "lower" || earningsCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`Housing costs are elevated, but earnings are only <strong>${earningsCtx.bucket === "similar" ? "around the London average" : "modest by London standards"}</strong>, pointing to a tighter affordability balance.`, 95, "affordability-tradeoff"));
+    }
+
+    if (densityCtx && internationalCtx && (densityCtx.bucket === "much-higher" || densityCtx.bucket === "higher") && (internationalCtx.bucket === "much-higher" || internationalCtx.bucket === "higher")) {
+      insights.push(makeInsight(`Dense urban form and a high international share combine to give the borough a distinctly inner-London profile.`, 90, "dense-international"));
+    }
+
+    if (densityCtx && childrenCtx && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower") && (childrenCtx.bucket === "much-higher" || childrenCtx.bucket === "higher")) {
+      insights.push(makeInsight(`Lower density and a larger child population make this feel more family-oriented than much of inner London.`, 88, "family-outer"));
+    }
+
+    if (priceCtx && childrenCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (childrenCtx.bucket === "lower" || childrenCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`High housing costs sit alongside a smaller child share, a pattern more typical of expensive central boroughs.`, 84, "expensive-fewer-children"));
+    }
+
+    if (priceCtx && earningsCtx && (priceCtx.bucket === "lower" || priceCtx.bucket === "much-lower") && (earningsCtx.bucket === "similar" || earningsCtx.bucket === "higher")) {
+      insights.push(makeInsight(`Housing looks relatively affordable while earnings stay close to, or above, the London average.`, 82, "affordable-solid-earnings"));
+    }
+
+    const unique = [];
+    const seen = new Set();
+    for (const insight of insights.sort((a, b) => b.score - a.score)) {
+      if (seen.has(insight.key)) continue;
+      seen.add(insight.key);
+      unique.push(insight.sentence);
+      if (unique.length === 4) break;
+    }
+    return unique;
   }
 
   function comparisonSupportLine(feature) {
@@ -2418,10 +2479,10 @@ async function init() {
           ${supportA ? `<div class="c-support">${supportA}</div>` : ""}
         </div>
         <div class="c-mid">
-          <div class="c-diff-label">B − A</div>
+          <div class="c-diff-label">Difference</div>
           <div class="c-diff ${comparisonDifferenceTone(diff)}">${comparisonDifferenceLabel(metricKey, diff)}</div>
           <div class="c-diff-note">${comparisonDifferenceNote(diff)}</div>
-          <div class="c-meta">${metric.legendLabel}</div>
+          <div class="c-meta">B − A · ${metric.legendLabel}</div>
         </div>
         <div class="c-col b">
           <span class="c-tag b">B</span>

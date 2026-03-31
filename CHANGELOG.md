@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Spotlight cross-metric insight pass
+
+- Deepened the borough `Why here?` spotlight to rank and surface the strongest cross-metric patterns instead of listing one blurb per metric.
+- Expanded the comparison card to a wider desktop layout with clearer A, B, and difference zones.
+
 ## 2026-04-01 — Spotlight panel placement & comparison spacing
 
 - Moved the borough `Why here?` spotlight out of the left control stack into its own centre-right analysis card and fixed first-click spotlight refresh on borough selection.
