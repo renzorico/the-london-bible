@@ -90,9 +90,27 @@
   }
   .maplibregl-ctrl-attrib-button { display: none !important; }
 
+  #left-stack {
+    position: absolute;
+    top: 22px;
+    left: 24px;
+    z-index: 12;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 11px;
+    max-width: min(520px, calc(100vw - 48px));
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
   #title {
-    position: absolute; top: 22px; left: 24px;
-    pointer-events: none; z-index: 10;
+    position: relative;
+    pointer-events: none;
     padding: 14px 16px 12px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
@@ -120,21 +138,18 @@
   }
 
   #layer-toggle, #view-toggle, #metric-toggle {
-    position: absolute; left: 24px;
-    z-index: 10; display: flex; gap: 4px;
-  }
-  #layer-toggle { top: 117px; }
-  #view-toggle  { top: 154px; }
-  #metric-toggle {
-    top: 191px;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
     flex-wrap: wrap;
+  }
+  #metric-toggle {
     max-width: 500px;
     gap: 6px;
   }
   #metric-options {
-    position: absolute;
-    top: 256px;
-    left: 24px;
+    position: relative;
     z-index: 10;
     display: none;
     flex-direction: column;
@@ -191,8 +206,7 @@
     flex: 0 0 auto;
   }
   .control-title {
-    position: absolute;
-    left: 26px;
+    position: relative;
     z-index: 10;
     font-family: var(--font-ui);
     font-size: .58rem;
@@ -202,8 +216,6 @@
     color: color-mix(in srgb, var(--title) 68%, var(--subtitle) 32%);
     pointer-events: none;
   }
-  #view-label { top: 142px; }
-  #metric-label { top: 179px; }
   .toggle-btn {
     padding: 7px 12px 6px;
     font-family: var(--font-ui);
@@ -339,9 +351,7 @@
     display: none;
   }
   #country-toggle {
-    position: absolute;
-    left: 24px;
-    top: 256px;
+    position: relative;
     z-index: 10;
     display: none;
     flex-direction: column;
@@ -554,17 +564,12 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 540px) {
-    #title          { top: 14px; left: 14px; }
+    #left-stack     { top: 14px; left: 14px; right: 14px; max-width: calc(100vw - 28px); gap: 9px; }
     #title h1       { font-size: 1.52rem; }
     #title p        { font-size: .6rem; }
-
-    #layer-toggle   { top: 98px;  left: 14px; }
-    #view-label     { top: 126px; left: 16px; }
-    #view-toggle    { top: 136px; left: 14px; }
-    #metric-label   { top: 162px; left: 16px; }
-    #metric-toggle  { top: 172px; left: 14px; right: 14px; max-width: none; }
-    #metric-options { top: 226px; left: 14px; right: 14px; min-width: 0; max-width: calc(100vw - 28px); gap: 9px; }
-    #country-toggle { top: 226px; left: 14px; right: auto; max-width: calc(100vw - 28px); }
+    #metric-toggle  { max-width: none; }
+    #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
+    #country-toggle { max-width: 100%; }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
     #theme-toggle   { top: auto; right: auto; left: auto; }
     .toggle-btn     { padding: 4px 10px; font-size: .65rem; }
@@ -591,62 +596,74 @@
 
 <div id="map"></div>
 
-<div id="title">
-  <h1>London</h1>
-  <p>Demographic Analysis Atlas · Borough Metrics</p>
-</div>
+<div id="left-stack">
+  <div id="title">
+    <h1>London</h1>
+    <p>Demographic Analysis Atlas · Borough Metrics</p>
+  </div>
 
-<div id="layer-toggle">
-  <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
-  <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
-  <button id="btn-tube" class="toggle-btn" onclick="toggleStations()">Tube</button>
-  <button id="btn-tube-map" class="toggle-btn" onclick="setMode('tube')">Only-tube</button>
-</div>
-<div id="view-label" class="control-title">View</div>
-<div id="view-toggle">
-  <button id="btn-flat" class="toggle-btn active" onclick="setView('flat')">Flat map</button>
-  <button id="btn-3d"   class="toggle-btn" onclick="setView('3d')">Spikes</button>
-  <button id="btn-home" class="toggle-btn" style="margin-left:4px" onclick="resetView()" title="Reset to overview">⌂</button>
-</div>
-<div id="metric-label" class="control-title">Metric</div>
-<div id="metric-toggle">
-  <button id="metric-density" class="toggle-btn metric-btn active" onclick="setMetric('density')">Density</button>
-  <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn" onclick="setMetric('house_price_proxy_gbp')">House prices</button>
-  <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
-  <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
-  <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
-  <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
-</div>
-<div id="metric-options">
-  <div class="metric-option-row tools-row" id="compare-row">
-    <div class="metric-option-label">Tools</div>
-    <div class="metric-subtoggle">
-      <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
+  <div class="control-group" id="layer-group">
+    <div id="layer-toggle">
+      <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
+      <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
+      <button id="btn-tube" class="toggle-btn" onclick="toggleStations()">Tube</button>
+      <button id="btn-tube-map" class="toggle-btn" onclick="setMode('tube')">Only-tube</button>
     </div>
   </div>
-  <div class="metric-option-row" id="geography-row">
-    <div class="metric-option-label">Geography</div>
-    <div id="geography-toggle" class="metric-subtoggle">
-      <button id="geo-borough" class="toggle-btn secondary-btn active" onclick="setGeography('borough')">Borough</button>
-      <button id="geo-msoa" class="toggle-btn secondary-btn" onclick="setGeography('msoa')">MSOA</button>
+
+  <div class="control-group" id="view-group">
+    <div id="view-label" class="control-title">View</div>
+    <div id="view-toggle">
+      <button id="btn-flat" class="toggle-btn active" onclick="setView('flat')">Flat map</button>
+      <button id="btn-3d"   class="toggle-btn" onclick="setView('3d')">Spikes</button>
+      <button id="btn-home" class="toggle-btn" style="margin-left:4px" onclick="resetView()" title="Reset to overview">⌂</button>
     </div>
   </div>
-  <div class="metric-option-row" id="year-row">
-    <div class="metric-option-label">Year</div>
-    <div id="year-toggle" class="metric-subtoggle">
-      <button id="year-2021" class="toggle-btn secondary-btn" onclick="setYear(2021)">2021</button>
-      <button id="year-2024" class="toggle-btn secondary-btn active" onclick="setYear(2024)">2024</button>
+
+  <div class="control-group" id="metric-group">
+    <div id="metric-label" class="control-title">Metric</div>
+    <div id="metric-toggle">
+      <button id="metric-density" class="toggle-btn metric-btn active" onclick="setMetric('density')">Density</button>
+      <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn" onclick="setMetric('house_price_proxy_gbp')">House prices</button>
+      <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
+      <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
+      <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
+      <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
   </div>
-</div>
-<div id="country-toggle">
-  <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
-  <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
+
+  <div id="metric-options">
+    <div class="metric-option-row tools-row" id="compare-row">
+      <div class="metric-option-label">Tools</div>
+      <div class="metric-subtoggle">
+        <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
+      </div>
+    </div>
+    <div class="metric-option-row" id="geography-row">
+      <div class="metric-option-label">Geography</div>
+      <div id="geography-toggle" class="metric-subtoggle">
+        <button id="geo-borough" class="toggle-btn secondary-btn active" onclick="setGeography('borough')">Borough</button>
+        <button id="geo-msoa" class="toggle-btn secondary-btn" onclick="setGeography('msoa')">MSOA</button>
+      </div>
+    </div>
+    <div class="metric-option-row" id="year-row">
+      <div class="metric-option-label">Year</div>
+      <div id="year-toggle" class="metric-subtoggle">
+        <button id="year-2021" class="toggle-btn secondary-btn" onclick="setYear(2021)">2021</button>
+        <button id="year-2024" class="toggle-btn secondary-btn active" onclick="setYear(2024)">2024</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="country-toggle">
+    <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
+    <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
+  </div>
 </div>
 <div id="top-right-controls">
   <div id="theme-toggle">
@@ -1053,8 +1070,10 @@ async function init() {
   const comparisonPanelEl = document.getElementById("comparison-panel");
   const comparisonContentEl = document.getElementById("comparison-content");
   const countryToggleEl = document.getElementById("country-toggle");
+  const viewGroupEl = document.getElementById("view-group");
   const viewLabelEl = document.getElementById("view-label");
   const viewToggleEl = document.getElementById("view-toggle");
+  const metricGroupEl = document.getElementById("metric-group");
   const metricLabelEl = document.getElementById("metric-label");
   const metricToggleEl = document.getElementById("metric-toggle");
   const metricOptionsEl = document.getElementById("metric-options");
@@ -1901,10 +1920,11 @@ async function init() {
     const yearMode = geographyMode && activeGeography === "msoa";
     const compareMode = boroughsMode && comparisonAvailable();
     const showMetricOptions = compareMode || geographyMode;
-    const mobile = window.innerWidth <= 540;
 
+    viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
+    metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
     metricOptionsEl.style.display = showMetricOptions ? "flex" : "none";
@@ -1918,11 +1938,6 @@ async function init() {
     btnCompare.disabled = !comparisonAvailable();
     btnCompare.title = comparisonAvailable() ? "Compare two boroughs" : "Comparison is available in borough geography only";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
-    if (countryMode) {
-      countryToggleEl.style.top = showMetricOptions ? (mobile ? "332px" : "404px") : (mobile ? "226px" : "256px");
-    } else {
-      countryToggleEl.style.top = "";
-    }
   }
 
   function updateCountrySelector() {
