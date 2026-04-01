@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — View icon and flag refinement
+
+- Replaced the Views text buttons with compact icon controls plus hover labels, swapped the pub metric icon for a clearer pint-glass mark, and tightened the Origin focus picker into one horizontal flag row.
+- Replaced the Origin overview swatch with a UK flag treatment while keeping hover/focus labels and active-state clarity intact across the icon-based controls.
+
 ## 2026-04-01 — Compact metric icons and origin flags
 
 - Shortened the METRICS panel by replacing the text metric buttons with a compact icon grid, keeping full metric names available through hover/focus labels and aria-labels while preserving the existing metric-switching behavior.
