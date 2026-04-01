@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — v1 release cleanup
+
+- Finalized The London Bible for a stable v1 release on GitHub Pages, confirmed the root index entry and Pages support files, and tidied the repo by removing untracked cache cruft before merging the completed work onto main.
+
 ## 2026-04-01 — GitHub Pages repo-rename cleanup
 
 - Added a root `index.html` entry point for the renamed `the-london-bible` repo, updated stale repo and local-path references, and refreshed the README for GitHub Pages publishing at `https://renzorico.github.io/the-london-bible/`.
