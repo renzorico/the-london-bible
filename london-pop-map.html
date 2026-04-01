@@ -151,43 +151,61 @@
   }
 
   #layer-toggle, #view-toggle, #metric-toggle {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
     width: 100%;
   }
-  #layer-toggle { gap: 7px; }
+  #layer-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+  }
   #view-toggle {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     align-items: stretch;
   }
+  #layer-toggle .toggle-btn,
   #view-toggle .toggle-btn {
     width: 100%;
     min-width: 0;
     justify-content: center;
+    padding: 6px 10px 5px;
+    font-size: .6rem;
+    letter-spacing: .14em;
+    min-height: 35px;
+    text-align: center;
   }
   #metric-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
     max-width: none;
-    gap: 6px;
+    position: relative;
+    z-index: 2;
   }
   #metric-options {
     display: none;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
     width: 100%;
-    margin-top: 2px;
+    margin-top: 8px;
     padding: 11px 12px 12px;
     border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
     background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
     border-radius: 12px;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
   }
+  #metric-group { position: relative; isolation: isolate; }
   .metric-option-row {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+    pointer-events: auto;
   }
   .metric-option-row.active-scope {
     padding: 10px 11px 11px;
@@ -354,9 +372,13 @@
   .toggle-btn.active { background: var(--button-active); color: var(--button-active-text); border-color: var(--button-active-border); }
   .toggle-btn:disabled { opacity: .4; cursor: default; }
   .toggle-btn.metric-btn {
-    padding-left: 10px;
-    padding-right: 10px;
-    letter-spacing: .12em;
+    padding: 6px 10px 5px;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    justify-content: center;
+    min-height: 35px;
+    text-align: center;
   }
   .toggle-btn.secondary-btn {
     padding: 6px 10px 5px;
@@ -372,11 +394,11 @@
     justify-content: center;
   }
   #layer-toggle .toggle-btn {
-    flex: 1 1 calc(50% - 7px);
     justify-content: center;
   }
   #metric-toggle .toggle-btn.metric-btn {
-    flex: 0 1 auto;
+    width: 100%;
+    min-width: 0;
   }
   #btn-home {
     min-width: 88px;

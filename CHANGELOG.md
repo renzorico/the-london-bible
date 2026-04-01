@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Control rail cleanup and metric switching fix
+
+- Reduced the visual weight of the Views and Metrics buttons to match the Analysis controls more closely, and reorganized those groups into cleaner two-column grids for a more ordered left rail.
+- Fixed the intermittent Density switching issue by separating the metric button grid from the nested Density options surface in the stacking order, so the open scope panel no longer blocks clicks on other metric buttons.
+
 ## 2026-04-01 — Hexes and spikes refinement
 
 - Restored HEXES spikes to proper extruded hex geometry, improved the density palette toward a cleaner stone-to-plum range, and tightened the HEXES style controls so Flat map, Spikes, and Reset distribute evenly.
