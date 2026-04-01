@@ -1312,7 +1312,24 @@
     background: #ffffff;
     opacity: 1;
     visibility: visible;
-    transition: opacity .58s ease, visibility .58s ease;
+    transition: opacity .72s cubic-bezier(.22,.8,.24,1), visibility .72s cubic-bezier(.22,.8,.24,1), background-color .72s cubic-bezier(.22,.8,.24,1);
+  }
+  #loading::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 48%, rgba(255,255,255,0) 0 18%, rgba(255,255,255,0.1) 32%, rgba(255,255,255,0.92) 78%),
+      linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,.99));
+    opacity: 1;
+    transition: opacity .86s cubic-bezier(.18,.82,.22,1);
+    pointer-events: none;
+  }
+  #loading.is-revealing {
+    background: rgba(255,255,255,0.76);
+  }
+  #loading.is-revealing::after {
+    opacity: 0;
   }
   #loading.is-hidden {
     opacity: 0;
@@ -1320,43 +1337,91 @@
     pointer-events: none;
   }
   .loading-shell {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 22px;
-    padding: 30px 34px;
+    gap: 16px;
+    padding: 26px 34px;
     text-align: center;
+    transition: opacity .72s cubic-bezier(.22,.8,.24,1), transform .72s cubic-bezier(.22,.8,.24,1), filter .72s cubic-bezier(.22,.8,.24,1);
+  }
+  #loading.is-revealing .loading-shell {
+    opacity: 0;
+    transform: scale(.92);
+    filter: blur(6px);
   }
   .loading-logo-wrap {
-    width: min(62vw, 560px);
-    height: min(62vw, 560px);
+    width: min(64vw, 586px);
+    height: min(64vw, 586px);
     display: grid;
     place-items: center;
     background: transparent;
   }
   .loading-logo {
-    width: min(52vw, 460px);
-    height: min(52vw, 460px);
+    width: min(55vw, 496px);
+    height: min(55vw, 496px);
     object-fit: contain;
     transform-origin: center;
+    animation: logoSpinDown 2.15s cubic-bezier(.16,.9,.24,1) forwards;
   }
   #loading h2 {
     display: block;
     font-family: var(--font-display);
-    font-size: clamp(1.72rem, 3.1vw, 2.9rem);
+    font-size: clamp(1.52rem, 2.55vw, 2.45rem);
     font-weight: 800;
     letter-spacing: .18em;
     line-height: 1;
     color: var(--title);
     text-transform: uppercase;
     white-space: nowrap;
+    transform: translateY(-6px);
   }
   #loading .lstatus  {
     display: none;
   }
+  #map {
+    width: 100vw;
+    height: 100vh;
+    transform: scale(1.045);
+    transform-origin: center;
+    filter: saturate(.88) contrast(.95) brightness(.98);
+    opacity: .84;
+    transition: transform 1.02s cubic-bezier(.18,.84,.24,1), filter 1.02s cubic-bezier(.18,.84,.24,1), opacity .9s cubic-bezier(.18,.84,.24,1);
+  }
+  body.intro-revealing #map {
+    transform: scale(1);
+    filter: saturate(1) contrast(1) brightness(1);
+    opacity: 1;
+  }
+  @keyframes logoSpinDown {
+    0% { transform: rotate(0deg) scale(1); }
+    42% { transform: rotate(540deg) scale(1.01); }
+    74% { transform: rotate(805deg) scale(1); }
+    100% { transform: rotate(900deg) scale(.995); }
+  }
   @media (prefers-reduced-motion: reduce) {
-    #loading { transition: none; }
+    #loading,
+    #loading::after,
+    .loading-shell,
+    #map {
+      transition: none;
+    }
+    .loading-logo {
+      animation: none;
+    }
+    #loading.is-revealing .loading-shell {
+      opacity: 0;
+      transform: none;
+      filter: none;
+    }
+    body.intro-revealing #map {
+      transform: none;
+      filter: none;
+      opacity: 1;
+    }
   }
 
   @media (max-width: 540px) {
@@ -2235,10 +2300,38 @@ async function init() {
   let currentMainLayer = null;
   let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
   let loadingOverlayDismissed = false;
-  const LOADER_MIN_DISPLAY_MS = 5000;
+  const LOADER_MIN_DISPLAY_MS = 3000;
+  const LOADER_REVEAL_MS = 980;
   const loadingStartedAt = performance.now();
   let atlasReadyForReveal = false;
   let loadingDismissTimer = null;
+  let loadingRevealStarted = false;
+
+  function reducedMotionPreferred() {
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  }
+
+  function beginLoadingReveal() {
+    if (loadingRevealStarted || loadingOverlayDismissed || !loadingOverlayEl) return;
+    loadingRevealStarted = true;
+    bodyEl.classList.add("intro-revealing");
+    loadingOverlayEl.classList.add("is-revealing");
+    if (!reducedMotionPreferred()) {
+      const map = getBaseMap();
+      if (map?.easeTo) {
+        map.easeTo({
+          center: [-0.118, 51.505],
+          zoom: 10.5,
+          pitch: 0,
+          bearing: 0,
+          duration: LOADER_REVEAL_MS,
+          easing: (t) => 1 - Math.pow(1 - t, 3),
+          animate: true,
+        });
+      }
+    }
+    setTimeout(dismissLoadingOverlay, LOADER_REVEAL_MS);
+  }
 
   function dismissLoadingOverlay() {
     if (loadingOverlayDismissed || !loadingOverlayEl) return;
@@ -2252,10 +2345,11 @@ async function init() {
       loadingOverlayEl.hidden = true;
       loadingOverlayEl.setAttribute("aria-hidden", "true");
       loadingOverlayEl.style.pointerEvents = "none";
+      bodyEl.classList.remove("intro-revealing");
       loadingOverlayEl.removeEventListener("transitionend", cleanup);
     };
     loadingOverlayEl.addEventListener("transitionend", cleanup);
-    setTimeout(cleanup, 800);
+    setTimeout(cleanup, LOADER_REVEAL_MS + 120);
   }
 
   function maybeDismissLoadingOverlay() {
@@ -2266,11 +2360,11 @@ async function init() {
       if (loadingDismissTimer) clearTimeout(loadingDismissTimer);
       loadingDismissTimer = setTimeout(() => {
         loadingDismissTimer = null;
-        requestAnimationFrame(() => requestAnimationFrame(dismissLoadingOverlay));
+        requestAnimationFrame(() => requestAnimationFrame(beginLoadingReveal));
       }, remaining);
       return;
     }
-    requestAnimationFrame(() => requestAnimationFrame(dismissLoadingOverlay));
+    requestAnimationFrame(() => requestAnimationFrame(beginLoadingReveal));
   }
 
   function markAtlasReady() {

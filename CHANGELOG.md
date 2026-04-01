@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Loading intro motion pass
+
+- Refined the loading screen proportions, shortened the intro to roughly three seconds, and added a decelerating logo-spin reveal that blends into the default London map view for a more cinematic first load.
+
 ## 2026-04-01 — Tube lines overlay restored
 
 - Fixed a regression that hid Tube lines by restoring the full local Tube network source and keeping the line overlay path intact, so Tube lines and stations render together again without affecting the new contours layer.
