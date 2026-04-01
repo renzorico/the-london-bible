@@ -2325,6 +2325,7 @@ async function init() {
 
   let tooltipPinned = false;
   let pinnedCoord = null;
+  let pinnedPoiFeature = null;
   let currentDataset = "sections";
   let is3D = false;
   let currentTheme = "day";
@@ -2483,6 +2484,19 @@ async function init() {
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
+    if (pinnedPoiFeature) {
+      try {
+        const vp = new deck.WebMercatorViewport({ width: innerWidth, height: innerHeight, ...vs });
+        const [sx, sy] = vp.project(pinnedCoord);
+        if (sx < 0 || sx > innerWidth || sy < 0 || sy > innerHeight) {
+          tooltipEl.style.display = "none";
+        } else {
+          tooltipEl.style.display = "block";
+          positionTooltip(sx, sy);
+        }
+      } catch (e) {}
+      return;
+    }
     if (currentDataset === "municipi") {
       positionPinnedSummaryCard();
       return;
@@ -2914,7 +2928,7 @@ async function init() {
   }
 
   function correlationPinnedFeature() {
-    if (!tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
+    if (pinnedPoiFeature || !tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -2974,13 +2988,13 @@ async function init() {
   }
 
   function spotlightFeature() {
-    if (!isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || !isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
 
   function similarityFeature() {
-    if (!isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || !isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -4189,7 +4203,9 @@ async function init() {
   }
 
   function syncPinnedSelectionState(feature = null) {
-    if (!tooltipPinned) {
+    if (pinnedPoiFeature) {
+      highlightedFeature = null;
+    } else if (!tooltipPinned) {
       highlightedFeature = pinData.length ? featureAt(pinData[0].lon, pinData[0].lat) : null;
     } else if (feature) {
       highlightedFeature = feature;
@@ -4208,6 +4224,14 @@ async function init() {
 
   function renderPinnedTooltip() {
     if (!tooltipPinned || !pinnedCoord) return;
+
+    if (pinnedPoiFeature) {
+      tooltipEl.classList.remove("summary-card");
+      tooltipEl.innerHTML = poiTooltipHtml(pinnedPoiFeature, true);
+      tooltipEl.style.display = "block";
+      updatePinnedPosition(viewState);
+      return;
+    }
 
     const object = featureAt(pinnedCoord[0], pinnedCoord[1]);
 
@@ -4247,6 +4271,7 @@ async function init() {
   function clearTubeInteractionState() {
     tooltipPinned = false;
     pinnedCoord = null;
+    pinnedPoiFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -4273,6 +4298,10 @@ async function init() {
 
   function lineTooltipHtml(line, pinned) {
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Line</span><br><span class="tarea">${line.properties.lineName}</span>`;
+  }
+
+  function isPoiObject(object) {
+    return object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area";
   }
 
   function poiTooltipHtml(poi, pinned) {
@@ -4463,14 +4492,14 @@ async function init() {
     if (tubeCase) layers.push(tubeCase);
     const tubeLines = makeTubeLineLayer();
     if (tubeLines) layers.push(tubeLines);
+    const stations = makeStationsLayer();
+    if (stations) layers.push(stations);
     const poiHit = makePoiHitLayer();
     if (poiHit) layers.push(poiHit);
     const poiHalo = makePoiHaloLayer();
     if (poiHalo) layers.push(poiHalo);
     const poiLayer = makePoiLayer();
     if (poiLayer) layers.push(poiLayer);
-    const stations = makeStationsLayer();
-    if (stations) layers.push(stations);
     const comparisonLayerA = makeComparisonSelectionLayer(comparisonFeature(comparisonA), "A");
     if (comparisonLayerA) layers.push(comparisonLayerA);
     const comparisonLayerB = makeComparisonSelectionLayer(comparisonFeature(comparisonB), "B");
@@ -5179,6 +5208,7 @@ async function init() {
   function clearPinnedTooltip() {
     tooltipPinned = false;
     pinnedCoord = null;
+    pinnedPoiFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -5205,6 +5235,7 @@ async function init() {
     mapStyle: THEMES[currentTheme].mapStyle,
     initialViewState: viewState,
     controller: { scrollZoom: { smooth: true, speed: 0.02 }, inertia: 0, doubleClickZoom: false },
+    pickingRadius: 6,
     layers: [],
     onViewStateChange: ({ viewState: vs, oldViewState }) => {
       if (oldViewState) {
@@ -5242,7 +5273,7 @@ async function init() {
         positionTooltip(x, y);
         return;
       }
-      if (object.layer?.id === "poi-markers" || object.layer?.id === "poi-hit-area") {
+      if (isPoiObject(object)) {
         tooltipEl.innerHTML = poiTooltipHtml(object, false);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
@@ -5298,11 +5329,11 @@ async function init() {
         return;
       }
 
-      tooltipPinned = true;
-      pinnedCoord = coordinate;
-      tooltipEl.classList.add("pinned");
-
       if (object?.layer?.id === "stations") {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = null;
+        tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
         tooltipEl.style.display = "block";
@@ -5311,6 +5342,10 @@ async function init() {
         return;
       }
       if (object?.layer?.id === "tube-lines") {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = null;
+        tooltipEl.classList.add("pinned");
         const lineKey = object.properties?.lineKey || null;
         setSelectedTubeLine(lineKey, { preserveTooltip: true });
         tooltipEl.classList.remove("summary-card");
@@ -5320,11 +5355,18 @@ async function init() {
         renderAnalysisPanel();
         return;
       }
-      if (object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area") {
+      if (isPoiObject(object)) {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = object;
+        highlightedFeature = null;
+        tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = poiTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        deckgl.setProps({ layers: getLayers() });
+        renderAnalysisPanel();
         return;
       }
 
@@ -5334,6 +5376,10 @@ async function init() {
       }
 
       if (currentDataset === "municipi" && object) {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = null;
+        tooltipEl.classList.add("pinned");
         highlightedFeature = object;
         tooltipEl.classList.add("summary-card");
         tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
@@ -5343,6 +5389,10 @@ async function init() {
         return;
       }
 
+      tooltipPinned = true;
+      pinnedCoord = coordinate;
+      pinnedPoiFeature = null;
+      tooltipEl.classList.add("pinned");
       tooltipEl.classList.remove("summary-card");
       const pop = object?.properties?.[POP_FIELD] ?? statsAt(...coordinate).population;
       const dens = object?.properties?.density ?? statsAt(...coordinate).density;
@@ -5663,6 +5713,7 @@ async function init() {
     pinData = [];
     tooltipPinned = false;
     pinnedCoord = null;
+    pinnedPoiFeature = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
     refreshMapState({
@@ -5690,6 +5741,7 @@ async function init() {
     pinData = [geo];
     is3D = false;
     tooltipPinned = false;
+    pinnedPoiFeature = null;
     tooltipEl.style.display = "none";
     document.getElementById("btn-3d").classList.remove("active");
     document.getElementById("btn-flat").classList.add("active");

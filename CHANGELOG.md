@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — POI interaction cleanup
+
+- Fixed POI hover and click behavior so place names remain easy to inspect in Boroughs and ONLY-TUBE view, and clicking a POI now opens POI-specific info instead of the normal metric pin card.
+
 ## 2026-04-01 — Restored POI place-name hover
 
 - Restored compact hover labels for POIs so place names remain discoverable while keeping the calmer POI-first background behavior and reduced borough hover noise.
