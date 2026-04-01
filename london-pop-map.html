@@ -310,6 +310,13 @@
     font-size: .5rem;
     letter-spacing: .04em;
   }
+  .time-stops.selective .time-stop.muted {
+    opacity: 0;
+  }
+  .time-stops.selective .time-stop.active,
+  .time-stops.selective .time-stop.anchor {
+    opacity: 1;
+  }
   .time-stop {
     color: var(--subtitle);
     opacity: .72;
@@ -536,7 +543,10 @@
     border-radius: 12px; padding: 10px 14px;
     font-family: var(--font-ui);
     font-size: .78rem; line-height: 1.6; color: var(--tooltip-text);
-    display: none; white-space: nowrap;
+    display: none;
+    width: min(306px, calc(100vw - 32px));
+    max-width: min(306px, calc(100vw - 32px));
+    white-space: normal;
     box-shadow: var(--panel-shadow);
     pointer-events: none;
     backdrop-filter: blur(14px);
@@ -2045,6 +2055,13 @@ const SMALL_AREA_DENSITY = {
   note: "Density is computed from official mid-year population counts and MSOA polygon area; the 2022 to 2024 values use the latest revised ONS small-area series",
 };
 
+const SMALL_AREA_GENDER = {
+  geography: "MSOA 2021",
+  years: [],
+  source: "ONS Middle layer Super Output Area population estimates by sex (Accredited official statistics), using the mid-2011 to mid-2022 edition plus the revised mid-2022 to mid-2024 edition, joined to GLA MSOA 2021 boundaries",
+  note: "Gender balance is derived from official male and female MSOA mid-year totals; positive values indicate a higher male share",
+};
+
 const SMALL_AREA_PUBS = {
   geography: "MSOA 2021",
   source: "OpenStreetMap amenity=pub snapshot via Overpass API",
@@ -2093,17 +2110,17 @@ function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
-function discoverMsoaDensityYears(frame) {
+function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   if (!frame?.features?.length) return [];
   const years = new Set();
   for (const feature of frame.features) {
     const props = feature?.properties || {};
     for (const key of Object.keys(props)) {
-      const match = key.match(/^density_(\d{4})$/);
+      const match = key.match(new RegExp(`^${valuePrefix}_(\\d{4})$`));
       if (!match) continue;
       const year = Number(match[1]);
-      const populationValue = props[`population_${year}`];
-      if (Number.isFinite(props[key]) && Number.isFinite(populationValue)) years.add(year);
+      const companionValue = props[`${companionPrefix}_${year}`];
+      if (Number.isFinite(props[key]) && Number.isFinite(companionValue)) years.add(year);
     }
   }
   return [...years].sort((a, b) => a - b);
@@ -2144,6 +2161,7 @@ async function init() {
   };
   const geographyToggleEl = document.getElementById("geography-toggle");
   const geographyRowEl = document.getElementById("geography-row");
+  const geographyRowLabelEl = geographyRowEl.querySelector(".metric-option-label");
   const yearRowEl = document.getElementById("year-row");
   const yearToggleEl = document.getElementById("year-toggle");
   const countryRowEl = document.getElementById("country-row");
@@ -2270,6 +2288,7 @@ async function init() {
   function getAvailableYearsForState(metricKey = boroughMetric, geography = activeGeography) {
     if (currentDataset !== "municipi") return [];
     if (metricKey === "density" && geography === "msoa") return [...SMALL_AREA_DENSITY.years];
+    if (metricKey === "gender_balance_pp" && geography === "msoa") return [...SMALL_AREA_GENDER.years];
     return [];
   }
 
@@ -2318,7 +2337,8 @@ async function init() {
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
-    SMALL_AREA_DENSITY.years = discoverMsoaDensityYears(msoaGeoJSON);
+    SMALL_AREA_DENSITY.years = discoverMsoaSeriesYears(msoaGeoJSON, "density", "population");
+    SMALL_AREA_GENDER.years = discoverMsoaSeriesYears(msoaGeoJSON, "gender_balance_pp", "population");
   }
   if (msoaPubsJson?.by_msoa) msoaPubMeta = msoaPubsJson;
   const stationAccessData = computeStationAccessData(stationsGeoJSON, municipiGeoJSON);
@@ -2458,6 +2478,37 @@ async function init() {
         .filter(([, stats]) => !!stats)
     );
   })();
+  const msoaGenderStats = (() => {
+    if (!msoaGeoJSON?.features?.length) return {};
+    const years = SMALL_AREA_GENDER.years;
+    const build = (year) => {
+      const valueField = `gender_balance_pp_${year}`;
+      const populationField = `population_${year}`;
+      const values = msoaGeoJSON.features
+        .map((feature) => feature.properties?.[valueField])
+        .filter((value) => Number.isFinite(value));
+      if (!values.length) return null;
+      const populationWeighted = msoaGeoJSON.features.reduce((acc, feature) => {
+        const value = feature.properties?.[valueField];
+        const weight = feature.properties?.[populationField] ?? 0;
+        if (!Number.isFinite(value) || !weight) return acc;
+        acc.total += value * weight;
+        acc.weight += weight;
+        return acc;
+      }, { total: 0, weight: 0 });
+      return {
+        min: Math.min(...values),
+        max: Math.max(...values),
+        avg: populationWeighted.weight ? populationWeighted.total / populationWeighted.weight : values.reduce((sum, value) => sum + value, 0) / values.length,
+        maxAbs: Math.max(...values.map((value) => Math.abs(value))),
+      };
+    };
+    return Object.fromEntries(
+      years
+        .map((year) => [year, build(year)])
+        .filter(([, stats]) => !!stats)
+    );
+  })();
   const msoaPubStats = (() => {
     if (!msoaGeoJSON?.features?.length) return null;
     const values = msoaGeoJSON.features
@@ -2524,6 +2575,15 @@ async function init() {
         note: SMALL_AREA_DENSITY.note,
       };
     }
+    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return {
+        ...METRICS.gender_balance_pp,
+        year: String(activeYear),
+        source: SMALL_AREA_GENDER.source,
+        geography: SMALL_AREA_GENDER.geography,
+        note: SMALL_AREA_GENDER.note,
+      };
+    }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return {
         ...METRICS.pubs_per_km2_msoa,
@@ -2566,6 +2626,9 @@ async function init() {
   function getMetricStats(metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
+    }
+    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return msoaGenderStats[activeYear];
     }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaPubStats;
@@ -2636,6 +2699,9 @@ async function init() {
   function metricValue(feature, metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return feature?.properties?.[activeDensityField()] ?? null;
+    }
+    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return feature?.properties?.[`gender_balance_pp_${activeYear}`] ?? null;
     }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return feature?.properties?.pubs_per_km2_msoa ?? null;
@@ -3342,6 +3408,10 @@ async function init() {
     return boroughMetric === "pubs_per_km2" || boroughMetric === "pubs_per_km2_msoa";
   }
 
+  function metricSupportsMsoa(metricKey = boroughMetric) {
+    return metricKey === "density" || metricKey === "gender_balance_pp";
+  }
+
   function activeMetricFamilyKey() {
     if (pubsMetricActive()) return "pubs_per_km2";
     return boroughMetric;
@@ -3355,7 +3425,7 @@ async function init() {
   }
 
   function geographyAvailableInCurrentView(geography) {
-    if (currentDataset !== "municipi" || boroughMetric !== "density") return geography === "borough";
+    if (currentDataset !== "municipi" || !metricSupportsMsoa(boroughMetric)) return geography === "borough";
     if (geography === "borough") return true;
     return geography === "msoa" && !!msoaGeoJSON?.features?.length;
   }
@@ -3762,9 +3832,10 @@ async function init() {
         support.push(`Borough · ${analysisParentName(feature)}`);
       }
     } else if (metricKey === "gender_balance_pp") {
-      const male = feature.properties?.male_share_pct;
-      const female = feature.properties?.female_share_pct;
+      const male = activeGeography === "msoa" ? feature.properties?.[`male_share_pct_${activeYear}`] : feature.properties?.male_share_pct;
+      const female = activeGeography === "msoa" ? feature.properties?.[`female_share_pct_${activeYear}`] : feature.properties?.female_share_pct;
       if (Number.isFinite(male) && Number.isFinite(female)) support.push(`Men ${male.toFixed(1)}% · Women ${female.toFixed(1)}%`);
+      if (activeGeography === "msoa") support.push(`Borough · ${analysisParentName(feature)}`);
     } else if (metricKey === "country_of_birth_pct") {
       if (selectedCountryBirth === "ALL") {
         const notUk = feature.properties?.not_born_uk_share_pct;
@@ -4029,7 +4100,17 @@ async function init() {
     yearSliderEl.disabled = false;
     yearSliderEl.style.opacity = 1;
     yearStopsEl.classList.toggle("compact", years.length > 8);
-    yearStopsEl.innerHTML = years.map((year) => `<span class="time-stop${year === resolvedYear ? " active" : ""}">${year}</span>`).join("");
+    const selectiveLabels = years.length > 8;
+    yearStopsEl.classList.toggle("selective", selectiveLabels);
+    yearStopsEl.innerHTML = years.map((year, yearIndex) => {
+      const anchor = yearIndex === 0 || yearIndex === years.length - 1 || yearIndex % 3 === 0;
+      const active = year === resolvedYear;
+      const classes = ["time-stop"];
+      if (active) classes.push("active");
+      if (anchor) classes.push("anchor");
+      if (selectiveLabels && !anchor && !active) classes.push("muted");
+      return `<span class="${classes.join(" ")}">${active || anchor || !selectiveLabels ? year : ""}</span>`;
+    }).join("");
   }
 
   function updateModeButtons() {
@@ -4051,11 +4132,12 @@ async function init() {
     const boroughsMode = currentDataset === "municipi";
     const boroughAnalysisMode = boroughsMode && activeGeography === "borough";
     const densityMode = boroughsMode && boroughMetric === "density";
+    const genderMode = boroughsMode && boroughMetric === "gender_balance_pp";
     const pubsMode = boroughsMode && pubsMetricActive();
     const originMode = boroughsMode && boroughMetric === "country_of_birth_pct";
-    const geographyMode = densityMode;
-    const yearMode = densityMode && getAvailableYearsForState().length > 1;
-    const showMetricOptions = densityMode || pubsMode || originMode;
+    const geographyMode = boroughsMode && metricSupportsMsoa(boroughMetric);
+    const yearMode = boroughsMode && activeGeography === "msoa" && getAvailableYearsForState().length > 1;
+    const showMetricOptions = geographyMode || pubsMode || originMode;
 
     viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
@@ -4070,6 +4152,7 @@ async function init() {
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
     geographyRowEl.classList.toggle("active-scope", geographyMode);
+    if (geographyRowLabelEl) geographyRowLabelEl.textContent = densityMode ? "Density scope" : genderMode ? "Gender scope" : "Geography";
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     yearRowEl.classList.toggle("active-scope", yearMode);
@@ -4857,7 +4940,7 @@ async function init() {
   setMetric = function(metricKey) {
     if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
     if (metricKey === "pubs_per_km2_msoa") activeGeography = "msoa";
-    else if (metricKey !== "density") activeGeography = "borough";
+    else if (!metricSupportsMsoa(metricKey)) activeGeography = "borough";
     if (metricKey === "country_of_birth_pct" && analysisMode === "compare") selectedCountryBirth = "ALL";
     applyActiveMetric(metricKey);
   };

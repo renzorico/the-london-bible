@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — MSOA controls cleanup and metric audit
+
+- Simplified the expanded MSOA density time control by labeling only milestone years plus the active year, and tightened transient hover cards so they stay compact instead of stretching across the map.
+- Added defensible MSOA gender-balance support from the same ONS MSOA 2021 annual population-by-sex series used for density, while keeping unsupported metrics borough-only or fixed-year where no honest small-area dataset exists.
+
 ## 2026-04-01 — Expanded MSOA density timeline
 
 - Expanded the MSOA population-density timeline to the full ONS-backed annual series currently available on MSOA 2021 geographies, using mid-2011 to mid-2022 data plus the revised mid-2022 to mid-2024 edition.
