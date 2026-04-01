@@ -174,7 +174,7 @@
   }
   #overlay-toggle {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     width: 100%;
@@ -204,6 +204,20 @@
     line-height: 1.45;
     color: var(--subtitle);
     letter-spacing: .04em;
+  }
+  #school-toggle {
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    width: 100%;
+    margin-top: 8px;
+  }
+  #school-toggle .toggle-btn {
+    justify-content: center;
+    min-height: 34px;
+    padding: 6px 8px 5px;
+    font-size: .56rem;
+    letter-spacing: .11em;
   }
   #metric-toggle {
     display: grid;
@@ -1513,6 +1527,7 @@
       <button id="btn-contours" class="toggle-btn secondary-btn" title="Contours" aria-label="Contours" onclick="toggleContours()">Contours</button>
       <button id="btn-bikes" class="toggle-btn secondary-btn" title="Bikes" aria-label="Bikes" onclick="toggleBikes()">Bikes</button>
       <button id="btn-pois" class="toggle-btn secondary-btn" title="POIs" aria-label="POIs" onclick="togglePois()">POIs</button>
+      <button id="btn-schools" class="toggle-btn secondary-btn" title="Schools" aria-label="Schools" onclick="toggleSchools()">Schools</button>
     </div>
     <div id="poi-toggle">
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="coffee" title="Coffee" aria-label="Coffee" onclick="togglePoiCategory('coffee')">Coffee</button>
@@ -1522,6 +1537,11 @@
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="landmarks" title="Landmarks" aria-label="Landmarks" onclick="togglePoiCategory('landmarks')">Landmarks</button>
     </div>
     <div id="poi-note" aria-live="polite"></div>
+    <div id="school-toggle">
+      <button class="toggle-btn secondary-btn school-filter-btn active" data-school-phase="all" title="All mainstream schools" aria-label="All mainstream schools" onclick="toggleSchoolPhase('all')">All</button>
+      <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">Primary</button>
+      <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">Secondary</button>
+    </div>
   </div>
 
   <div class="control-group rail-card" id="view-group">
@@ -1667,6 +1687,8 @@ const BIKE_LAYER_IDS = [
 ];
 const POI_DATA_URL = "data/london_pois.geojson";
 const POI_CATEGORIES = ["coffee", "nightlife", "culture", "sport", "landmarks"];
+const SCHOOLS_DATA_URL = "data/london_schools_ofsted.geojson";
+const SCHOOL_PHASES = ["all", "Primary", "Secondary"];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -2255,7 +2277,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2286,6 +2308,7 @@ async function init() {
   const pubsToggleEl = document.getElementById("pubs-toggle");
   const overlayToggleEl = document.getElementById("overlay-toggle");
   const poiToggleEl = document.getElementById("poi-toggle");
+  const schoolToggleEl = document.getElementById("school-toggle");
   const poiNoteEl = document.getElementById("poi-note");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
@@ -2311,6 +2334,7 @@ async function init() {
   const btnContours = document.getElementById("btn-contours");
   const btnBikes = document.getElementById("btn-bikes");
   const btnPois = document.getElementById("btn-pois");
+  const btnSchools = document.getElementById("btn-schools");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
@@ -2322,10 +2346,14 @@ async function init() {
   const poiButtons = Object.fromEntries(
     [...poiToggleEl.querySelectorAll("[data-poi-category]")].map((button) => [button.dataset.poiCategory, button])
   );
+  const schoolButtons = Object.fromEntries(
+    [...schoolToggleEl.querySelectorAll("[data-school-phase]")].map((button) => [button.dataset.schoolPhase, button])
+  );
 
   let tooltipPinned = false;
   let pinnedCoord = null;
   let pinnedPoiFeature = null;
+  let pinnedSchoolFeature = null;
   let currentDataset = "sections";
   let is3D = false;
   let currentTheme = "day";
@@ -2344,13 +2372,16 @@ async function init() {
   let showContours = false;
   let showBikes = false;
   let showPois = false;
+  let showSchools = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let contoursGeoJSON = null;
   let bikesGeoJSON = null;
   let poisGeoJSON = null;
+  let schoolsGeoJSON = null;
   let poiCategoryCounts = Object.fromEntries(POI_CATEGORIES.map((category) => [category, 0]));
+  let schoolPhaseCounts = Object.fromEntries(SCHOOL_PHASES.map((phase) => [phase, 0]));
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2358,6 +2389,7 @@ async function init() {
   let pinData = [];
   let currentMainLayer = null;
   let activePoiCategories = new Set(POI_CATEGORIES);
+  let activeSchoolPhase = "all";
   const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 };
   const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 8.72, pitch: 0, bearing: 0 };
   let viewState = { ...INTRO_VIEW_STATE };
@@ -2484,7 +2516,7 @@ async function init() {
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
-    if (pinnedPoiFeature) {
+    if (pinnedPoiFeature || pinnedSchoolFeature) {
       try {
         const vp = new deck.WebMercatorViewport({ width: innerWidth, height: innerHeight, ...vs });
         const [sx, sy] = vp.project(pinnedCoord);
@@ -2520,7 +2552,7 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, poisData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, poisData, schoolsData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
@@ -2528,6 +2560,7 @@ async function init() {
     fetch(CONTOUR_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch(BIKES_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch(POI_DATA_URL).then((r) => r.json()).catch(() => null),
+    fetch(SCHOOLS_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2545,6 +2578,17 @@ async function init() {
       if (category in counts) counts[category] += 1;
     }
     poiCategoryCounts = counts;
+  }
+  if (schoolsData?.features) {
+    schoolsGeoJSON = schoolsData;
+    const counts = Object.fromEntries(SCHOOL_PHASES.map((phase) => [phase, 0]));
+    for (const feature of schoolsGeoJSON.features) {
+      const phase = feature.properties?.phase;
+      counts.all += 1;
+      if (phase === "Primary") counts.Primary += 1;
+      if (phase === "Secondary" || phase === "All-through") counts.Secondary += 1;
+    }
+    schoolPhaseCounts = counts;
   }
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
@@ -2928,7 +2972,7 @@ async function init() {
   }
 
   function correlationPinnedFeature() {
-    if (pinnedPoiFeature || !tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || !tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -2988,13 +3032,13 @@ async function init() {
   }
 
   function spotlightFeature() {
-    if (pinnedPoiFeature || !isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || !isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
 
   function similarityFeature() {
-    if (pinnedPoiFeature || !isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || !isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -3672,12 +3716,16 @@ async function init() {
     return showPois && !!poisGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
   }
 
+  function schoolsVisible() {
+    return showSchools && !!schoolsGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
+  }
+
   function poiButtonActive(category) {
     return activePoiCategories.has(category);
   }
 
   function poiFocusMode() {
-    return poisVisible();
+    return poisVisible() || schoolsVisible();
   }
 
   function firstLabelLayerId(map) {
@@ -4079,6 +4127,134 @@ async function init() {
     });
   }
 
+  function visibleSchoolFeatures() {
+    if (!schoolsVisible()) return [];
+    const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    return schoolsGeoJSON.features.filter((feature) => {
+      const props = feature.properties || {};
+      if (activeSchoolPhase === "Primary" && props.phase !== "Primary") return false;
+      if (activeSchoolPhase === "Secondary" && props.phase !== "Secondary" && props.phase !== "All-through") return false;
+      if (props.phase === "Primary") return zoom >= 10.15;
+      if (props.phase === "All-through") return zoom >= 9.95;
+      return zoom >= 9.7;
+    });
+  }
+
+  function schoolColorFor(rating) {
+    const day = {
+      "Outstanding": [43, 132, 90, 236],
+      "Good": [69, 165, 132, 232],
+      "Requires improvement": [209, 150, 64, 236],
+      "Inadequate": [191, 73, 73, 238],
+      "Ungraded": [106, 117, 127, 212],
+    };
+    const night = {
+      "Outstanding": [124, 255, 174, 242],
+      "Good": [92, 229, 190, 238],
+      "Requires improvement": [255, 193, 107, 240],
+      "Inadequate": [255, 117, 117, 244],
+      "Ungraded": [161, 172, 188, 220],
+    };
+    return (currentTheme === "night" ? night : day)[rating] || (currentTheme === "night" ? night.Ungraded : day.Ungraded);
+  }
+
+  function schoolHaloColorFor(rating) {
+    const day = {
+      "Outstanding": [123, 201, 160, 74],
+      "Good": [141, 216, 189, 70],
+      "Requires improvement": [243, 198, 136, 76],
+      "Inadequate": [231, 141, 141, 82],
+      "Ungraded": [180, 188, 198, 58],
+    };
+    const night = {
+      "Outstanding": [166, 255, 203, 86],
+      "Good": [143, 247, 215, 80],
+      "Requires improvement": [255, 216, 154, 84],
+      "Inadequate": [255, 156, 156, 92],
+      "Ungraded": [186, 196, 212, 66],
+    };
+    return (currentTheme === "night" ? night : day)[rating] || (currentTheme === "night" ? night.Ungraded : day.Ungraded);
+  }
+
+  function schoolBaseRadius(feature) {
+    const props = feature.properties || {};
+    if (props.phase === "Secondary") return 4.6;
+    if (props.phase === "All-through") return 4.8;
+    return 3.8;
+  }
+
+  function makeSchoolHitLayer() {
+    const data = visibleSchoolFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "school-hit-area",
+      data,
+      pickable: true,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 10,
+      radiusMaxPixels: 20,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => Math.max(8.5, schoolBaseRadius(f) * 2.8),
+      getFillColor: () => [255, 255, 255, 1],
+      opacity: 1,
+      updateTriggers: {
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+      },
+    });
+  }
+
+  function makeSchoolHaloLayer() {
+    const data = visibleSchoolFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "school-halo",
+      data,
+      pickable: false,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 4,
+      radiusMaxPixels: 14,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => schoolBaseRadius(f) * 2.2,
+      getFillColor: (f) => schoolHaloColorFor(f.properties?.ofsted_rating),
+      opacity: 1,
+      updateTriggers: {
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+        getFillColor: [currentTheme],
+      },
+    });
+  }
+
+  function makeSchoolLayer() {
+    const data = visibleSchoolFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "school-markers",
+      data,
+      pickable: true,
+      stroked: true,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 2.8,
+      radiusMaxPixels: 10,
+      lineWidthMinPixels: 1.2,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => schoolBaseRadius(f),
+      getFillColor: (f) => schoolColorFor(f.properties?.ofsted_rating),
+      getLineColor: currentTheme === "night" ? [7, 13, 22, 245] : [255, 250, 244, 238],
+      getLineWidth: () => 1.2,
+      opacity: 1,
+      updateTriggers: {
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+        getFillColor: [currentTheme],
+        getLineColor: [currentTheme],
+      },
+    });
+  }
+
   function makeTubeLineCaseLayer() {
     if (!transportOverlayVisible() || !tubeLinesGeoJSON) return null;
     return new deck.GeoJsonLayer({
@@ -4142,6 +4318,7 @@ async function init() {
   function zoneLabel(object, coordinate) {
     if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
     if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
+    if (object?.layer?.id === "school-markers" || object?.layer?.id === "school-hit-area") return object.properties.school_name || "School";
     if (object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area") return object.properties.name || object.properties.category_label || "Place";
     if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
     if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
@@ -4203,7 +4380,7 @@ async function init() {
   }
 
   function syncPinnedSelectionState(feature = null) {
-    if (pinnedPoiFeature) {
+    if (pinnedPoiFeature || pinnedSchoolFeature) {
       highlightedFeature = null;
     } else if (!tooltipPinned) {
       highlightedFeature = pinData.length ? featureAt(pinData[0].lon, pinData[0].lat) : null;
@@ -4224,6 +4401,14 @@ async function init() {
 
   function renderPinnedTooltip() {
     if (!tooltipPinned || !pinnedCoord) return;
+
+    if (pinnedSchoolFeature) {
+      tooltipEl.classList.remove("summary-card");
+      tooltipEl.innerHTML = schoolTooltipHtml(pinnedSchoolFeature, true);
+      tooltipEl.style.display = "block";
+      updatePinnedPosition(viewState);
+      return;
+    }
 
     if (pinnedPoiFeature) {
       tooltipEl.classList.remove("summary-card");
@@ -4272,6 +4457,7 @@ async function init() {
     tooltipPinned = false;
     pinnedCoord = null;
     pinnedPoiFeature = null;
+    pinnedSchoolFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -4300,6 +4486,10 @@ async function init() {
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Line</span><br><span class="tarea">${line.properties.lineName}</span>`;
   }
 
+  function isSchoolObject(object) {
+    return object?.layer?.id === "school-markers" || object?.layer?.id === "school-hit-area";
+  }
+
   function isPoiObject(object) {
     return object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area";
   }
@@ -4320,6 +4510,8 @@ async function init() {
     for (const item of picked) {
       if (item && !candidates.includes(item)) candidates.push(item);
     }
+    const school = candidates.find((item) => isSchoolObject(item));
+    if (school) return school;
     const poi = candidates.find((item) => isPoiObject(item));
     if (poi) return poi;
     const station = candidates.find((item) => item?.layer?.id === "stations");
@@ -4335,6 +4527,17 @@ async function init() {
     const label = props.name || `${category} place`;
     const subcategory = props.subcategory ? `<br><span class="tsub">${props.subcategory}</span>` : "";
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${category}</span><br><span class="tarea">${label}</span>${subcategory}`;
+  }
+
+  function schoolTooltipHtml(school, pinned) {
+    const props = school.properties || {};
+    const rating = props.ofsted_rating || "Ungraded";
+    const phase = props.phase ? `<br><span class="tsub">${props.phase}</span>` : "";
+    const inspectionDate = props.inspection_date ? `<br><span class="tsub">${props.inspection_date}</span>` : "";
+    const detail = props.inspection_detail && props.inspection_detail !== "Latest OEIF graded inspection"
+      ? `<br><span class="tsub">${props.inspection_detail}</span>`
+      : "";
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${rating}</span><br><span class="tarea">${props.school_name || "School"}</span>${phase}${inspectionDate}${detail}`;
   }
 
   function formatMetricValue(metricKey, value) {
@@ -4518,6 +4721,12 @@ async function init() {
     if (tubeLines) layers.push(tubeLines);
     const stations = makeStationsLayer();
     if (stations) layers.push(stations);
+    const schoolHit = makeSchoolHitLayer();
+    if (schoolHit) layers.push(schoolHit);
+    const schoolHalo = makeSchoolHaloLayer();
+    if (schoolHalo) layers.push(schoolHalo);
+    const schoolLayer = makeSchoolLayer();
+    if (schoolLayer) layers.push(schoolLayer);
     const poiHit = makePoiHitLayer();
     if (poiHit) layers.push(poiHit);
     const poiHalo = makePoiHaloLayer();
@@ -4664,6 +4873,14 @@ async function init() {
     poiNoteEl.textContent = "Zoom in to reveal coffee, nightlife, and smaller local places.";
   }
 
+  function updateSchoolButtons() {
+    for (const [phase, button] of Object.entries(schoolButtons)) {
+      if (!button) continue;
+      button.disabled = (schoolPhaseCounts[phase] || 0) < 1;
+      button.classList.toggle("active", activeSchoolPhase === phase);
+    }
+  }
+
   function updateModeButtons() {
     document.getElementById("btn-sections").classList.toggle("active", currentDataset === "sections");
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
@@ -4672,6 +4889,7 @@ async function init() {
     btnContours.classList.toggle("active", contoursVisible());
     btnBikes.classList.toggle("active", bikesVisible());
     btnPois.classList.toggle("active", poisVisible());
+    btnSchools.classList.toggle("active", schoolsVisible());
     btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
@@ -4697,6 +4915,7 @@ async function init() {
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
     poiToggleEl.style.display = !sectionsMode && showPois ? "grid" : "none";
+    schoolToggleEl.style.display = !sectionsMode && showSchools ? "grid" : "none";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -4819,6 +5038,7 @@ async function init() {
     if (contoursVisible()) metaParts.push("Contours · elevation in meters above sea level");
     if (bikesVisible()) metaParts.push("Bikes · major and local cycle routes");
     if (poisVisible()) metaParts.push("POIs · curated city places");
+    if (schoolsVisible()) metaParts.push("Schools · Ofsted outcomes");
     legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
@@ -5217,6 +5437,7 @@ async function init() {
     updateCountrySelector();
     updateChapterSelector();
     updatePoiButtons();
+    updateSchoolButtons();
     updateLegend();
     updateContourLayers();
     updateBikeLayers();
@@ -5233,6 +5454,7 @@ async function init() {
     tooltipPinned = false;
     pinnedCoord = null;
     pinnedPoiFeature = null;
+    pinnedSchoolFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -5286,6 +5508,12 @@ async function init() {
       if (!object) { tooltipEl.style.display = "none"; return; }
       tooltipEl.classList.remove("pinned");
 
+      if (isSchoolObject(object)) {
+        tooltipEl.innerHTML = schoolTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
       if (object.layer?.id === "stations") {
         tooltipEl.innerHTML = stationTooltipHtml(object, false);
         tooltipEl.style.display = "block";
@@ -5355,10 +5583,26 @@ async function init() {
         return;
       }
 
+      if (isSchoolObject(object)) {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = null;
+        pinnedSchoolFeature = object;
+        highlightedFeature = null;
+        tooltipEl.classList.add("pinned");
+        tooltipEl.classList.remove("summary-card");
+        tooltipEl.innerHTML = schoolTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        deckgl.setProps({ layers: getLayers() });
+        renderAnalysisPanel();
+        return;
+      }
       if (object?.layer?.id === "stations") {
         tooltipPinned = true;
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
+        pinnedSchoolFeature = null;
         tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
@@ -5371,6 +5615,7 @@ async function init() {
         tooltipPinned = true;
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
+        pinnedSchoolFeature = null;
         tooltipEl.classList.add("pinned");
         const lineKey = object.properties?.lineKey || null;
         setSelectedTubeLine(lineKey, { preserveTooltip: true });
@@ -5385,6 +5630,7 @@ async function init() {
         tooltipPinned = true;
         pinnedCoord = coordinate;
         pinnedPoiFeature = object;
+        pinnedSchoolFeature = null;
         highlightedFeature = null;
         tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
@@ -5405,6 +5651,7 @@ async function init() {
         tooltipPinned = true;
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
+        pinnedSchoolFeature = null;
         tooltipEl.classList.add("pinned");
         highlightedFeature = object;
         tooltipEl.classList.add("summary-card");
@@ -5418,6 +5665,7 @@ async function init() {
       tooltipPinned = true;
       pinnedCoord = coordinate;
       pinnedPoiFeature = null;
+      pinnedSchoolFeature = null;
       tooltipEl.classList.add("pinned");
       tooltipEl.classList.remove("summary-card");
       const pop = object?.properties?.[POP_FIELD] ?? statsAt(...coordinate).population;
@@ -5717,6 +5965,11 @@ async function init() {
     refreshMapState();
   };
 
+  toggleSchools = function() {
+    showSchools = !showSchools;
+    refreshMapState();
+  };
+
   togglePoiCategory = function(category) {
     if (!POI_CATEGORIES.includes(category)) return;
     if ((poiCategoryCounts[category] || 0) < 1) return;
@@ -5726,6 +5979,13 @@ async function init() {
     } else {
       activePoiCategories.add(category);
     }
+    refreshMapState();
+  };
+
+  toggleSchoolPhase = function(phase) {
+    if (!SCHOOL_PHASES.includes(phase)) return;
+    if ((schoolPhaseCounts[phase] || 0) < 1) return;
+    activeSchoolPhase = phase;
     refreshMapState();
   };
 
@@ -5740,6 +6000,7 @@ async function init() {
     tooltipPinned = false;
     pinnedCoord = null;
     pinnedPoiFeature = null;
+    pinnedSchoolFeature = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
     refreshMapState({
@@ -5768,6 +6029,7 @@ async function init() {
     is3D = false;
     tooltipPinned = false;
     pinnedPoiFeature = null;
+    pinnedSchoolFeature = null;
     tooltipEl.style.display = "none";
     document.getElementById("btn-3d").classList.remove("active");
     document.getElementById("btn-flat").classList.add("active");

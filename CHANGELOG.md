@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Ofsted schools overlay
+
+- Added a new Schools overlay built from the official GIAS establishments download joined to the latest official Ofsted state-funded schools inspections dataset, filtered to open mainstream London schools and rendered as a compact Ofsted-colored civic layer with school-specific hover and click cards.
+
 ## 2026-04-01 — POI name-path fix
 
 - Fixed the POI hover/click name path so the overlay now shows the real venue name from the local POI dataset whenever one exists, falling back to a generic label only for genuinely unnamed places.
