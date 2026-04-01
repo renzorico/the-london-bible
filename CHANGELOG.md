@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Restored POI place-name hover
+
+- Restored compact hover labels for POIs so place names remain discoverable while keeping the calmer POI-first background behavior and reduced borough hover noise.
+
 ## 2026-04-01 — POI overlay reliability and focus
 
 - Fixed the POIs overlay so categories reliably reappear when toggled, prevented the filter UI from ending in an all-off empty state, and added clearer zoom feedback when smaller place categories are not yet visible.

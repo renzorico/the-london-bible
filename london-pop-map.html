@@ -3993,6 +3993,28 @@ async function init() {
     return THEMES[currentTheme][key][category] || THEMES[currentTheme][key].culture;
   }
 
+  function makePoiHitLayer() {
+    const data = visiblePoiFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "poi-hit-area",
+      data,
+      pickable: true,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 9,
+      radiusMaxPixels: 20,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => Math.max(7.5, poiBaseRadius(f) * 2.65),
+      getFillColor: () => [255, 255, 255, 1],
+      opacity: 1,
+      updateTriggers: {
+        data: [showPois, currentDataset, viewState.zoom, Array.from(activePoiCategories).join("|")],
+      },
+    });
+  }
+
   function makePoiHaloLayer() {
     const data = visiblePoiFeatures();
     if (!data.length) return null;
@@ -4106,7 +4128,7 @@ async function init() {
   function zoneLabel(object, coordinate) {
     if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
     if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
-    if (object?.layer?.id === "poi-markers") return object.properties.name || "Place";
+    if (object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area") return object.properties.name || object.properties.category_label || "Place";
     if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
     if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
     if (object?.properties?.[NAME_FIELD] && currentDataset !== "sections") return object.properties[NAME_FIELD];
@@ -4256,9 +4278,10 @@ async function init() {
   function poiTooltipHtml(poi, pinned) {
     const props = poi.properties || {};
     const category = props.category_label || props.category || "POI";
+    const label = props.name || `${category} place`;
     const subcategory = props.subcategory ? `<br><span class="tsub">${props.subcategory}</span>` : "";
     const source = props.source_type ? `<br><span class="tsub">${props.source_type}</span>` : "";
-    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${category}</span><br><span class="tarea">${props.name || "Place"}</span>${subcategory}${source}`;
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${category}</span><br><span class="tarea">${label}</span>${subcategory}${source}`;
   }
 
   function formatMetricValue(metricKey, value) {
@@ -4440,6 +4463,8 @@ async function init() {
     if (tubeCase) layers.push(tubeCase);
     const tubeLines = makeTubeLineLayer();
     if (tubeLines) layers.push(tubeLines);
+    const poiHit = makePoiHitLayer();
+    if (poiHit) layers.push(poiHit);
     const poiHalo = makePoiHaloLayer();
     if (poiHalo) layers.push(poiHalo);
     const poiLayer = makePoiLayer();
@@ -5217,7 +5242,7 @@ async function init() {
         positionTooltip(x, y);
         return;
       }
-      if (object.layer?.id === "poi-markers") {
+      if (object.layer?.id === "poi-markers" || object.layer?.id === "poi-hit-area") {
         tooltipEl.innerHTML = poiTooltipHtml(object, false);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
@@ -5295,7 +5320,7 @@ async function init() {
         renderAnalysisPanel();
         return;
       }
-      if (object?.layer?.id === "poi-markers") {
+      if (object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area") {
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = poiTooltipHtml(object, true);
         tooltipEl.style.display = "block";
