@@ -2009,8 +2009,9 @@ async function init() {
   let currentMainLayer = null;
   let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
   const OUTLIER_THRESHOLD = 50000;
-  const MIN_HEX_SPIKE_AREA_KM2 = 0.05;
-  const SPIKE_RENDER_QUANTILE = 0.992;
+  const MIN_HEX_SPIKE_AREA_KM2 = 0.18;
+  const SPIKE_RENDER_QUANTILE = 0.997;
+  const SPIKE_HEIGHT_EXPONENT = 0.86;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
   const SIMILARITY_METRICS = [
@@ -3151,7 +3152,7 @@ async function init() {
   function elevationFor(feature, dataset) {
     const density = feature.properties.density ?? 0;
     if (dataset === "sections" && !validSectionDensity(feature, "spike")) return 0;
-    const scaled = Math.sqrt(Math.min(density, spikeRenderMax) / spikeRenderMax);
+    const scaled = Math.pow(Math.min(density, spikeRenderMax) / spikeRenderMax, SPIKE_HEIGHT_EXPONENT);
     return scaled * TARGET_HEIGHT_M;
   }
 
