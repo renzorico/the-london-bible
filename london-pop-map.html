@@ -143,7 +143,7 @@
   }
   #overlay-toggle {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     width: 100%;
@@ -174,7 +174,8 @@
     color: var(--subtitle);
     letter-spacing: .04em;
   }
-  #school-controls {
+  #school-controls,
+  #hospital-controls {
     display: none;
     align-items: center;
     gap: 8px;
@@ -294,6 +295,32 @@
     background: color-mix(in srgb, currentColor 92%, rgba(255,255,255,.2) 8%);
   }
   #school-note {
+    display: none;
+    margin-top: 7px;
+    font-size: .58rem;
+    line-height: 1.45;
+    color: var(--subtitle);
+    letter-spacing: .04em;
+  }
+  #hospital-rating-toggle {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    flex: 1 1 auto;
+    width: 100%;
+    margin-top: 0;
+    min-width: 0;
+  }
+  #hospital-rating-toggle .toggle-btn {
+    justify-content: center;
+    min-height: 34px;
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 6px 6px 5px;
+    font-size: .56rem;
+    letter-spacing: .11em;
+  }
+  #hospital-note {
     display: none;
     margin-top: 7px;
     font-size: .58rem;
@@ -1674,6 +1701,7 @@
       <button id="btn-bikes" class="toggle-btn secondary-btn" title="Bikes" aria-label="Bikes" onclick="toggleBikes()">Bikes</button>
       <button id="btn-pois" class="toggle-btn secondary-btn" title="POIs" aria-label="POIs" onclick="togglePois()">POIs</button>
       <button id="btn-schools" class="toggle-btn secondary-btn" title="Schools" aria-label="Schools" onclick="toggleSchools()">Schools</button>
+      <button id="btn-hospitals" class="toggle-btn secondary-btn" title="Hospitals" aria-label="Hospitals" onclick="toggleHospitals()">Hospitals</button>
     </div>
     <div id="poi-toggle">
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="coffee" title="Coffee" aria-label="Coffee" onclick="togglePoiCategory('coffee')">Coffee</button>
@@ -1698,6 +1726,16 @@
       </div>
     </div>
     <div id="school-note" aria-live="polite"></div>
+    <div id="hospital-controls">
+      <div id="hospital-rating-toggle">
+        <button class="toggle-btn secondary-btn hospital-rating-btn school-quality-btn active" data-hospital-rating="Inadequate" data-label="Inadequate" title="Inadequate" aria-label="Inadequate" onclick="toggleHospitalRating('Inadequate')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn hospital-rating-btn school-quality-btn active" data-hospital-rating="Requires improvement" data-label="Requires improvement" title="Requires improvement" aria-label="Requires improvement" onclick="toggleHospitalRating('Requires improvement')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn hospital-rating-btn school-quality-btn active" data-hospital-rating="Good" data-label="Good" title="Good" aria-label="Good" onclick="toggleHospitalRating('Good')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn hospital-rating-btn school-quality-btn active" data-hospital-rating="Outstanding" data-label="Outstanding" title="Outstanding" aria-label="Outstanding" onclick="toggleHospitalRating('Outstanding')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn hospital-rating-btn school-quality-btn active" data-hospital-rating="Not rated" data-label="Not rated" title="Not rated" aria-label="Not rated" onclick="toggleHospitalRating('Not rated')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+      </div>
+    </div>
+    <div id="hospital-note" aria-live="polite"></div>
   </div>
 
   <div class="control-group rail-card" id="view-group">
@@ -1841,6 +1879,8 @@ const POI_CATEGORIES = ["coffee", "nightlife", "culture", "sport", "landmarks"];
 const SCHOOLS_DATA_URL = "data/london_schools_ofsted.geojson";
 const SCHOOL_PHASES = ["all", "Primary", "Secondary"];
 const SCHOOL_RATINGS = ["Outstanding", "Good", "Requires improvement", "Inadequate", "Ungraded"];
+const HOSPITALS_DATA_URL = "data/london_hospitals.geojson";
+const HOSPITAL_RATINGS = ["Outstanding", "Good", "Requires improvement", "Inadequate", "Not rated"];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -2428,7 +2468,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase, toggleSchoolRating;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase, toggleSchoolRating, toggleHospitals, toggleHospitalRating;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2464,6 +2504,9 @@ async function init() {
   const schoolRatingToggleEl = document.getElementById("school-rating-toggle");
   const poiNoteEl = document.getElementById("poi-note");
   const schoolNoteEl = document.getElementById("school-note");
+  const hospitalControlsEl = document.getElementById("hospital-controls");
+  const hospitalRatingToggleEl = document.getElementById("hospital-rating-toggle");
+  const hospitalNoteEl = document.getElementById("hospital-note");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
     msoa: document.getElementById("pubs-msoa"),
@@ -2488,6 +2531,7 @@ async function init() {
   const btnBikes = document.getElementById("btn-bikes");
   const btnPois = document.getElementById("btn-pois");
   const btnSchools = document.getElementById("btn-schools");
+  const btnHospitals = document.getElementById("btn-hospitals");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
@@ -2505,11 +2549,15 @@ async function init() {
   const schoolRatingButtons = Object.fromEntries(
     [...schoolRatingToggleEl.querySelectorAll("[data-school-rating]")].map((button) => [button.dataset.schoolRating, button])
   );
+  const hospitalRatingButtons = Object.fromEntries(
+    [...hospitalRatingToggleEl.querySelectorAll("[data-hospital-rating]")].map((button) => [button.dataset.hospitalRating, button])
+  );
 
   let tooltipPinned = false;
   let pinnedCoord = null;
   let pinnedPoiFeature = null;
   let pinnedSchoolFeature = null;
+  let pinnedHospitalFeature = null;
   let currentDataset = "sections";
   let is3D = false;
   let currentTheme = "day";
@@ -2529,6 +2577,7 @@ async function init() {
   let showBikes = false;
   let showPois = false;
   let showSchools = false;
+  let showHospitals = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
@@ -2536,10 +2585,13 @@ async function init() {
   let bikesGeoJSON = null;
   let poisGeoJSON = null;
   let schoolsGeoJSON = null;
+  let hospitalsGeoJSON = null;
   let poiCategoryCounts = Object.fromEntries(POI_CATEGORIES.map((category) => [category, 0]));
   let schoolPhaseCounts = Object.fromEntries(SCHOOL_PHASES.map((phase) => [phase, 0]));
   let schoolRatingCounts = Object.fromEntries(SCHOOL_RATINGS.map((rating) => [rating, 0]));
   let boroughSchoolStats = new Map();
+  let hospitalRatingCounts = Object.fromEntries(HOSPITAL_RATINGS.map((rating) => [rating, 0]));
+  let boroughHospitalStats = new Map();
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2549,6 +2601,7 @@ async function init() {
   let activePoiCategories = new Set(POI_CATEGORIES);
   let activeSchoolPhase = "all";
   let activeSchoolRatings = new Set(SCHOOL_RATINGS);
+  let activeHospitalRatings = new Set(HOSPITAL_RATINGS);
   const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 };
   const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 8.72, pitch: 0, bearing: 0 };
   let viewState = { ...INTRO_VIEW_STATE };
@@ -2675,7 +2728,7 @@ async function init() {
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
-    if (pinnedPoiFeature || pinnedSchoolFeature) {
+    if (pinnedPoiFeature || pinnedSchoolFeature || pinnedHospitalFeature) {
       try {
         const vp = new deck.WebMercatorViewport({ width: innerWidth, height: innerHeight, ...vs });
         const [sx, sy] = vp.project(pinnedCoord);
@@ -2711,7 +2764,7 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, poisData, schoolsData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, poisData, schoolsData, hospitalsData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
@@ -2720,6 +2773,7 @@ async function init() {
     fetch(BIKES_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch(POI_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch(SCHOOLS_DATA_URL).then((r) => r.json()).catch(() => null),
+    fetch(HOSPITALS_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2754,6 +2808,16 @@ async function init() {
     schoolPhaseCounts = counts;
     schoolRatingCounts = ratingCounts;
     boroughSchoolStats = computeBoroughSchoolStats(schoolsGeoJSON);
+  }
+  if (hospitalsData?.features) {
+    hospitalsGeoJSON = hospitalsData;
+    const counts = Object.fromEntries(HOSPITAL_RATINGS.map((rating) => [rating, 0]));
+    for (const feature of hospitalsGeoJSON.features) {
+      const rating = feature.properties?.cqc_rating || "Not rated";
+      if (rating in counts) counts[rating] += 1;
+    }
+    hospitalRatingCounts = counts;
+    boroughHospitalStats = computeBoroughHospitalStats(hospitalsGeoJSON);
   }
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
@@ -3137,7 +3201,7 @@ async function init() {
   }
 
   function correlationPinnedFeature() {
-    if (pinnedPoiFeature || pinnedSchoolFeature || !tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || pinnedHospitalFeature || !tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -3197,13 +3261,13 @@ async function init() {
   }
 
   function spotlightFeature() {
-    if (pinnedPoiFeature || pinnedSchoolFeature || !isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || pinnedHospitalFeature || !isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
 
   function similarityFeature() {
-    if (pinnedPoiFeature || pinnedSchoolFeature || !isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
+    if (pinnedPoiFeature || pinnedSchoolFeature || pinnedHospitalFeature || !isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -3885,6 +3949,10 @@ async function init() {
     return showSchools && !!schoolsGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
   }
 
+  function hospitalsVisible() {
+    return showHospitals && !!hospitalsGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
+  }
+
   function schoolRatingScore(rating) {
     if (rating === "Outstanding") return 4;
     if (rating === "Good") return 3;
@@ -3964,12 +4032,64 @@ async function init() {
     return boroughSchoolStats.get(borough) || null;
   }
 
+  function computeBoroughHospitalStats(geojson) {
+    const statsByBorough = new Map();
+    if (!geojson?.features?.length) return statsByBorough;
+    for (const feature of geojson.features) {
+      const props = feature.properties || {};
+      const borough = props.borough;
+      if (!borough) continue;
+      if (!statsByBorough.has(borough)) {
+        statsByBorough.set(borough, {
+          total: 0,
+          outstanding: 0,
+          good: 0,
+          requiresImprovement: 0,
+          inadequate: 0,
+          notRated: 0,
+          goodOrOutstanding: 0,
+          rated: 0,
+          goodOrOutstandingShare: null,
+          rankGoodOrOutstanding: null,
+        });
+      }
+      const stat = statsByBorough.get(borough);
+      const rating = props.cqc_rating || "Not rated";
+      stat.total += 1;
+      if (rating === "Outstanding") stat.outstanding += 1;
+      else if (rating === "Good") stat.good += 1;
+      else if (rating === "Requires improvement") stat.requiresImprovement += 1;
+      else if (rating === "Inadequate") stat.inadequate += 1;
+      else stat.notRated += 1;
+      if (rating !== "Not rated") {
+        stat.rated += 1;
+        if (rating === "Outstanding" || rating === "Good") stat.goodOrOutstanding += 1;
+      }
+    }
+    const ranked = [...statsByBorough.entries()].map(([borough, stat]) => {
+      stat.goodOrOutstandingShare = stat.rated ? (stat.goodOrOutstanding / stat.rated) * 100 : null;
+      return { borough, stat };
+    });
+    ranked
+      .filter((entry) => Number.isFinite(entry.stat.goodOrOutstandingShare))
+      .sort((a, b) => b.stat.goodOrOutstandingShare - a.stat.goodOrOutstandingShare)
+      .forEach((entry, index) => { entry.stat.rankGoodOrOutstanding = index + 1; });
+    return statsByBorough;
+  }
+
+  function hospitalInsightsForFeature(feature) {
+    if (!feature || currentDataset !== "municipi" || !hospitalsVisible()) return null;
+    const borough = feature.properties?.[NAME_FIELD];
+    if (!borough) return null;
+    return boroughHospitalStats.get(borough) || null;
+  }
+
   function poiButtonActive(category) {
     return activePoiCategories.has(category);
   }
 
   function poiFocusMode() {
-    return poisVisible() || schoolsVisible();
+    return poisVisible() || schoolsVisible() || hospitalsVisible();
   }
 
   function firstLabelLayerId(map) {
@@ -4385,6 +4505,16 @@ async function init() {
     });
   }
 
+  function visibleHospitalFeatures() {
+    if (!hospitalsVisible()) return [];
+    const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    return hospitalsGeoJSON.features.filter((feature) => {
+      const props = feature.properties || {};
+      if (!activeHospitalRatings.has(props.cqc_rating || "Not rated")) return false;
+      return zoom >= 9.55;
+    });
+  }
+
   function schoolColorFor(rating) {
     const day = {
       "Outstanding": [43, 132, 90, 236],
@@ -4426,6 +4556,32 @@ async function init() {
     if (props.phase === "Secondary") return 4.6;
     if (props.phase === "All-through") return 4.8;
     return 3.8;
+  }
+
+  function hospitalColorFor(rating) {
+    const palette = {
+      Outstanding: [38, 122, 83, 236],
+      Good: [52, 147, 122, 232],
+      "Requires improvement": [196, 145, 76, 236],
+      Inadequate: [181, 72, 72, 238],
+      "Not rated": [112, 121, 130, 214],
+    };
+    return palette[rating] || palette["Not rated"];
+  }
+
+  function hospitalHaloColorFor(rating) {
+    const palette = {
+      Outstanding: [121, 201, 164, 72],
+      Good: [138, 211, 189, 68],
+      "Requires improvement": [238, 201, 145, 74],
+      Inadequate: [226, 148, 148, 80],
+      "Not rated": [182, 188, 196, 58],
+    };
+    return palette[rating] || palette["Not rated"];
+  }
+
+  function hospitalBaseRadius(feature) {
+    return feature.properties?.type === "Hospital" ? 4.6 : 4.2;
   }
 
   function makeSchoolHitLayer() {
@@ -4500,6 +4656,75 @@ async function init() {
     });
   }
 
+  function makeHospitalHitLayer() {
+    const data = visibleHospitalFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "hospital-hit-area",
+      data,
+      pickable: true,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 10,
+      radiusMaxPixels: 20,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => Math.max(9, hospitalBaseRadius(f) * 2.9),
+      getFillColor: () => [255, 255, 255, 1],
+      opacity: 1,
+      updateTriggers: {
+        data: [showHospitals, currentDataset, viewState.zoom, Array.from(activeHospitalRatings).join("|")],
+      },
+    });
+  }
+
+  function makeHospitalHaloLayer() {
+    const data = visibleHospitalFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "hospital-halo",
+      data,
+      pickable: false,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 4,
+      radiusMaxPixels: 15,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => hospitalBaseRadius(f) * 2.25,
+      getFillColor: (f) => hospitalHaloColorFor(f.properties?.cqc_rating),
+      opacity: 1,
+      updateTriggers: {
+        data: [showHospitals, currentDataset, viewState.zoom, Array.from(activeHospitalRatings).join("|")],
+      },
+    });
+  }
+
+  function makeHospitalLayer() {
+    const data = visibleHospitalFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "hospital-markers",
+      data,
+      pickable: true,
+      stroked: true,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 3,
+      radiusMaxPixels: 11,
+      lineWidthMinPixels: 1.2,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => hospitalBaseRadius(f),
+      getFillColor: (f) => hospitalColorFor(f.properties?.cqc_rating),
+      getLineColor: [255, 250, 244, 238],
+      getLineWidth: () => 1.2,
+      opacity: 1,
+      updateTriggers: {
+        data: [showHospitals, currentDataset, viewState.zoom, Array.from(activeHospitalRatings).join("|")],
+      },
+    });
+  }
+
   function makeTubeLineCaseLayer() {
     if (!transportOverlayVisible() || !tubeLinesGeoJSON) return null;
     return new deck.GeoJsonLayer({
@@ -4563,6 +4788,7 @@ async function init() {
   function zoneLabel(object, coordinate) {
     if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
     if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
+    if (object?.layer?.id === "hospital-markers" || object?.layer?.id === "hospital-hit-area") return object.properties.hospital_name || "Hospital";
     if (object?.layer?.id === "school-markers" || object?.layer?.id === "school-hit-area") return object.properties.school_name || "School";
     if (object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area") return object.properties.name || object.properties.category_label || "Place";
     if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
@@ -4625,7 +4851,7 @@ async function init() {
   }
 
   function syncPinnedSelectionState(feature = null) {
-    if (pinnedPoiFeature || pinnedSchoolFeature) {
+    if (pinnedPoiFeature || pinnedSchoolFeature || pinnedHospitalFeature) {
       highlightedFeature = null;
     } else if (!tooltipPinned) {
       highlightedFeature = pinData.length ? featureAt(pinData[0].lon, pinData[0].lat) : null;
@@ -4650,6 +4876,14 @@ async function init() {
     if (pinnedSchoolFeature) {
       tooltipEl.classList.remove("summary-card");
       tooltipEl.innerHTML = schoolTooltipHtml(pinnedSchoolFeature, true);
+      tooltipEl.style.display = "block";
+      updatePinnedPosition(viewState);
+      return;
+    }
+
+    if (pinnedHospitalFeature) {
+      tooltipEl.classList.remove("summary-card");
+      tooltipEl.innerHTML = hospitalTooltipHtml(pinnedHospitalFeature, true);
       tooltipEl.style.display = "block";
       updatePinnedPosition(viewState);
       return;
@@ -4703,6 +4937,7 @@ async function init() {
     pinnedCoord = null;
     pinnedPoiFeature = null;
     pinnedSchoolFeature = null;
+    pinnedHospitalFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -4735,6 +4970,10 @@ async function init() {
     return object?.layer?.id === "school-markers" || object?.layer?.id === "school-hit-area";
   }
 
+  function isHospitalObject(object) {
+    return object?.layer?.id === "hospital-markers" || object?.layer?.id === "hospital-hit-area";
+  }
+
   function isPoiObject(object) {
     return object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area";
   }
@@ -4755,6 +4994,8 @@ async function init() {
     for (const item of picked) {
       if (item && !candidates.includes(item)) candidates.push(item);
     }
+    const hospital = candidates.find((item) => isHospitalObject(item));
+    if (hospital) return hospital;
     const school = candidates.find((item) => isSchoolObject(item));
     if (school) return school;
     const poi = candidates.find((item) => isPoiObject(item));
@@ -4783,6 +5024,14 @@ async function init() {
       ? `<br><span class="tsub">${props.inspection_detail}</span>`
       : "";
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${rating}</span><br><span class="tarea">${props.school_name || "School"}</span>${phase}${inspectionDate}${detail}`;
+  }
+
+  function hospitalTooltipHtml(hospital, pinned) {
+    const props = hospital.properties || {};
+    const rating = props.cqc_rating || "Not rated";
+    const type = props.type ? `<br><span class="tsub">${props.type}</span>` : "";
+    const inspectionDate = props.inspection_date ? `<br><span class="tsub">${props.inspection_date}</span>` : "";
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${rating}</span><br><span class="tarea">${props.hospital_name || "Hospital"}</span>${type}${inspectionDate}`;
   }
 
   function boroughSchoolSummaryHtml(feature, pinned) {
@@ -4873,6 +5122,78 @@ async function init() {
     `;
   }
 
+  function boroughHospitalSummaryHtml(feature, pinned) {
+    const stats = hospitalInsightsForFeature(feature);
+    if (!stats || !stats.total) return "";
+    if (!pinned) {
+      const share = Number.isFinite(stats.goodOrOutstandingShare)
+        ? `${stats.goodOrOutstandingShare.toFixed(1)}% Good or Outstanding`
+        : `${stats.total.toLocaleString()} hospitals`;
+      return `<br><span class="ttag">Hospitals</span><br><span class="tsub">${share}</span>`;
+    }
+    return `
+      <div class="tblock">
+        <span class="ttag">Hospitals</span>
+        <div class="tgrid">
+          <div class="tcell">
+            <span class="tkicker">Total</span>
+            <span class="tmetric">${stats.total.toLocaleString()}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Good / Outstanding</span>
+            <span class="tmetric">${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}%` : "No rated data"}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Outstanding / Good</span>
+            <span class="tmetric">${stats.outstanding} / ${stats.good}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">London rank</span>
+            <span class="tmetric">${Number.isFinite(stats.rankGoodOrOutstanding) ? `#${stats.rankGoodOrOutstanding}` : "N/A"}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Requires improvement</span>
+            <span class="tmetric">${stats.requiresImprovement}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Inadequate / Not rated</span>
+            <span class="tmetric">${stats.inadequate} / ${stats.notRated}</span>
+          </div>
+        </div>
+        <span class="tnote">Hospital summary uses the local CQC hospital overlay. Good / Outstanding share uses rated hospitals only.</span>
+      </div>
+    `;
+  }
+
+  function boroughHospitalInsightPanelHtml(feature) {
+    const stats = hospitalInsightsForFeature(feature);
+    if (!stats || !stats.total) return "";
+    return `
+      <div class="school-insight-card">
+        <div class="s-lens">Hospitals overlay</div>
+        <div class="school-insight-grid">
+          <div>
+            <span class="school-insight-kicker">Hospitals</span>
+            <span class="school-insight-value">${stats.total.toLocaleString()}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Good / Outstanding</span>
+            <span class="school-insight-value">${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}%` : "No rated data"}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Outstanding / Good</span>
+            <span class="school-insight-value">${stats.outstanding} / ${stats.good}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">London rank</span>
+            <span class="school-insight-value">${Number.isFinite(stats.rankGoodOrOutstanding) ? `#${stats.rankGoodOrOutstanding}` : "N/A"}</span>
+          </div>
+        </div>
+        <div class="school-insight-note">Hospital summary uses rated CQC locations only for the Good / Outstanding share. Not rated hospitals in this borough: ${stats.notRated}.</div>
+      </div>
+    `;
+  }
+
   function formatMetricValue(metricKey, value) {
     if (!Number.isFinite(value)) return "No data";
     return getMetricConfig(metricKey).formatter(value);
@@ -4939,7 +5260,8 @@ async function init() {
     }
     const supportHtml = support.length ? `<br><span class="tsub">${support.join("<br>")}</span>` : "";
     const schoolHtml = boroughSchoolSummaryHtml(feature, pinned);
-    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}${schoolHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
+    const hospitalHtml = boroughHospitalSummaryHtml(feature, pinned);
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}${schoolHtml}${hospitalHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
   }
 
   function densityTooltipHtml(zone, pop, dens, pinned) {
@@ -5061,6 +5383,12 @@ async function init() {
     if (schoolHalo) layers.push(schoolHalo);
     const schoolLayer = makeSchoolLayer();
     if (schoolLayer) layers.push(schoolLayer);
+    const hospitalHit = makeHospitalHitLayer();
+    if (hospitalHit) layers.push(hospitalHit);
+    const hospitalHalo = makeHospitalHaloLayer();
+    if (hospitalHalo) layers.push(hospitalHalo);
+    const hospitalLayer = makeHospitalLayer();
+    if (hospitalLayer) layers.push(hospitalLayer);
     const poiHit = makePoiHitLayer();
     if (poiHit) layers.push(poiHit);
     const poiHalo = makePoiHaloLayer();
@@ -5235,6 +5563,29 @@ async function init() {
     schoolNoteEl.textContent = "Zoom in or widen the Ofsted filters to reveal more schools.";
   }
 
+  function updateHospitalButtons() {
+    for (const [rating, button] of Object.entries(hospitalRatingButtons)) {
+      if (!button) continue;
+      const available = (hospitalRatingCounts[rating] || 0) > 0;
+      button.disabled = !available;
+      button.classList.toggle("active", activeHospitalRatings.has(rating));
+    }
+    if (!hospitalNoteEl) return;
+    if (!showHospitals) {
+      hospitalNoteEl.style.display = "none";
+      hospitalNoteEl.textContent = "";
+      return;
+    }
+    const visibleCount = visibleHospitalFeatures().length;
+    if (visibleCount > 0) {
+      hospitalNoteEl.style.display = "none";
+      hospitalNoteEl.textContent = "";
+      return;
+    }
+    hospitalNoteEl.style.display = "block";
+    hospitalNoteEl.textContent = "Zoom in or widen the hospital rating filters to reveal more sites.";
+  }
+
   function updateModeButtons() {
     document.getElementById("btn-sections").classList.toggle("active", currentDataset === "sections");
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
@@ -5244,6 +5595,7 @@ async function init() {
     btnBikes.classList.toggle("active", bikesVisible());
     btnPois.classList.toggle("active", poisVisible());
     btnSchools.classList.toggle("active", schoolsVisible());
+    btnHospitals.classList.toggle("active", hospitalsVisible());
     btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
@@ -5270,6 +5622,7 @@ async function init() {
     overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
     poiToggleEl.style.display = !sectionsMode && showPois ? "grid" : "none";
     schoolControlsEl.style.display = !sectionsMode && showSchools ? "flex" : "none";
+    hospitalControlsEl.style.display = !sectionsMode && showHospitals ? "flex" : "none";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -5393,6 +5746,7 @@ async function init() {
     if (bikesVisible()) metaParts.push("Bikes · major and local cycle routes");
     if (poisVisible()) metaParts.push("POIs · curated city places");
     if (schoolsVisible()) metaParts.push("Schools · Ofsted outcomes");
+    if (hospitalsVisible()) metaParts.push("Hospitals · CQC ratings");
     legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
@@ -5521,12 +5875,14 @@ async function init() {
     const currentMetric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
     const stories = buildSpotlightNarrative(feature);
     const schoolInsights = boroughSchoolInsightPanelHtml(feature);
+    const hospitalInsights = boroughHospitalInsightPanelHtml(feature);
     if (!stories.length) {
       return `
         <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
         <div class="s-lens">Current lens · ${currentMetric.label}</div>
         <div class="s-helper">No reliable borough-level spotlight summary is available from the current metric set.</div>
         ${schoolInsights}
+        ${hospitalInsights}
       `;
     }
     return `
@@ -5536,7 +5892,8 @@ async function init() {
         ${stories.map((story) => `<div class="s-story">${story}</div>`).join("")}
       </div>
       ${schoolInsights}
-      <div class="s-foot">Built from the current borough metrics using London-wide averages and simple ranking buckets.${schoolsVisible() ? " Schools insight uses the joined Ofsted overlay dataset." : ""}</div>
+      ${hospitalInsights}
+      <div class="s-foot">Built from the current borough metrics using London-wide averages and simple ranking buckets.${schoolsVisible() ? " Schools insight uses the joined Ofsted overlay dataset." : ""}${hospitalsVisible() ? " Hospital insight uses the local CQC hospital overlay." : ""}</div>
     `;
   }
 
@@ -5795,6 +6152,7 @@ async function init() {
     updateChapterSelector();
     updatePoiButtons();
     updateSchoolButtons();
+    updateHospitalButtons();
     updateLegend();
     updateContourLayers();
     updateBikeLayers();
@@ -5812,6 +6170,7 @@ async function init() {
     pinnedCoord = null;
     pinnedPoiFeature = null;
     pinnedSchoolFeature = null;
+    pinnedHospitalFeature = null;
     tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
@@ -5865,6 +6224,12 @@ async function init() {
       if (!object) { tooltipEl.style.display = "none"; return; }
       tooltipEl.classList.remove("pinned");
 
+      if (isHospitalObject(object)) {
+        tooltipEl.innerHTML = hospitalTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
       if (isSchoolObject(object)) {
         tooltipEl.innerHTML = schoolTooltipHtml(object, false);
         tooltipEl.style.display = "block";
@@ -5945,10 +6310,27 @@ async function init() {
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
         pinnedSchoolFeature = object;
+        pinnedHospitalFeature = null;
         highlightedFeature = null;
         tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = schoolTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        deckgl.setProps({ layers: getLayers() });
+        renderAnalysisPanel();
+        return;
+      }
+      if (isHospitalObject(object)) {
+        tooltipPinned = true;
+        pinnedCoord = coordinate;
+        pinnedPoiFeature = null;
+        pinnedSchoolFeature = null;
+        pinnedHospitalFeature = object;
+        highlightedFeature = null;
+        tooltipEl.classList.add("pinned");
+        tooltipEl.classList.remove("summary-card");
+        tooltipEl.innerHTML = hospitalTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
         deckgl.setProps({ layers: getLayers() });
@@ -5960,6 +6342,7 @@ async function init() {
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
         pinnedSchoolFeature = null;
+        pinnedHospitalFeature = null;
         tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
@@ -5973,6 +6356,7 @@ async function init() {
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
         pinnedSchoolFeature = null;
+        pinnedHospitalFeature = null;
         tooltipEl.classList.add("pinned");
         const lineKey = object.properties?.lineKey || null;
         setSelectedTubeLine(lineKey, { preserveTooltip: true });
@@ -5988,6 +6372,7 @@ async function init() {
         pinnedCoord = coordinate;
         pinnedPoiFeature = object;
         pinnedSchoolFeature = null;
+        pinnedHospitalFeature = null;
         highlightedFeature = null;
         tooltipEl.classList.add("pinned");
         tooltipEl.classList.remove("summary-card");
@@ -6009,6 +6394,7 @@ async function init() {
         pinnedCoord = coordinate;
         pinnedPoiFeature = null;
         pinnedSchoolFeature = null;
+        pinnedHospitalFeature = null;
         tooltipEl.classList.add("pinned");
         highlightedFeature = object;
         tooltipEl.classList.add("summary-card");
@@ -6023,6 +6409,7 @@ async function init() {
       pinnedCoord = coordinate;
       pinnedPoiFeature = null;
       pinnedSchoolFeature = null;
+      pinnedHospitalFeature = null;
       tooltipEl.classList.add("pinned");
       tooltipEl.classList.remove("summary-card");
       const pop = object?.properties?.[POP_FIELD] ?? statsAt(...coordinate).population;
@@ -6327,6 +6714,12 @@ async function init() {
     refreshMapState();
   };
 
+  toggleHospitals = function() {
+    if (!activeHospitalRatings.size) activeHospitalRatings = new Set(HOSPITAL_RATINGS.filter((rating) => (hospitalRatingCounts[rating] || 0) > 0));
+    showHospitals = !showHospitals;
+    refreshMapState();
+  };
+
   togglePoiCategory = function(category) {
     if (!POI_CATEGORIES.includes(category)) return;
     if ((poiCategoryCounts[category] || 0) < 1) return;
@@ -6358,6 +6751,18 @@ async function init() {
     refreshMapState();
   };
 
+  toggleHospitalRating = function(rating) {
+    if (!HOSPITAL_RATINGS.includes(rating)) return;
+    if ((hospitalRatingCounts[rating] || 0) < 1) return;
+    if (activeHospitalRatings.has(rating)) {
+      if (activeHospitalRatings.size === 1) return;
+      activeHospitalRatings.delete(rating);
+    } else {
+      activeHospitalRatings.add(rating);
+    }
+    refreshMapState();
+  };
+
   resetView = function() {
     selectedTubeLineKey = null;
     highlightedFeature = null;
@@ -6366,6 +6771,7 @@ async function init() {
     pinnedCoord = null;
     pinnedPoiFeature = null;
     pinnedSchoolFeature = null;
+    pinnedHospitalFeature = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
     refreshMapState({
@@ -6395,6 +6801,7 @@ async function init() {
     tooltipPinned = false;
     pinnedPoiFeature = null;
     pinnedSchoolFeature = null;
+    pinnedHospitalFeature = null;
     tooltipEl.style.display = "none";
     document.getElementById("btn-3d").classList.remove("active");
     document.getElementById("btn-flat").classList.add("active");

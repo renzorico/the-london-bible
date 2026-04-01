@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Hospitals overlay
+
+- Added a new Hospitals overlay built from the official CQC care directory and current CQC hospital location pages, with compact rating filters, hospital-specific hover/click cards, and borough-level hospital summaries alongside the existing civic overlays.
+
 ## 2026-04-01 — Schools control compaction
 
 - Shortened the Schools phase buttons to A / P / S and added compact hover labels to the Ofsted rating icons so the full filter row stays tidier without losing clarity.
