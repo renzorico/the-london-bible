@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Loading intro alignment refinement
+
+- Tuned the logo spin-down to finish in the correct upright orientation and refined the intro map choreography so the logo more convincingly transforms into the homepage map view before settling into the default framing.
+
 ## 2026-04-01 — Loading intro motion pass
 
 - Refined the loading screen proportions, shortened the intro to roughly three seconds, and added a decelerating logo-spin reveal that blends into the default London map view for a more cinematic first load.

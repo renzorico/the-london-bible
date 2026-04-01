@@ -1385,11 +1385,11 @@
   #map {
     width: 100vw;
     height: 100vh;
-    transform: scale(1.045);
+    transform: scale(1.14);
     transform-origin: center;
-    filter: saturate(.88) contrast(.95) brightness(.98);
-    opacity: .84;
-    transition: transform 1.02s cubic-bezier(.18,.84,.24,1), filter 1.02s cubic-bezier(.18,.84,.24,1), opacity .9s cubic-bezier(.18,.84,.24,1);
+    filter: saturate(.86) contrast(.94) brightness(.985);
+    opacity: .82;
+    transition: transform 1.08s cubic-bezier(.18,.84,.24,1), filter 1.08s cubic-bezier(.18,.84,.24,1), opacity .94s cubic-bezier(.18,.84,.24,1);
   }
   body.intro-revealing #map {
     transform: scale(1);
@@ -1398,9 +1398,10 @@
   }
   @keyframes logoSpinDown {
     0% { transform: rotate(0deg) scale(1); }
-    42% { transform: rotate(540deg) scale(1.01); }
-    74% { transform: rotate(805deg) scale(1); }
-    100% { transform: rotate(900deg) scale(.995); }
+    36% { transform: rotate(520deg) scale(1.012); }
+    68% { transform: rotate(884deg) scale(1.004); }
+    86% { transform: rotate(1032deg) scale(1); }
+    100% { transform: rotate(1080deg) scale(.996); }
   }
   @media (prefers-reduced-motion: reduce) {
     #loading,
@@ -2298,7 +2299,9 @@ async function init() {
   let highlightedFeature = null;
   let pinData = [];
   let currentMainLayer = null;
-  let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
+  const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
+  const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 11.28, pitch: 0, bearing: 0 };
+  let viewState = { ...INTRO_VIEW_STATE };
   let loadingOverlayDismissed = false;
   const LOADER_MIN_DISPLAY_MS = 3000;
   const LOADER_REVEAL_MS = 980;
@@ -2316,19 +2319,26 @@ async function init() {
     loadingRevealStarted = true;
     bodyEl.classList.add("intro-revealing");
     loadingOverlayEl.classList.add("is-revealing");
+    const map = getBaseMap();
     if (!reducedMotionPreferred()) {
-      const map = getBaseMap();
       if (map?.easeTo) {
         map.easeTo({
-          center: [-0.118, 51.505],
-          zoom: 10.5,
-          pitch: 0,
-          bearing: 0,
+          center: [HOME_VIEW_STATE.longitude, HOME_VIEW_STATE.latitude],
+          zoom: HOME_VIEW_STATE.zoom,
+          pitch: HOME_VIEW_STATE.pitch,
+          bearing: HOME_VIEW_STATE.bearing,
           duration: LOADER_REVEAL_MS,
           easing: (t) => 1 - Math.pow(1 - t, 3),
           animate: true,
         });
       }
+    } else if (map?.jumpTo) {
+      map.jumpTo({
+        center: [HOME_VIEW_STATE.longitude, HOME_VIEW_STATE.latitude],
+        zoom: HOME_VIEW_STATE.zoom,
+        pitch: HOME_VIEW_STATE.pitch,
+        bearing: HOME_VIEW_STATE.bearing,
+      });
     }
     setTimeout(dismissLoadingOverlay, LOADER_REVEAL_MS);
   }
@@ -5278,8 +5288,8 @@ async function init() {
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
     refreshMapState({
-      longitude: -0.118, latitude: 51.505, zoom: 10.5,
-      pitch: is3D ? 50 : 0, bearing: is3D ? -15 : 0,
+      longitude: HOME_VIEW_STATE.longitude, latitude: HOME_VIEW_STATE.latitude, zoom: HOME_VIEW_STATE.zoom,
+      pitch: is3D ? 50 : HOME_VIEW_STATE.pitch, bearing: is3D ? -15 : HOME_VIEW_STATE.bearing,
       transitionDuration: 700,
     });
   };
