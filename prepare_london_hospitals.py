@@ -41,7 +41,7 @@ RATING_ORDER = {
     "Not rated": 5,
 }
 
-USER_AGENT = "LondonBibleHospitals/1.0 (+https://github.com/renzorico/map-maker)"
+USER_AGENT = "LondonBibleHospitals/1.0 (+https://github.com/renzorico/the-london-bible)"
 
 
 def clean(value):

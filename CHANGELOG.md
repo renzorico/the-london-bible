@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — GitHub Pages repo-rename cleanup
+
+- Added a root `index.html` entry point for the renamed `the-london-bible` repo, updated stale repo and local-path references, and refreshed the README for GitHub Pages publishing at `https://renzorico.github.io/the-london-bible/`.
+
 ## 2026-04-01 — Overlay control cleanup
 
 - Unified the Hospitals rating controls with the Schools signal-scale filter style and removed Contours from the visible overlay row so the main civic overlays now stay focused on Bikes, POIs, Schools, and Hospitals.

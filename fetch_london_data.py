@@ -20,7 +20,7 @@ DATA_DIR = ROOT / "_data_cache"
 OUTPUT_CRS = "EPSG:27700"
 WGS84 = "EPSG:4326"
 SESSION = requests.Session()
-SESSION.headers.update({"User-Agent": "map-maker-london-pop/1.0"})
+SESSION.headers.update({"User-Agent": "the-london-bible/1.0"})
 
 KONTUR_URLS = [
     "https://geodata-eu-central-1-kontur-public.s3.amazonaws.com/kontur_datasets/kontur_population_GB_20231101.gpkg.gz",
