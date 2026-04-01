@@ -218,6 +218,34 @@
     position: relative;
     overflow: visible;
   }
+  .school-quality-btn::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(4px);
+    padding: 6px 8px 5px;
+    border-radius: 8px;
+    background: var(--panel-strong);
+    border: 1px solid var(--panel-border);
+    color: var(--tooltip-text);
+    font-family: var(--font-ui);
+    font-size: .56rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    box-shadow: var(--panel-shadow);
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .school-quality-btn:hover::after,
+  .school-quality-btn:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
   .school-signal {
     display: inline-flex;
     align-items: flex-end;
@@ -1657,9 +1685,9 @@
     <div id="poi-note" aria-live="polite"></div>
     <div id="school-controls">
       <div id="school-toggle">
-        <button class="toggle-btn secondary-btn school-filter-btn active" data-school-phase="all" title="All mainstream schools" aria-label="All mainstream schools" onclick="toggleSchoolPhase('all')">All</button>
-        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">Primary</button>
-        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">Secondary</button>
+        <button class="toggle-btn secondary-btn school-filter-btn active" data-school-phase="all" title="All mainstream schools" aria-label="All mainstream schools" onclick="toggleSchoolPhase('all')">A</button>
+        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">P</button>
+        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">S</button>
       </div>
       <div id="school-rating-toggle">
         <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Inadequate" data-label="Inadequate" title="Inadequate" aria-label="Inadequate" onclick="toggleSchoolRating('Inadequate')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>

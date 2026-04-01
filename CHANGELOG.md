@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Schools control compaction
+
+- Shortened the Schools phase buttons to A / P / S and added compact hover labels to the Ofsted rating icons so the full filter row stays tidier without losing clarity.
+
 ## 2026-04-01 — Schools insight visibility and rating-scale controls
 
 - Surfaced borough school analysis more clearly in the selected-borough and Why here? views, and redesigned the Schools rating filters into a compact single-row quality scale so the Ofsted controls read faster and stay tidy.
