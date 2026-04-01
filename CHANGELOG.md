@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough pub density metric
+
+- Added a borough-level pubs-per-km² metric using an OpenStreetMap amenity=pub snapshot aggregated to London borough polygons.
+- Wired pub density into borough choropleths, legend copy, tooltips, comparison, spotlight, similarity, and correlation while intentionally leaving pint price out on source-quality grounds.
+
 ## 2026-04-01 — Borough correlation view
 
 - Added a borough-only Correlation tool with a compact linked scatterplot for comparing two existing borough metrics at once.

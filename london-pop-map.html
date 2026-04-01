@@ -1273,6 +1273,7 @@
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
       <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
       <button id="metric-station_access_per_10k" class="toggle-btn metric-btn" onclick="setMetric('station_access_per_10k')">Stations / 10k</button>
+      <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2')">Pubs / km²</button>
       <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
@@ -1481,6 +1482,8 @@ const TUBE_LINE_COLOURS = {
 const BOROUGH_METRIC_DATA = {"City of London":{"house_price_proxy_gbp":835000,"median_weekly_earnings_gbp":null,"male_share_pct":55.76,"female_share_pct":44.24,"children_share_pct":8,"not_born_uk_share_pct":36.7},"Barking and Dagenham":{"house_price_proxy_gbp":300000,"median_weekly_earnings_gbp":744.1,"male_share_pct":48.88,"female_share_pct":51.12,"children_share_pct":26.12,"not_born_uk_share_pct":31.26},"Barnet":{"house_price_proxy_gbp":533500,"median_weekly_earnings_gbp":862.4,"male_share_pct":49.09,"female_share_pct":50.91,"children_share_pct":20.87,"not_born_uk_share_pct":39.08},"Bexley":{"house_price_proxy_gbp":342500,"median_weekly_earnings_gbp":849.1,"male_share_pct":48.18,"female_share_pct":51.82,"children_share_pct":20.22,"not_born_uk_share_pct":14.11},"Brent":{"house_price_proxy_gbp":499950,"median_weekly_earnings_gbp":747.6,"male_share_pct":50.64,"female_share_pct":49.36,"children_share_pct":20.6,"not_born_uk_share_pct":55.18},"Bromley":{"house_price_proxy_gbp":440000,"median_weekly_earnings_gbp":958.2,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":19.7,"not_born_uk_share_pct":14.5},"Camden":{"house_price_proxy_gbp":760000,"median_weekly_earnings_gbp":864.8,"male_share_pct":49.73,"female_share_pct":50.27,"children_share_pct":15.41,"not_born_uk_share_pct":42.52},"Croydon":{"house_price_proxy_gbp":365000,"median_weekly_earnings_gbp":829.8,"male_share_pct":48.54,"female_share_pct":51.46,"children_share_pct":21.73,"not_born_uk_share_pct":29.66},"Ealing":{"house_price_proxy_gbp":485000,"median_weekly_earnings_gbp":784.9,"male_share_pct":50.18,"female_share_pct":49.82,"children_share_pct":20.81,"not_born_uk_share_pct":48.29},"Enfield":{"house_price_proxy_gbp":402500,"median_weekly_earnings_gbp":838.4,"male_share_pct":48.6,"female_share_pct":51.4,"children_share_pct":22.09,"not_born_uk_share_pct":35.11},"Greenwich":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":852.1,"male_share_pct":50.1,"female_share_pct":49.9,"children_share_pct":21.81,"not_born_uk_share_pct":31.11},"Hackney":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":882,"male_share_pct":49.67,"female_share_pct":50.33,"children_share_pct":20.38,"not_born_uk_share_pct":39.12},"Hammersmith and Fulham":{"house_price_proxy_gbp":777475,"median_weekly_earnings_gbp":862.4,"male_share_pct":48.93,"female_share_pct":51.07,"children_share_pct":16.79,"not_born_uk_share_pct":42.81},"Haringey":{"house_price_proxy_gbp":540000,"median_weekly_earnings_gbp":814.5,"male_share_pct":50.12,"female_share_pct":49.88,"children_share_pct":19.4,"not_born_uk_share_pct":44.69},"Harrow":{"house_price_proxy_gbp":500000,"median_weekly_earnings_gbp":853.8,"male_share_pct":49.66,"female_share_pct":50.34,"children_share_pct":20.28,"not_born_uk_share_pct":44.8},"Havering":{"house_price_proxy_gbp":350000,"median_weekly_earnings_gbp":822.5,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":18.88,"not_born_uk_share_pct":10.36},"Hillingdon":{"house_price_proxy_gbp":415000,"median_weekly_earnings_gbp":804.1,"male_share_pct":49.89,"female_share_pct":50.11,"children_share_pct":21.11,"not_born_uk_share_pct":30},"Hounslow":{"house_price_proxy_gbp":395000,"median_weekly_earnings_gbp":766.6,"male_share_pct":50.6,"female_share_pct":49.4,"children_share_pct":20.92,"not_born_uk_share_pct":43.34},"Islington":{"house_price_proxy_gbp":615000,"median_weekly_earnings_gbp":935,"male_share_pct":49.79,"female_share_pct":50.21,"children_share_pct":15.89,"not_born_uk_share_pct":35.44},"Kensington and Chelsea":{"house_price_proxy_gbp":1315000,"median_weekly_earnings_gbp":988,"male_share_pct":49.46,"female_share_pct":50.54,"children_share_pct":15.69,"not_born_uk_share_pct":51.61},"Kingston upon Thames":{"house_price_proxy_gbp":487250,"median_weekly_earnings_gbp":844,"male_share_pct":49.08,"female_share_pct":50.92,"children_share_pct":19.28,"not_born_uk_share_pct":28.28},"Lambeth":{"house_price_proxy_gbp":518110,"median_weekly_earnings_gbp":883.5,"male_share_pct":50.14,"female_share_pct":49.86,"children_share_pct":17.81,"not_born_uk_share_pct":38.89},"Lewisham":{"house_price_proxy_gbp":430000,"median_weekly_earnings_gbp":843,"male_share_pct":49.16,"female_share_pct":50.84,"children_share_pct":20.68,"not_born_uk_share_pct":33.82},"Merton":{"house_price_proxy_gbp":470000,"median_weekly_earnings_gbp":876.3,"male_share_pct":49.12,"female_share_pct":50.88,"children_share_pct":20.59,"not_born_uk_share_pct":37.79},"Newham":{"house_price_proxy_gbp":390500,"median_weekly_earnings_gbp":758.8,"male_share_pct":52.17,"female_share_pct":47.83,"children_share_pct":22.21,"not_born_uk_share_pct":53.61},"Redbridge":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":820.1,"male_share_pct":49.54,"female_share_pct":50.46,"children_share_pct":22.9,"not_born_uk_share_pct":37.05},"Richmond upon Thames":{"house_price_proxy_gbp":650000,"median_weekly_earnings_gbp":962,"male_share_pct":48.58,"female_share_pct":51.42,"children_share_pct":20.49,"not_born_uk_share_pct":24.29},"Southwark":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":880.4,"male_share_pct":49.57,"female_share_pct":50.43,"children_share_pct":18.5,"not_born_uk_share_pct":39.49},"Sutton":{"house_price_proxy_gbp":367000,"median_weekly_earnings_gbp":853.2,"male_share_pct":48.71,"female_share_pct":51.29,"children_share_pct":20.38,"not_born_uk_share_pct":19.89},"Tower Hamlets":{"house_price_proxy_gbp":490000,"median_weekly_earnings_gbp":882.2,"male_share_pct":51.74,"female_share_pct":48.26,"children_share_pct":19.59,"not_born_uk_share_pct":43.16},"Waltham Forest":{"house_price_proxy_gbp":445000,"median_weekly_earnings_gbp":839.7,"male_share_pct":49.95,"female_share_pct":50.05,"children_share_pct":22,"not_born_uk_share_pct":38.64},"Wandsworth":{"house_price_proxy_gbp":654000,"median_weekly_earnings_gbp":921.1,"male_share_pct":48.06,"female_share_pct":51.94,"children_share_pct":17.59,"not_born_uk_share_pct":35.43},"Westminster":{"house_price_proxy_gbp":1025000,"median_weekly_earnings_gbp":958.2,"male_share_pct":51.64,"female_share_pct":48.36,"children_share_pct":14.71,"not_born_uk_share_pct":53.32}};
 const MEDIAN_AGE_DATA = {"Barking and Dagenham":33.4,"Barnet":37.9,"Bexley":39.5,"Brent":35.9,"Bromley":41.3,"Camden":34.6,"City of London":37.2,"Croydon":37.7,"Ealing":36.9,"Enfield":37.5,"Greenwich":35.3,"Hackney":32.7,"Hammersmith and Fulham":34,"Haringey":36.2,"Harrow":38.1,"Havering":39.4,"Hillingdon":37,"Hounslow":36.8,"Islington":33.4,"Kensington and Chelsea":39,"Kingston upon Thames":38.7,"Lambeth":33.4,"Lewisham":35.4,"Merton":37.5,"Newham":32.5,"Redbridge":36.1,"Richmond upon Thames":41.7,"Southwark":33.4,"Sutton":39.5,"Tower Hamlets":30.7,"Waltham Forest":35.8,"Wandsworth":33.5,"Westminster":35.8};
 const MEDIAN_AGE_LONDON = 35.8;
+const PUB_DENSITY_DATA = {"Barking and Dagenham":{"pub_count":19,"pubs_per_km2":0.53},"Barnet":{"pub_count":56,"pubs_per_km2":0.65},"Bexley":{"pub_count":81,"pubs_per_km2":1.34},"Brent":{"pub_count":57,"pubs_per_km2":1.32},"Bromley":{"pub_count":102,"pubs_per_km2":0.68},"Camden":{"pub_count":224,"pubs_per_km2":10.28},"City of London":{"pub_count":121,"pubs_per_km2":41.67},"Croydon":{"pub_count":76,"pubs_per_km2":0.88},"Ealing":{"pub_count":76,"pubs_per_km2":1.37},"Enfield":{"pub_count":64,"pubs_per_km2":0.78},"Greenwich":{"pub_count":81,"pubs_per_km2":1.71},"Hackney":{"pub_count":121,"pubs_per_km2":6.35},"Hammersmith and Fulham":{"pub_count":106,"pubs_per_km2":6.46},"Haringey":{"pub_count":77,"pubs_per_km2":2.6},"Harrow":{"pub_count":34,"pubs_per_km2":0.67},"Havering":{"pub_count":54,"pubs_per_km2":0.48},"Hillingdon":{"pub_count":77,"pubs_per_km2":0.67},"Hounslow":{"pub_count":77,"pubs_per_km2":1.38},"Islington":{"pub_count":184,"pubs_per_km2":12.39},"Kensington and Chelsea":{"pub_count":81,"pubs_per_km2":6.68},"Kingston upon Thames":{"pub_count":59,"pubs_per_km2":1.58},"Lambeth":{"pub_count":149,"pubs_per_km2":5.56},"Lewisham":{"pub_count":85,"pubs_per_km2":2.42},"Merton":{"pub_count":46,"pubs_per_km2":1.22},"Newham":{"pub_count":44,"pubs_per_km2":1.22},"Redbridge":{"pub_count":29,"pubs_per_km2":0.51},"Richmond upon Thames":{"pub_count":117,"pubs_per_km2":2.04},"Southwark":{"pub_count":194,"pubs_per_km2":6.72},"Sutton":{"pub_count":42,"pubs_per_km2":0.96},"Tower Hamlets":{"pub_count":129,"pubs_per_km2":6.52},"Waltham Forest":{"pub_count":62,"pubs_per_km2":1.6},"Wandsworth":{"pub_count":114,"pubs_per_km2":3.33},"Westminster":{"pub_count":334,"pubs_per_km2":15.54}};
+const PUB_DENSITY_LONDON_AVG = 2.02;
 const GREENSPACE_SHARE_DATA = {"City of London":4.8,"Barking and Dagenham":33.6,"Barnet":41.3,"Bexley":31.7,"Brent":21.9,"Bromley":57.8,"Camden":24.8,"Croydon":37.1,"Ealing":30.9,"Enfield":45.6,"Greenwich":34.4,"Hackney":23.2,"Hammersmith and Fulham":19.1,"Haringey":25.5,"Harrow":34.6,"Havering":59.3,"Hillingdon":49.2,"Hounslow":39.6,"Islington":12.4,"Kensington and Chelsea":15.1,"Kingston upon Thames":36.4,"Lambeth":17.3,"Lewisham":22.5,"Merton":34.6,"Newham":23.9,"Redbridge":40.6,"Richmond upon Thames":50.8,"Southwark":24.9,"Sutton":32,"Tower Hamlets":15.2,"Waltham Forest":31.4,"Wandsworth":26.9,"Westminster":21.5};
 const GREENSPACE_LONDON_AVG = 38.2;
 const COUNTRY_BIRTH_SHORTLIST = ["ALL", "India", "Poland", "Romania", "Nigeria", "Pakistan", "Bangladesh"];
@@ -1700,6 +1703,7 @@ const METRIC_PALETTES = {
   children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
   median_age_years: [[241, 244, 236, 220], [205, 218, 193, 232], [166, 185, 153, 242], [125, 144, 111, 250], [76, 92, 67, 255]],
   station_access_per_10k: [[236, 241, 244, 220], [190, 210, 222, 232], [138, 176, 196, 242], [85, 131, 159, 250], [41, 82, 109, 255]],
+  pubs_per_km2: [[244, 239, 228, 220], [225, 194, 158, 232], [198, 147, 100, 242], [150, 95, 54, 250], [90, 52, 27, 255]],
   greenspace_share_pct: [[239, 244, 232, 220], [199, 218, 174, 232], [146, 186, 123, 242], [94, 144, 78, 250], [45, 92, 53, 255]],
   country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
 };
@@ -1823,6 +1827,24 @@ const METRICS = {
     summaryLabel: "London rate",
     tooltipTag: "Stations / 10k",
     note: "Station-based proxy derived from TfL station locations only; excludes buses, service frequency, and full PTAL",
+  },
+  pubs_per_km2: {
+    key: "pubs_per_km2",
+    label: "Pub density",
+    button: "Pubs / km²",
+    legendLabel: "Mapped pubs per km²",
+    unit: "pubs/km²",
+    year: "Snapshot 2026-04-01",
+    source: "OpenStreetMap amenity=pub snapshot via Overpass API",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "pubs_per_km2",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(2)} pubs/km²`,
+    diffFormatter: (v) => `${v.toFixed(2)} pubs/km²`,
+    summaryLabel: "London avg",
+    tooltipTag: "Pub density",
+    note: "Community-maintained pub locations aggregated to borough polygons; station or nightlife quality is not implied",
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
@@ -2008,6 +2030,7 @@ async function init() {
     { key: "median_weekly_earnings_gbp", label: "earnings" },
     { key: "children_share_pct", label: "child share" },
     { key: "country_of_birth_pct", label: "international mix", countrySelection: "ALL" },
+    { key: "pubs_per_km2", label: "pub density" },
     { key: "greenspace_share_pct", label: "greenspace share" },
     { key: "median_age_years", label: "median age" },
     { key: "station_access_per_10k", label: "station coverage" },
@@ -2018,6 +2041,7 @@ async function init() {
     "median_weekly_earnings_gbp",
     "children_share_pct",
     "country_of_birth_pct",
+    "pubs_per_km2",
     "greenspace_share_pct",
     "median_age_years",
     "station_access_per_10k",
@@ -2081,6 +2105,9 @@ async function init() {
   }
   for (const [boroughName, medianAge] of Object.entries(MEDIAN_AGE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].median_age_years = medianAge;
+  }
+  for (const [boroughName, pubMetrics] of Object.entries(PUB_DENSITY_DATA)) {
+    if (BOROUGH_METRIC_DATA[boroughName]) Object.assign(BOROUGH_METRIC_DATA[boroughName], pubMetrics);
   }
   for (const [boroughName, greenspaceShare] of Object.entries(GREENSPACE_SHARE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].greenspace_share_pct = greenspaceShare;
@@ -2281,6 +2308,12 @@ async function init() {
         avg: MEDIAN_AGE_LONDON,
       };
     }
+    if (metricKey === "pubs_per_km2") {
+      return {
+        ...boroughStats[metricKey],
+        avg: PUB_DENSITY_LONDON_AVG,
+      };
+    }
     if (metricKey === "greenspace_share_pct") {
       return {
         ...boroughStats[metricKey],
@@ -2387,6 +2420,7 @@ async function init() {
     if (metricKey === "median_weekly_earnings_gbp") return "Earnings (£/week)";
     if (metricKey === "children_share_pct") return "Children (%)";
     if (metricKey === "country_of_birth_pct") return "Born outside UK (%)";
+    if (metricKey === "pubs_per_km2") return "Pubs / km²";
     if (metricKey === "greenspace_share_pct") return "Greenspace share (2005, %)";
     if (metricKey === "median_age_years") return "Median age (years)";
     if (metricKey === "station_access_per_10k") return "Stations / 10k residents";
@@ -2631,6 +2665,14 @@ async function init() {
       if (delta <= -4) return "lower";
       return "similar";
     }
+    if (metricKey === "pubs_per_km2") {
+      const ratio = average ? value / average : null;
+      if (ratio != null && ratio >= 1.7) return "much-higher";
+      if (ratio != null && ratio >= 1.15) return "higher";
+      if (ratio != null && ratio <= 0.55) return "much-lower";
+      if (ratio != null && ratio <= 0.85) return "lower";
+      return "similar";
+    }
     if (metricKey === "median_age_years") {
       const delta = value - average;
       if (delta >= 2) return "much-higher";
@@ -2678,6 +2720,11 @@ async function init() {
       const delta = Math.abs(value - average);
       const direction = value >= average ? "above" : "below";
       return `${delta.toFixed(1)} pp ${direction} the London average`;
+    }
+    if (metricKey === "pubs_per_km2") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${delta.toFixed(2)} pubs/km² ${direction} the London average`;
     }
     if (metricKey === "station_access_per_10k") {
       const delta = Math.abs(value - average);
@@ -2766,6 +2813,14 @@ async function init() {
       return makeInsight(`Station coverage is close to the London-wide rate, at <strong>${formatted}</strong>.`, 22, key);
     }
 
+    if (key === "pubs_per_km2") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`One of London’s denser pub landscapes, with <strong>${formatted}</strong>, ${diff}.`, 74, key);
+      if (bucket === "higher") return makeInsight(`Pub density sits above the London average at <strong>${formatted}</strong>.`, 56, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Pub density is sparse by London standards, at <strong>${formatted}</strong>, ${diff}.`, 72, key);
+      if (bucket === "lower") return makeInsight(`Pub density runs a little below the London average, at <strong>${formatted}</strong>.`, 52, key);
+      return makeInsight(`Pub density is close to the London average, at <strong>${formatted}</strong>.`, 22, key);
+    }
+
     if (key === "greenspace_share_pct") {
       if (bucket === "much-higher" || rank === "top-5") return makeInsight(`In the GLUD 2005 baseline, a notably large <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 74, key);
       if (bucket === "higher") return makeInsight(`The GLUD 2005 baseline shows a higher-than-average greenspace land share here, reaching <strong>${formatted}</strong>.`, 60, key);
@@ -2792,6 +2847,7 @@ async function init() {
     const childrenCtx = spotlightMetricContext(feature, "children_share_pct");
     const ageCtx = spotlightMetricContext(feature, "median_age_years");
     const transportCtx = spotlightMetricContext(feature, "station_access_per_10k");
+    const pubsCtx = spotlightMetricContext(feature, "pubs_per_km2");
     const greenspaceCtx = spotlightMetricContext(feature, "greenspace_share_pct");
     const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
 
@@ -2802,6 +2858,7 @@ async function init() {
       buildSpotlightMetricInsight(childrenCtx),
       buildSpotlightMetricInsight(ageCtx),
       buildSpotlightMetricInsight(transportCtx),
+      buildSpotlightMetricInsight(pubsCtx),
       buildSpotlightMetricInsight(greenspaceCtx),
       buildSpotlightMetricInsight(internationalCtx),
     ].filter(Boolean);
@@ -2850,6 +2907,18 @@ async function init() {
       insights.push(makeInsight(`Stronger station coverage lines up with higher housing costs, hinting at the premium attached to better-connected boroughs.`, 78, "transport-price-premium"));
     }
 
+    if (pubsCtx && transportCtx && (pubsCtx.bucket === "much-higher" || pubsCtx.bucket === "higher") && (transportCtx.bucket === "much-higher" || transportCtx.bucket === "higher")) {
+      insights.push(makeInsight(`Dense pub clusters and stronger station coverage reinforce a central, highly social borough profile.`, 79, "pubs-transport-core"));
+    }
+
+    if (pubsCtx && priceCtx && (pubsCtx.bucket === "higher" || pubsCtx.bucket === "much-higher") && (priceCtx.bucket === "higher" || priceCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`Higher pub density also overlaps with elevated housing costs, a pattern strongest in expensive central boroughs.`, 77, "pubs-price-central"));
+    }
+
+    if (pubsCtx && greenspaceCtx && densityCtx && (pubsCtx.bucket === "lower" || pubsCtx.bucket === "much-lower") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`Lower pub density fits a greener, lower-density outer-borough pattern rather than a dense central nightlife core.`, 75, "pubs-green-outer"));
+    }
+
     if (transportCtx && greenspaceCtx && densityCtx && (transportCtx.bucket === "lower" || transportCtx.bucket === "much-lower") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
       insights.push(makeInsight(`Lower station coverage fits a greener, lower-density borough pattern more typical of London’s outer edge.`, 76, "transport-green-outer"));
     }
@@ -2889,6 +2958,12 @@ async function init() {
       return Number.isFinite(stationCount)
         ? `${stationCount.toLocaleString()} mapped TfL / rail stations`
         : "Station-based borough proxy";
+    }
+    if (boroughMetric === "pubs_per_km2") {
+      const pubCount = feature.properties?.pub_count;
+      return Number.isFinite(pubCount)
+        ? `${pubCount.toLocaleString()} mapped pubs in the OSM snapshot`
+        : "OpenStreetMap amenity=pub snapshot aggregated to borough polygons";
     }
     if (boroughMetric === "median_age_years") {
       return "Census 2021 median age of usual residents";
@@ -3227,6 +3302,11 @@ async function init() {
       if (Number.isFinite(stationCount)) support.push(`${stationCount.toLocaleString()} mapped TfL / rail stations`);
       support.push("Station-based borough proxy derived from station locations only");
       support.push("Excludes buses, service frequency, and full PTAL");
+    } else if (metricKey === "pubs_per_km2") {
+      const pubCount = feature.properties?.pub_count;
+      if (Number.isFinite(pubCount)) support.push(`${pubCount.toLocaleString()} mapped pubs in the OpenStreetMap snapshot`);
+      support.push("OpenStreetMap amenity=pub points aggregated to borough polygons");
+      support.push("Community-maintained pub location baseline, not a measure of pint price or venue quality");
     } else if (metricKey === "median_age_years") {
       support.push("Census 2021 median age of usual residents");
       support.push("Derived from single-year age counts at borough level");
