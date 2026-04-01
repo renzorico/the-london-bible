@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Hexes and spikes refinement
+
+- Restored HEXES spikes to proper extruded hex geometry, improved the density palette toward a cleaner stone-to-plum range, and tightened the HEXES style controls so Flat map, Spikes, and Reset distribute evenly.
+- Refined the Residents per km² legend with calmer typography, better alignment and width, capitalized Sparse / Dense labels, and corrected spike rendering by excluding tiny clipped edge cells and using a robust capped height scale for extreme densities.
+
 ## 2026-04-01 — Tube interaction and branding polish
 
 - Fixed the actual only-tube interaction path so station hover restores station names, line selection from the legend or the map visibly updates rendered Tube lines, and empty-space click clears tube selection cleanly without falling back to borough metrics.

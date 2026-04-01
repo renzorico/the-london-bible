@@ -157,6 +157,17 @@
     width: 100%;
   }
   #layer-toggle { gap: 7px; }
+  #view-toggle {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+  }
+  #view-toggle .toggle-btn {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+  }
   #metric-toggle {
     max-width: none;
     gap: 6px;
@@ -444,26 +455,28 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    max-width: min(340px, calc(100vw - 48px));
+    width: min(388px, calc(100vw - 48px));
+    max-width: min(388px, calc(100vw - 48px));
     pointer-events: none;
   }
   #legend {
     position: relative;
-    min-width: 248px;
-    padding: 18px 18px 17px;
+    width: 100%;
+    min-width: 0;
+    padding: 18px 20px 18px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
   }
-  #legend .llbl { font-family: var(--font-ui); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--subtitle); margin-bottom: 12px; }
-  #legend .lbar { width: 100%; max-width: 236px; height: 12px; border-radius: 999px; margin-bottom: 10px;
+  #legend .llbl { font-family: var(--font-ui); font-size: .83rem; font-weight: 600; letter-spacing: .01em; text-transform: none; color: color-mix(in srgb, var(--title) 88%, var(--subtitle) 12%); margin-bottom: 13px; }
+  #legend .lbar { width: 100%; max-width: none; height: 12px; border-radius: 999px; margin-bottom: 10px;
     background-image: linear-gradient(to right, rgba(253,228,140,.9), #f4a350, #d55e58, #a52674, #560b6b, #0e0430);
     background-size: 100% 100%;
     background-repeat: no-repeat; }
   #legend .lends { display: flex; justify-content: space-between; font-size: .81rem; color: var(--legend-text); gap: 12px; }
-  #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
+  #legend .lavg  { margin-top: 12px; font-size: .79rem; letter-spacing: .02em; color: var(--legend-text); }
   #legend .lmeta { margin-top: 9px; max-width: 320px; font-size: .68rem; line-height: 1.5; color: var(--hint); }
   #analysis-panel {
     position: absolute;
@@ -1346,12 +1359,12 @@ const TFL_STATIONS_URL = "https://services1.arcgis.com/YswvgzOodUvqkoCN/arcgis/r
 const TUBE_LINES_URL = "https://raw.githubusercontent.com/vega/vega-datasets/main/data/londonTubeLines.json";
 
 const PALETTE = [
-  [244, 239, 231, 205],
-  [225, 207, 186, 222],
-  [202, 167, 146, 236],
-  [164, 126, 126, 244],
-  [118, 86, 97, 250],
-  [74, 52, 67, 255],
+  [244, 240, 236, 210],
+  [230, 218, 220, 224],
+  [209, 183, 194, 236],
+  [176, 136, 159, 244],
+  [126, 84, 116, 250],
+  [67, 42, 76, 255],
 ];
 const COLOUR_GAMMA = 0.4;
 function lerp(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
@@ -1996,9 +2009,10 @@ async function init() {
   let currentMainLayer = null;
   let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
   const OUTLIER_THRESHOLD = 50000;
+  const MIN_HEX_SPIKE_AREA_KM2 = 0.05;
+  const SPIKE_RENDER_QUANTILE = 0.992;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
-  const SPIKE_RADIUS_M = 110;
   const SIMILARITY_METRICS = [
     { key: "density", label: "density" },
     { key: "house_price_proxy_gbp", label: "house prices" },
@@ -2172,7 +2186,11 @@ async function init() {
   const totalPopulation = sectionsGeoJSON.features.reduce((sum, f) => sum + (f.properties[POP_FIELD] ?? 0), 0);
   const totalArea = sectionsGeoJSON.features.reduce((sum, f) => sum + (f.properties.area_km2 ?? 0), 0);
   const avgDensity = totalArea > 0 ? Math.round(totalPopulation / totalArea) : 0;
-  const sectionDensityMax = Math.max(...sectionsGeoJSON.features.filter((f) => (f.properties.density ?? 0) <= OUTLIER_THRESHOLD).map((f) => f.properties.density));
+  const validSectionFeatures = sectionsGeoJSON.features.filter((f) => validSectionDensity(f, "flat"));
+  const validSpikeFeatures = sectionsGeoJSON.features.filter((f) => validSectionDensity(f, "spike"));
+  const sectionDensityMax = Math.max(...validSectionFeatures.map((f) => f.properties.density));
+  const sortedSpikeDensities = validSpikeFeatures.map((f) => f.properties.density).sort((a, b) => a - b);
+  const spikeRenderMax = sortedSpikeDensities[Math.min(sortedSpikeDensities.length - 1, Math.floor((sortedSpikeDensities.length - 1) * SPIKE_RENDER_QUANTILE))] || sectionDensityMax;
   const boroughStats = {};
   const msoaDensityStats = (() => {
     if (!msoaGeoJSON?.features?.length) return {};
@@ -3102,44 +3120,16 @@ async function init() {
 
   function colorFor(feature, dataset) {
     const density = feature.properties.density ?? 0;
-    if (dataset === "sections" && density > OUTLIER_THRESHOLD) return OUTLIER_COLOR;
+    if (dataset === "sections" && !validSectionDensity(feature, "flat")) return OUTLIER_COLOR;
     return hexColor(Math.min(density / sectionDensityMax, 1));
   }
 
-  function validSectionDensity(feature) {
+  function validSectionDensity(feature, mode = "flat") {
     const density = feature?.properties?.density ?? 0;
-    return Number.isFinite(density) && density > 0 && density <= OUTLIER_THRESHOLD;
-  }
-
-  function featureRepresentativePoint(feature) {
-    const geometry = feature?.geometry;
-    if (!geometry) return null;
-    const ring = geometry.type === "Polygon"
-      ? geometry.coordinates?.[0]
-      : geometry.type === "MultiPolygon"
-        ? geometry.coordinates?.[0]?.[0]
-        : null;
-    if (!ring?.length) return null;
-    const sum = ring.reduce((acc, coord) => {
-      acc.lon += coord[0];
-      acc.lat += coord[1];
-      return acc;
-    }, { lon: 0, lat: 0 });
-    return [sum.lon / ring.length, sum.lat / ring.length];
-  }
-
-  function spikeSectionData() {
-    if (!sectionsGeoJSON?.features?.length) return [];
-    return sectionsGeoJSON.features
-      .filter((feature) => validSectionDensity(feature))
-      .map((feature) => ({
-        feature,
-        properties: feature.properties,
-        geometry: feature.geometry,
-        position: featureRepresentativePoint(feature),
-        density: feature.properties?.density ?? 0,
-      }))
-      .filter((entry) => Array.isArray(entry.position));
+    const area = feature?.properties?.area_km2 ?? null;
+    if (!Number.isFinite(density) || density <= 0 || density > OUTLIER_THRESHOLD) return false;
+    if (mode === "spike" && Number.isFinite(area) && area < MIN_HEX_SPIKE_AREA_KM2) return false;
+    return true;
   }
 
   function boroughMetricColor(feature, metricState = getActiveMetricState()) {
@@ -3160,8 +3150,9 @@ async function init() {
 
   function elevationFor(feature, dataset) {
     const density = feature.properties.density ?? 0;
-    if (dataset === "sections" && !validSectionDensity(feature)) return 0;
-    return (Math.min(density, sectionDensityMax) / sectionDensityMax) * TARGET_HEIGHT_M;
+    if (dataset === "sections" && !validSectionDensity(feature, "spike")) return 0;
+    const scaled = Math.sqrt(Math.min(density, spikeRenderMax) / spikeRenderMax);
+    return scaled * TARGET_HEIGHT_M;
   }
 
   function transportOverlayVisible() {
@@ -3188,37 +3179,20 @@ async function init() {
 
   function makeSectionsLayer() {
     if (onlyTubeMode()) return null;
-    if (is3D) {
-      return new deck.ColumnLayer({
-        id: "sections-spikes",
-        data: spikeSectionData(),
-        pickable: true,
-        diskResolution: 4,
-        radiusUnits: "meters",
-        radiusMinPixels: 2,
-        radiusMaxPixels: 16,
-        extruded: true,
-        getPosition: (d) => d.position,
-        getRadius: () => SPIKE_RADIUS_M,
-        getFillColor: (d) => colorFor(d.feature, "sections"),
-        getLineColor: currentTheme === "night" ? [255, 255, 255, 36] : [255, 255, 255, 48],
-        getLineWidth: 1,
-        lineWidthUnits: "pixels",
-        stroked: true,
-        getElevation: (d) => elevationFor(d.feature, "sections"),
-        opacity: currentTheme === "night" ? 0.95 : 0.92,
-      });
-    }
+    const data = is3D ? { type: "FeatureCollection", features: validSpikeFeatures } : sectionsGeoJSON;
     return new deck.GeoJsonLayer({
       id: "sections",
-      data: sectionsGeoJSON,
-      filled: true, stroked: false,
-      extruded: false, wireframe: false,
+      data,
+      filled: true, stroked: is3D,
+      extruded: is3D, wireframe: false,
       pickable: true, autoHighlight: true,
       highlightColor: [255, 255, 255, currentTheme === "night" ? 58 : 40],
       getFillColor: (f) => colorFor(f, "sections"),
-      getElevation: 0,
-      opacity: currentTheme === "night" ? 0.84 : 0.78,
+      getElevation: (f) => is3D ? elevationFor(f, "sections") : 0,
+      getLineColor: is3D ? (currentTheme === "night" ? [255, 255, 255, 40] : [255, 255, 255, 52]) : [0, 0, 0, 0],
+      getLineWidth: is3D ? 1 : 0,
+      lineWidthUnits: "pixels",
+      opacity: is3D ? (currentTheme === "night" ? 0.94 : 0.9) : (currentTheme === "night" ? 0.84 : 0.78),
     });
   }
 
@@ -3894,8 +3868,8 @@ async function init() {
     legendBarEl.style.background = metricGradientCss(metricKey);
 
     if (metricKey === "density" && currentDataset !== "municipi") {
-      legendEnds[0].textContent = "sparse";
-      legendEnds[1].textContent = "dense";
+      legendEnds[0].textContent = "Sparse";
+      legendEnds[1].textContent = "Dense";
       legendAvgEl.textContent = `London avg · ${avgDensity.toLocaleString()} res/km²`;
     } else {
       if (metric.scale === "diverging") {
