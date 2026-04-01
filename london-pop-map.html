@@ -1278,28 +1278,76 @@
     text-overflow: ellipsis;
   }
   #loading {
-    position: absolute; inset: 0; background: var(--bg);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 100; transition: opacity .5s ease;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--panel-strong) 84%, transparent) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 42%, var(--bg) 100%);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .58s ease, visibility .58s ease;
   }
-  #loading .lmark {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--panel-border) 90%, transparent);
+  #loading.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .loading-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 30px 34px;
+  }
+  .loading-logo-wrap {
+    width: 124px;
+    height: 124px;
     display: grid;
     place-items: center;
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    box-shadow: var(--panel-shadow);
-    font-family: var(--font-display);
-    font-size: 1.62rem;
-    font-weight: 800;
-    letter-spacing: .08em;
-    color: var(--legend-accent);
+    border-radius: 30px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 94%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 92%, transparent), color-mix(in srgb, var(--panel) 94%, transparent));
+    box-shadow: 0 22px 48px rgba(79, 49, 38, 0.10);
   }
-  #loading h2 { margin-top: 18px; font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; letter-spacing: .1em; color: var(--title); text-transform: uppercase; }
-  #loading .lstatus  { margin-top: 10px; font-size: .66rem; letter-spacing: .15em; text-transform: uppercase; color: var(--subtitle); font-family: var(--font-ui); }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-logo {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    animation: logoBreath 2.9s ease-in-out infinite;
+    transform-origin: center;
+  }
+  #loading h2 {
+    font-family: var(--font-display);
+    font-size: 1.82rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    line-height: 1;
+    color: var(--title);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  #loading .lstatus  {
+    font-size: .63rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+    font-family: var(--font-ui);
+  }
+  @keyframes logoBreath {
+    0%, 100% { transform: scale(0.985); }
+    50% { transform: scale(1.04); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #loading,
+    .loading-logo {
+      transition: none;
+      animation: none;
+    }
+  }
 
   @media (max-width: 540px) {
     #left-stack     { top: 14px; left: 14px; right: 14px; width: calc(100vw - 28px); max-width: calc(100vw - 28px); gap: 9px; }
@@ -1333,10 +1381,14 @@
 </head>
 <body>
 
-<div id="loading">
-  <div class="lmark" aria-hidden="true">TLB</div>
-  <h2>THE LONDON BIBLE</h2>
-  <div class="lstatus" id="load-status">Loading…</div>
+<div id="loading" role="status" aria-live="polite" aria-label="Loading The London Bible">
+  <div class="loading-shell">
+    <div class="loading-logo-wrap" aria-hidden="true">
+      <img class="loading-logo" src="logo.png" alt="" />
+    </div>
+    <h2>THE LONDON BIBLE</h2>
+    <div class="lstatus" id="load-status">Loading…</div>
+  </div>
 </div>
 
 <div id="map"></div>
@@ -2055,6 +2107,7 @@ let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, s
 
 async function init() {
   const bodyEl = document.body;
+  const loadingOverlayEl = document.getElementById("loading");
   const leftStackEl = document.getElementById("left-stack");
   const statusEl = document.getElementById("load-status");
   const tooltipEl = document.getElementById("tooltip");
@@ -2134,6 +2187,25 @@ async function init() {
   let pinData = [];
   let currentMainLayer = null;
   let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
+  let loadingOverlayDismissed = false;
+
+  function dismissLoadingOverlay() {
+    if (loadingOverlayDismissed || !loadingOverlayEl) return;
+    loadingOverlayDismissed = true;
+    loadingOverlayEl.classList.add("is-hidden");
+    const cleanup = () => {
+      loadingOverlayEl.hidden = true;
+      loadingOverlayEl.setAttribute("aria-hidden", "true");
+      loadingOverlayEl.style.pointerEvents = "none";
+      loadingOverlayEl.removeEventListener("transitionend", cleanup);
+    };
+    loadingOverlayEl.addEventListener("transitionend", cleanup);
+    setTimeout(cleanup, 800);
+  }
+
+  function markAtlasReady() {
+    requestAnimationFrame(() => requestAnimationFrame(dismissLoadingOverlay));
+  }
   const OUTLIER_THRESHOLD = 50000;
   const MIN_HEX_SPIKE_AREA_KM2 = 0.18;
   const SPIKE_RENDER_QUANTILE = 0.997;
@@ -4642,6 +4714,32 @@ async function init() {
     return deckgl.getMapboxMap?.() || deckgl.map || deckgl._map || null;
   }
 
+  function bindLoadingOverlayToReadiness() {
+    const map = getBaseMap();
+    if (!map) {
+      markAtlasReady();
+      return;
+    }
+
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(fallbackTimer);
+      statusEl.textContent = "Opening atlas…";
+      markAtlasReady();
+    };
+    const fallbackTimer = setTimeout(finish, 2400);
+
+    if (map.loaded?.() && map.isStyleLoaded?.()) {
+      finish();
+      return;
+    }
+
+    map.once?.("idle", finish);
+    map.once?.("error", finish);
+  }
+
   function applyBasemapThemeStyles() {
     const map = getBaseMap();
     if (!map) return;
@@ -4920,10 +5018,7 @@ async function init() {
 
   applyTheme("day");
   refreshMapState();
-
-  const loadEl = document.getElementById("loading");
-  loadEl.style.opacity = "0";
-  setTimeout(() => loadEl.style.display = "none", 500);
+  bindLoadingOverlayToReadiness();
 }
 
 init();

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Branded loading screen
+
+- Added a branded first-load overlay using the project `logo.png` asset, a restrained breathing animation, and a centered `THE LONDON BIBLE` lockup so the atlas opens with a calmer editorial entry state.
+- Switched loader dismissal from a fixed timeout to app readiness, fading the overlay out smoothly once the map style and core UI have initialized, while respecting reduced-motion preferences.
+
 ## 2026-04-01 — View icon and flag refinement
 
 - Replaced the Views text buttons with compact icon controls plus hover labels, swapped the pub metric icon for a clearer pint-glass mark, and tightened the Origin focus picker into one horizontal flag row.
