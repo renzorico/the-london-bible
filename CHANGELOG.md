@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Metrics rail repair and MSOA audit
+
+- Repaired the METRICS panel with a cleaner single-column metric list, restored clearer nested metric controls, moved the pinned borough summary into a fixed top card so it no longer blocks the center of the map, and removed the redundant selected-year chip from the Density time control.
+- Fixed Similar Areas so selecting a borough now rebuilds the map highlight layers immediately, keeping the three returned matches visibly highlighted on the map and in sync with the panel, and confirmed that current small-area support is limited to MSOA density and MSOA pub density with density years available only for 2021 and 2024.
+
 ## 2026-04-01 — Control rail cleanup and metric switching fix
 
 - Reduced the visual weight of the Views and Metrics buttons to match the Analysis controls more closely, and reorganized those groups into cleaner two-column grids for a more ordered left rail.

@@ -177,9 +177,9 @@
     text-align: center;
   }
   #metric-toggle {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
     align-items: stretch;
     max-width: none;
     position: relative;
@@ -233,6 +233,9 @@
   .metric-option-row.active-scope .metric-option-label {
     color: color-mix(in srgb, var(--button-active) 68%, var(--title) 32%);
   }
+  #year-row .metric-option-label {
+    margin-bottom: 2px;
+  }
   .metric-subtoggle {
     display: flex;
     flex-wrap: wrap;
@@ -247,30 +250,10 @@
     width: 100%;
     min-width: 0;
   }
-  .time-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .time-badge {
-    font-family: var(--font-ui);
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--title);
-    background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
-    border: 1px solid color-mix(in srgb, var(--panel-border) 92%, transparent);
-    padding: 6px 9px;
-    border-radius: 999px;
-    line-height: 1;
-    white-space: nowrap;
-  }
   .time-slider-wrap {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 8px;
     width: 100%;
   }
   .time-slider {
@@ -376,9 +359,9 @@
     font-size: .6rem;
     font-weight: 700;
     letter-spacing: .14em;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 35px;
-    text-align: center;
+    text-align: left;
   }
   .toggle-btn.secondary-btn {
     padding: 6px 10px 5px;
@@ -450,6 +433,18 @@
     backdrop-filter: blur(14px);
   }
   #tooltip.pinned { pointer-events: all; }
+  #tooltip.summary-card {
+    position: fixed;
+    width: min(420px, calc(100vw - 560px));
+    min-width: 320px;
+    max-width: calc(100vw - 48px);
+    white-space: normal;
+    padding: 12px 16px 13px;
+    border-radius: 14px;
+  }
+  #tooltip.summary-card .ttag {
+    margin-bottom: 3px;
+  }
   #tooltip .ttag {
     display: inline-block;
     margin-bottom: 5px;
@@ -1294,9 +1289,6 @@
       <div class="metric-option-row" id="year-row">
         <div class="metric-option-label">Time</div>
         <div id="year-toggle" class="time-control">
-          <div class="time-head">
-            <div id="year-badge" class="time-badge">2024</div>
-          </div>
           <div class="time-slider-wrap">
             <input id="year-slider" class="time-slider" type="range" min="0" max="0" step="1" value="0" oninput="setYearFromIndex(this.value)" />
             <div id="year-stops" class="time-stops"></div>
@@ -1984,8 +1976,8 @@ async function init() {
   const yearToggleEl = document.getElementById("year-toggle");
   const countryRowEl = document.getElementById("country-row");
   const yearSliderEl = document.getElementById("year-slider");
-  const yearBadgeEl = document.getElementById("year-badge");
   const yearStopsEl = document.getElementById("year-stops");
+  const topRightControlsEl = document.getElementById("top-right-controls");
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
@@ -2074,6 +2066,10 @@ async function init() {
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
+    if (currentDataset === "municipi") {
+      positionPinnedSummaryCard();
+      return;
+    }
     try {
       const vp = new deck.WebMercatorViewport({ width: innerWidth, height: innerHeight, ...vs });
       const [sx, sy] = vp.project(pinnedCoord);
@@ -2088,11 +2084,7 @@ async function init() {
 
   tooltipEl.addEventListener("click", (e) => {
     if (e.target.classList.contains("tclose")) {
-      tooltipPinned = false;
-      pinnedCoord = null;
-      tooltipEl.classList.remove("pinned");
-      tooltipEl.style.display = "none";
-      renderAnalysisPanel();
+      clearPinnedTooltip();
     }
   });
 
@@ -3421,6 +3413,38 @@ async function init() {
     tooltipEl.style.top = `${top}px`;
   }
 
+  function positionPinnedSummaryCard() {
+    const pad = 20;
+    const tw = tooltipEl.offsetWidth;
+    const railRect = leftStackEl?.getBoundingClientRect?.();
+    const analysisRect = getComputedStyle(analysisPanelEl).display !== "none" ? analysisPanelEl.getBoundingClientRect() : null;
+    const controlsRect = topRightControlsEl?.getBoundingClientRect?.();
+    const leftBound = railRect ? railRect.right + pad : pad;
+    const rightBound = Math.min(
+      analysisRect ? analysisRect.left - pad : innerWidth - pad,
+      controlsRect ? controlsRect.left - pad : innerWidth - pad
+    );
+    const availableWidth = Math.max(tw, rightBound - leftBound);
+    const left = rightBound > leftBound
+      ? Math.max(leftBound, Math.min(rightBound - tw, leftBound + (availableWidth - tw) / 2))
+      : Math.max(pad, innerWidth - tw - pad);
+
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${pad}px`;
+  }
+
+  function syncPinnedSelectionState(feature = null) {
+    if (!tooltipPinned) {
+      highlightedFeature = pinData.length ? featureAt(pinData[0].lon, pinData[0].lat) : null;
+    } else if (feature) {
+      highlightedFeature = feature;
+    } else if (pinnedCoord) {
+      highlightedFeature = featureAt(...pinnedCoord);
+    }
+    deckgl.setProps({ layers: getLayers() });
+    renderAnalysisPanel();
+  }
+
   function refreshHighlightedFeature() {
     if (!pinData.length) return;
     const pin = pinData[0];
@@ -3441,13 +3465,15 @@ async function init() {
     }
 
     if (currentDataset === "municipi" && object) {
+      tooltipEl.classList.add("summary-card");
       tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
       tooltipEl.style.display = "block";
-      updatePinnedPosition(viewState);
+      positionPinnedSummaryCard();
       return;
     }
 
     if (currentDataset === "sections") {
+      tooltipEl.classList.remove("summary-card");
       const stats = statsAt(...pinnedCoord);
       const zone = zoneAt(...pinnedCoord);
       tooltipEl.innerHTML = densityTooltipHtml(zone, stats.population, stats.density, true);
@@ -3458,6 +3484,7 @@ async function init() {
 
     tooltipPinned = false;
     pinnedCoord = null;
+    tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
   }
@@ -3465,6 +3492,7 @@ async function init() {
   function clearTubeInteractionState() {
     tooltipPinned = false;
     pinnedCoord = null;
+    tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
   }
@@ -3655,10 +3683,10 @@ async function init() {
       filled: true,
       stroked: true,
       pickable: false,
-      getFillColor: currentTheme === "night" ? [154, 128, 88, 18] : [154, 128, 88, 14],
-      getLineColor: currentTheme === "night" ? [232, 212, 170, 215] : [142, 109, 60, 215],
+      getFillColor: currentTheme === "night" ? [154, 128, 88, 26] : [154, 128, 88, 20],
+      getLineColor: currentTheme === "night" ? [232, 212, 170, 235] : [142, 109, 60, 232],
       lineWidthUnits: "pixels",
-      getLineWidth: 3.5,
+      getLineWidth: 4.5,
     });
   }
 
@@ -3758,7 +3786,6 @@ async function init() {
     const years = getAvailableYearsForState();
     const visible = years.length > 1;
     if (!visible) {
-      yearBadgeEl.textContent = "";
       yearStopsEl.innerHTML = "";
       yearSliderEl.min = 0;
       yearSliderEl.max = 0;
@@ -3776,7 +3803,6 @@ async function init() {
     yearSliderEl.value = String(index);
     yearSliderEl.disabled = false;
     yearSliderEl.style.opacity = 1;
-    yearBadgeEl.textContent = String(resolvedYear);
     yearStopsEl.innerHTML = years.map((year) => `<span class="time-stop${year === resolvedYear ? " active" : ""}">${year}</span>`).join("");
   }
 
@@ -4328,9 +4354,10 @@ async function init() {
   function clearPinnedTooltip() {
     tooltipPinned = false;
     pinnedCoord = null;
+    tooltipEl.classList.remove("summary-card");
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
-    renderAnalysisPanel();
+    syncPinnedSelectionState();
   }
 
   function handleComparisonSelection(feature) {
@@ -4440,6 +4467,7 @@ async function init() {
       tooltipEl.classList.add("pinned");
 
       if (object?.layer?.id === "stations") {
+        tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
@@ -4449,6 +4477,7 @@ async function init() {
       if (object?.layer?.id === "tube-lines") {
         const lineKey = object.properties?.lineKey || null;
         setSelectedTubeLine(lineKey, { preserveTooltip: true });
+        tooltipEl.classList.remove("summary-card");
         tooltipEl.innerHTML = lineTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
@@ -4462,20 +4491,23 @@ async function init() {
       }
 
       if (currentDataset === "municipi" && object) {
+        highlightedFeature = object;
+        tooltipEl.classList.add("summary-card");
         tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
         tooltipEl.style.display = "block";
-        positionTooltip(x, y);
-        renderAnalysisPanel();
+        positionPinnedSummaryCard();
+        syncPinnedSelectionState(object);
         return;
       }
 
+      tooltipEl.classList.remove("summary-card");
       const pop = object?.properties?.[POP_FIELD] ?? statsAt(...coordinate).population;
       const dens = object?.properties?.density ?? statsAt(...coordinate).density;
       const zone = zoneLabel(object, coordinate);
       tooltipEl.innerHTML = densityTooltipHtml(zone, pop, dens, true);
       tooltipEl.style.display = "block";
       positionTooltip(x, y);
-      renderAnalysisPanel();
+      syncPinnedSelectionState();
     },
   });
 
