@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — London bikes overlay
+
+- Added a new Bikes overlay built from TfL’s published London cycle routes, preprocessed into a local GeoJSON with a clean major / primary / connector hierarchy and a dedicated toggle alongside Contours.
+- Styled the cycle network as layered jade-to-mint linework with zoom-based halos and route weighting so London’s cycling structure reads clearly across borough, MSOA, and tube views without clashing with Tube lines or contours.
+
 ## 2026-04-01 — Wider homepage framing
 
 - Zoomed the default homepage map view out to a noticeably wider London framing and updated the loading intro handoff so it still lands cleanly on the same final home camera.

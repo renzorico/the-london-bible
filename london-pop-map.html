@@ -173,7 +173,9 @@
     text-align: center;
   }
   #overlay-toggle {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
     margin-top: 8px;
     width: 100%;
   }
@@ -1487,6 +1489,7 @@
     </div>
     <div id="overlay-toggle">
       <button id="btn-contours" class="toggle-btn secondary-btn" title="Contours" aria-label="Contours" onclick="toggleContours()">Contours</button>
+      <button id="btn-bikes" class="toggle-btn secondary-btn" title="Bikes" aria-label="Bikes" onclick="toggleBikes()">Bikes</button>
     </div>
   </div>
 
@@ -1622,6 +1625,15 @@ const CONTOUR_LAYER_IDS = [
   "contours-line-minor",
   "contours-line-major",
 ];
+const BIKES_DATA_URL = "data/london_cycle_network.geojson";
+const BIKES_SOURCE_ID = "london-bikes";
+const BIKE_LAYER_IDS = [
+  "bikes-halo-major",
+  "bikes-halo-primary",
+  "bikes-line-major",
+  "bikes-line-primary",
+  "bikes-line-connector",
+];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -1670,8 +1682,8 @@ const ZONES = [
 ];
 
 const THEMES = {
-  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b" },
-  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff" },
+  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b", bikeHaloMajor: "rgba(108, 197, 171, 0.30)", bikeHaloPrimary: "rgba(101, 185, 161, 0.18)", bikeMajor: "#147a69", bikePrimary: "#2d9a85", bikeConnector: "#6db3a4" },
+  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff", bikeHaloMajor: "rgba(98, 255, 225, 0.28)", bikeHaloPrimary: "rgba(63, 212, 184, 0.18)", bikeMajor: "#8effd8", bikePrimary: "#42dfbf", bikeConnector: "#1f9f90" },
 };
 
 const TUBE_LINE_COLOURS = {
@@ -2210,7 +2222,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2262,6 +2274,7 @@ async function init() {
   const btnChapters = document.getElementById("btn-chapters");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const btnContours = document.getElementById("btn-contours");
+  const btnBikes = document.getElementById("btn-bikes");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
@@ -2289,10 +2302,12 @@ async function init() {
   let correlationHoverName = null;
   let selectedTubeLineKey = null;
   let showContours = false;
+  let showBikes = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let contoursGeoJSON = null;
+  let bikesGeoJSON = null;
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2300,7 +2315,7 @@ async function init() {
   let pinData = [];
   let currentMainLayer = null;
   const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 };
-  const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 10.72, pitch: 0, bearing: 0 };
+  const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 8.72, pitch: 0, bearing: 0 };
   let viewState = { ...INTRO_VIEW_STATE };
   let loadingOverlayDismissed = false;
   const LOADER_MIN_DISPLAY_MS = 3000;
@@ -2448,12 +2463,13 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_pubs.json").then((r) => r.json()).catch(() => null),
     fetch(CONTOUR_DATA_URL).then((r) => r.json()).catch(() => null),
+    fetch(BIKES_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2462,6 +2478,7 @@ async function init() {
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (contoursData?.features) contoursGeoJSON = contoursData;
+  if (bikesData?.features) bikesGeoJSON = bikesData;
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
     SMALL_AREA_DENSITY.years = discoverMsoaSeriesYears(msoaGeoJSON, "density", "population");
@@ -3580,6 +3597,10 @@ async function init() {
     return showContours && !!contoursGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
   }
 
+  function bikesVisible() {
+    return showBikes && !!bikesGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
+  }
+
   function firstLabelLayerId(map) {
     const layers = map.getStyle?.().layers || [];
     return layers.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"])?.id || null;
@@ -3662,6 +3683,100 @@ async function init() {
     const map = getBaseMap();
     if (!map) return;
     const apply = () => applyContourStyles(map);
+    if (map.isStyleLoaded?.()) {
+      apply();
+    } else {
+      map.once?.("styledata", apply);
+    }
+  }
+
+  function ensureBikeLayers() {
+    const map = getBaseMap();
+    if (!map?.isStyleLoaded?.() || !bikesGeoJSON?.features?.length) return;
+
+    if (!map.getSource(BIKES_SOURCE_ID)) {
+      map.addSource(BIKES_SOURCE_ID, {
+        type: "geojson",
+        data: bikesGeoJSON,
+        tolerance: 0.4,
+      });
+    }
+
+    const beforeId = firstLabelLayerId(map);
+    const addIfMissing = (id, config) => {
+      if (!map.getLayer(id)) map.addLayer({ id, source: BIKES_SOURCE_ID, ...config }, beforeId);
+    };
+
+    addIfMissing(BIKE_LAYER_IDS[0], {
+      type: "line",
+      filter: ["==", ["get", "route_class"], "major"],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(BIKE_LAYER_IDS[1], {
+      type: "line",
+      filter: ["==", ["get", "route_class"], "primary"],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(BIKE_LAYER_IDS[2], {
+      type: "line",
+      filter: ["==", ["get", "route_class"], "major"],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(BIKE_LAYER_IDS[3], {
+      type: "line",
+      filter: ["==", ["get", "route_class"], "primary"],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(BIKE_LAYER_IDS[4], {
+      type: "line",
+      filter: ["==", ["get", "route_class"], "connector"],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+
+    if (beforeId) {
+      BIKE_LAYER_IDS.forEach((id) => {
+        if (map.getLayer(id)) map.moveLayer(id, beforeId);
+      });
+    }
+  }
+
+  function applyBikeStyles(map = getBaseMap()) {
+    if (!map?.isStyleLoaded?.()) return;
+    ensureBikeLayers();
+    const theme = THEMES[currentTheme];
+    const visible = bikesVisible() ? "visible" : "none";
+    BIKE_LAYER_IDS.forEach((id) => {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible);
+    });
+    if (!bikesVisible()) return;
+
+    map.setPaintProperty(BIKE_LAYER_IDS[0], "line-color", theme.bikeHaloMajor);
+    map.setPaintProperty(BIKE_LAYER_IDS[0], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 2.4, 10.5, 4.2, 13.5, 7.0]);
+    map.setPaintProperty(BIKE_LAYER_IDS[0], "line-opacity", currentTheme === "night" ? 0.84 : 0.72);
+    map.setPaintProperty(BIKE_LAYER_IDS[0], "line-blur", currentTheme === "night" ? 2.6 : 1.8);
+
+    map.setPaintProperty(BIKE_LAYER_IDS[1], "line-color", theme.bikeHaloPrimary);
+    map.setPaintProperty(BIKE_LAYER_IDS[1], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 1.4, 10.5, 2.6, 13.5, 4.6]);
+    map.setPaintProperty(BIKE_LAYER_IDS[1], "line-opacity", currentTheme === "night" ? 0.52 : 0.42);
+    map.setPaintProperty(BIKE_LAYER_IDS[1], "line-blur", currentTheme === "night" ? 1.8 : 1.2);
+
+    map.setPaintProperty(BIKE_LAYER_IDS[2], "line-color", theme.bikeMajor);
+    map.setPaintProperty(BIKE_LAYER_IDS[2], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 1.2, 10.5, 2.2, 13.5, 3.8]);
+    map.setPaintProperty(BIKE_LAYER_IDS[2], "line-opacity", ["interpolate", ["linear"], ["zoom"], 8, currentTheme === "night" ? 0.82 : 0.78, 10.5, currentTheme === "night" ? 0.96 : 0.92, 14, 1]);
+
+    map.setPaintProperty(BIKE_LAYER_IDS[3], "line-color", theme.bikePrimary);
+    map.setPaintProperty(BIKE_LAYER_IDS[3], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 0.85, 10.5, 1.5, 13.5, 2.8]);
+    map.setPaintProperty(BIKE_LAYER_IDS[3], "line-opacity", ["interpolate", ["linear"], ["zoom"], 8, currentTheme === "night" ? 0.34 : 0.28, 10.5, currentTheme === "night" ? 0.7 : 0.62, 14, currentTheme === "night" ? 0.88 : 0.82]);
+
+    map.setPaintProperty(BIKE_LAYER_IDS[4], "line-color", theme.bikeConnector);
+    map.setPaintProperty(BIKE_LAYER_IDS[4], "line-width", ["interpolate", ["linear"], ["zoom"], 9.5, 0.45, 11.5, 0.85, 14, 1.4]);
+    map.setPaintProperty(BIKE_LAYER_IDS[4], "line-opacity", ["interpolate", ["linear"], ["zoom"], 9, 0, 10.3, currentTheme === "night" ? 0.18 : 0.14, 12.2, currentTheme === "night" ? 0.46 : 0.38, 14, currentTheme === "night" ? 0.64 : 0.56]);
+  }
+
+  function updateBikeLayers() {
+    const map = getBaseMap();
+    if (!map) return;
+    const apply = () => applyBikeStyles(map);
     if (map.isStyleLoaded?.()) {
       apply();
     } else {
@@ -4291,6 +4406,7 @@ async function init() {
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
     btnContours.classList.toggle("active", contoursVisible());
+    btnBikes.classList.toggle("active", bikesVisible());
     btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
@@ -4314,7 +4430,7 @@ async function init() {
     viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
-    overlayToggleEl.style.display = sectionsMode ? "none" : "flex";
+    overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -4435,6 +4551,7 @@ async function init() {
     const metaParts = [metric.source, metric.year, metric.geography];
     if (metric.note && metricKey !== "density") metaParts.push(metric.note);
     if (contoursVisible()) metaParts.push("Contours · elevation in meters above sea level");
+    if (bikesVisible()) metaParts.push("Bikes · major and local cycle routes");
     legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
@@ -4834,6 +4951,7 @@ async function init() {
     updateChapterSelector();
     updateLegend();
     updateContourLayers();
+    updateBikeLayers();
     refreshHighlightedFeature();
     renderPinnedTooltip();
   }
@@ -5080,6 +5198,7 @@ async function init() {
     if (map.isStyleLoaded?.()) tuneStyle();
     map.once?.("styledata", tuneStyle);
     updateContourLayers();
+    updateBikeLayers();
   }
 
   function applyTheme(theme) {
@@ -5271,6 +5390,14 @@ async function init() {
   toggleContours = function() {
     showContours = !showContours;
     updateContourLayers();
+    updateBikeLayers();
+    updateModeButtons();
+    updateLegend();
+  };
+
+  toggleBikes = function() {
+    showBikes = !showBikes;
+    updateBikeLayers();
     updateModeButtons();
     updateLegend();
   };
