@@ -818,6 +818,7 @@
       <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
       <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
+      <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
       <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
@@ -984,6 +985,8 @@ const TUBE_LINE_COLOURS = {
 };
 
 const BOROUGH_METRIC_DATA = {"City of London":{"house_price_proxy_gbp":835000,"median_weekly_earnings_gbp":null,"male_share_pct":55.76,"female_share_pct":44.24,"children_share_pct":8,"not_born_uk_share_pct":36.7},"Barking and Dagenham":{"house_price_proxy_gbp":300000,"median_weekly_earnings_gbp":744.1,"male_share_pct":48.88,"female_share_pct":51.12,"children_share_pct":26.12,"not_born_uk_share_pct":31.26},"Barnet":{"house_price_proxy_gbp":533500,"median_weekly_earnings_gbp":862.4,"male_share_pct":49.09,"female_share_pct":50.91,"children_share_pct":20.87,"not_born_uk_share_pct":39.08},"Bexley":{"house_price_proxy_gbp":342500,"median_weekly_earnings_gbp":849.1,"male_share_pct":48.18,"female_share_pct":51.82,"children_share_pct":20.22,"not_born_uk_share_pct":14.11},"Brent":{"house_price_proxy_gbp":499950,"median_weekly_earnings_gbp":747.6,"male_share_pct":50.64,"female_share_pct":49.36,"children_share_pct":20.6,"not_born_uk_share_pct":55.18},"Bromley":{"house_price_proxy_gbp":440000,"median_weekly_earnings_gbp":958.2,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":19.7,"not_born_uk_share_pct":14.5},"Camden":{"house_price_proxy_gbp":760000,"median_weekly_earnings_gbp":864.8,"male_share_pct":49.73,"female_share_pct":50.27,"children_share_pct":15.41,"not_born_uk_share_pct":42.52},"Croydon":{"house_price_proxy_gbp":365000,"median_weekly_earnings_gbp":829.8,"male_share_pct":48.54,"female_share_pct":51.46,"children_share_pct":21.73,"not_born_uk_share_pct":29.66},"Ealing":{"house_price_proxy_gbp":485000,"median_weekly_earnings_gbp":784.9,"male_share_pct":50.18,"female_share_pct":49.82,"children_share_pct":20.81,"not_born_uk_share_pct":48.29},"Enfield":{"house_price_proxy_gbp":402500,"median_weekly_earnings_gbp":838.4,"male_share_pct":48.6,"female_share_pct":51.4,"children_share_pct":22.09,"not_born_uk_share_pct":35.11},"Greenwich":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":852.1,"male_share_pct":50.1,"female_share_pct":49.9,"children_share_pct":21.81,"not_born_uk_share_pct":31.11},"Hackney":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":882,"male_share_pct":49.67,"female_share_pct":50.33,"children_share_pct":20.38,"not_born_uk_share_pct":39.12},"Hammersmith and Fulham":{"house_price_proxy_gbp":777475,"median_weekly_earnings_gbp":862.4,"male_share_pct":48.93,"female_share_pct":51.07,"children_share_pct":16.79,"not_born_uk_share_pct":42.81},"Haringey":{"house_price_proxy_gbp":540000,"median_weekly_earnings_gbp":814.5,"male_share_pct":50.12,"female_share_pct":49.88,"children_share_pct":19.4,"not_born_uk_share_pct":44.69},"Harrow":{"house_price_proxy_gbp":500000,"median_weekly_earnings_gbp":853.8,"male_share_pct":49.66,"female_share_pct":50.34,"children_share_pct":20.28,"not_born_uk_share_pct":44.8},"Havering":{"house_price_proxy_gbp":350000,"median_weekly_earnings_gbp":822.5,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":18.88,"not_born_uk_share_pct":10.36},"Hillingdon":{"house_price_proxy_gbp":415000,"median_weekly_earnings_gbp":804.1,"male_share_pct":49.89,"female_share_pct":50.11,"children_share_pct":21.11,"not_born_uk_share_pct":30},"Hounslow":{"house_price_proxy_gbp":395000,"median_weekly_earnings_gbp":766.6,"male_share_pct":50.6,"female_share_pct":49.4,"children_share_pct":20.92,"not_born_uk_share_pct":43.34},"Islington":{"house_price_proxy_gbp":615000,"median_weekly_earnings_gbp":935,"male_share_pct":49.79,"female_share_pct":50.21,"children_share_pct":15.89,"not_born_uk_share_pct":35.44},"Kensington and Chelsea":{"house_price_proxy_gbp":1315000,"median_weekly_earnings_gbp":988,"male_share_pct":49.46,"female_share_pct":50.54,"children_share_pct":15.69,"not_born_uk_share_pct":51.61},"Kingston upon Thames":{"house_price_proxy_gbp":487250,"median_weekly_earnings_gbp":844,"male_share_pct":49.08,"female_share_pct":50.92,"children_share_pct":19.28,"not_born_uk_share_pct":28.28},"Lambeth":{"house_price_proxy_gbp":518110,"median_weekly_earnings_gbp":883.5,"male_share_pct":50.14,"female_share_pct":49.86,"children_share_pct":17.81,"not_born_uk_share_pct":38.89},"Lewisham":{"house_price_proxy_gbp":430000,"median_weekly_earnings_gbp":843,"male_share_pct":49.16,"female_share_pct":50.84,"children_share_pct":20.68,"not_born_uk_share_pct":33.82},"Merton":{"house_price_proxy_gbp":470000,"median_weekly_earnings_gbp":876.3,"male_share_pct":49.12,"female_share_pct":50.88,"children_share_pct":20.59,"not_born_uk_share_pct":37.79},"Newham":{"house_price_proxy_gbp":390500,"median_weekly_earnings_gbp":758.8,"male_share_pct":52.17,"female_share_pct":47.83,"children_share_pct":22.21,"not_born_uk_share_pct":53.61},"Redbridge":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":820.1,"male_share_pct":49.54,"female_share_pct":50.46,"children_share_pct":22.9,"not_born_uk_share_pct":37.05},"Richmond upon Thames":{"house_price_proxy_gbp":650000,"median_weekly_earnings_gbp":962,"male_share_pct":48.58,"female_share_pct":51.42,"children_share_pct":20.49,"not_born_uk_share_pct":24.29},"Southwark":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":880.4,"male_share_pct":49.57,"female_share_pct":50.43,"children_share_pct":18.5,"not_born_uk_share_pct":39.49},"Sutton":{"house_price_proxy_gbp":367000,"median_weekly_earnings_gbp":853.2,"male_share_pct":48.71,"female_share_pct":51.29,"children_share_pct":20.38,"not_born_uk_share_pct":19.89},"Tower Hamlets":{"house_price_proxy_gbp":490000,"median_weekly_earnings_gbp":882.2,"male_share_pct":51.74,"female_share_pct":48.26,"children_share_pct":19.59,"not_born_uk_share_pct":43.16},"Waltham Forest":{"house_price_proxy_gbp":445000,"median_weekly_earnings_gbp":839.7,"male_share_pct":49.95,"female_share_pct":50.05,"children_share_pct":22,"not_born_uk_share_pct":38.64},"Wandsworth":{"house_price_proxy_gbp":654000,"median_weekly_earnings_gbp":921.1,"male_share_pct":48.06,"female_share_pct":51.94,"children_share_pct":17.59,"not_born_uk_share_pct":35.43},"Westminster":{"house_price_proxy_gbp":1025000,"median_weekly_earnings_gbp":958.2,"male_share_pct":51.64,"female_share_pct":48.36,"children_share_pct":14.71,"not_born_uk_share_pct":53.32}};
+const MEDIAN_AGE_DATA = {"Barking and Dagenham":33.4,"Barnet":37.9,"Bexley":39.5,"Brent":35.9,"Bromley":41.3,"Camden":34.6,"City of London":37.2,"Croydon":37.7,"Ealing":36.9,"Enfield":37.5,"Greenwich":35.3,"Hackney":32.7,"Hammersmith and Fulham":34,"Haringey":36.2,"Harrow":38.1,"Havering":39.4,"Hillingdon":37,"Hounslow":36.8,"Islington":33.4,"Kensington and Chelsea":39,"Kingston upon Thames":38.7,"Lambeth":33.4,"Lewisham":35.4,"Merton":37.5,"Newham":32.5,"Redbridge":36.1,"Richmond upon Thames":41.7,"Southwark":33.4,"Sutton":39.5,"Tower Hamlets":30.7,"Waltham Forest":35.8,"Wandsworth":33.5,"Westminster":35.8};
+const MEDIAN_AGE_LONDON = 35.8;
 const GREENSPACE_SHARE_DATA = {"City of London":4.8,"Barking and Dagenham":33.6,"Barnet":41.3,"Bexley":31.7,"Brent":21.9,"Bromley":57.8,"Camden":24.8,"Croydon":37.1,"Ealing":30.9,"Enfield":45.6,"Greenwich":34.4,"Hackney":23.2,"Hammersmith and Fulham":19.1,"Haringey":25.5,"Harrow":34.6,"Havering":59.3,"Hillingdon":49.2,"Hounslow":39.6,"Islington":12.4,"Kensington and Chelsea":15.1,"Kingston upon Thames":36.4,"Lambeth":17.3,"Lewisham":22.5,"Merton":34.6,"Newham":23.9,"Redbridge":40.6,"Richmond upon Thames":50.8,"Southwark":24.9,"Sutton":32,"Tower Hamlets":15.2,"Waltham Forest":31.4,"Wandsworth":26.9,"Westminster":21.5};
 const GREENSPACE_LONDON_AVG = 38.2;
 const COUNTRY_BIRTH_SHORTLIST = ["ALL", "India", "Poland", "Romania", "Nigeria", "Pakistan", "Bangladesh"];
@@ -1141,6 +1144,7 @@ const METRIC_PALETTES = {
   house_price_proxy_gbp: [[245, 236, 225, 220], [224, 181, 143, 232], [199, 132, 84, 242], [149, 74, 45, 252], [88, 34, 27, 255]],
   median_weekly_earnings_gbp: [[229, 245, 243, 220], [172, 220, 214, 232], [106, 186, 177, 242], [41, 129, 137, 250], [14, 70, 87, 255]],
   children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
+  median_age_years: [[241, 244, 236, 220], [205, 218, 193, 232], [166, 185, 153, 242], [125, 144, 111, 250], [76, 92, 67, 255]],
   greenspace_share_pct: [[239, 244, 232, 220], [199, 218, 174, 232], [146, 186, 123, 242], [94, 144, 78, 250], [45, 92, 53, 255]],
   country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
 };
@@ -1228,6 +1232,24 @@ const METRICS = {
     summaryLabel: "London avg",
     tooltipTag: "Children",
     note: "Used as the first-phase family / children metric",
+  },
+  median_age_years: {
+    key: "median_age_years",
+    label: "Median age",
+    button: "Median age",
+    legendLabel: "Median age of usual residents",
+    unit: "years",
+    year: "2021",
+    source: "Office for National Statistics Census 2021 TS007 Age by single year",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "median_age_years",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(1)} years`,
+    diffFormatter: (v) => `${v.toFixed(1)} years`,
+    summaryLabel: "London median",
+    tooltipTag: "Median age",
+    note: "Derived from Census 2021 single-year age counts for usual residents, interpolated to a borough median age",
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
@@ -1387,6 +1409,9 @@ async function init() {
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
+  for (const [boroughName, medianAge] of Object.entries(MEDIAN_AGE_DATA)) {
+    if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].median_age_years = medianAge;
+  }
   for (const [boroughName, greenspaceShare] of Object.entries(GREENSPACE_SHARE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].greenspace_share_pct = greenspaceShare;
   }
@@ -1574,6 +1599,12 @@ async function init() {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
     }
+    if (metricKey === "median_age_years") {
+      return {
+        ...boroughStats[metricKey],
+        avg: MEDIAN_AGE_LONDON,
+      };
+    }
     if (metricKey === "greenspace_share_pct") {
       return {
         ...boroughStats[metricKey],
@@ -1748,6 +1779,14 @@ async function init() {
       if (delta <= -4) return "lower";
       return "similar";
     }
+    if (metricKey === "median_age_years") {
+      const delta = value - average;
+      if (delta >= 2) return "much-higher";
+      if (delta >= 0.8) return "higher";
+      if (delta <= -2) return "much-lower";
+      if (delta <= -0.8) return "lower";
+      return "similar";
+    }
     return "similar";
   }
 
@@ -1779,6 +1818,11 @@ async function init() {
       const delta = Math.abs(value - average);
       const direction = value >= average ? "above" : "below";
       return `${delta.toFixed(1)} pp ${direction} the London average`;
+    }
+    if (metricKey === "median_age_years") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${delta.toFixed(1)} years ${direction} the London median`;
     }
     return spotlightDeltaText(metricKey, value, average, countrySelection);
   }
@@ -1841,6 +1885,14 @@ async function init() {
       return makeInsight(`Its child population looks close to the London average, at <strong>${formatted}</strong>.`, 24, key);
     }
 
+    if (key === "median_age_years") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`An older borough profile, with a median age of <strong>${formatted}</strong>, ${diff}.`, 76, key);
+      if (bucket === "higher") return makeInsight(`The borough’s median age is a little older than London overall, at <strong>${formatted}</strong>.`, 56, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`One of the younger borough profiles in London, with a median age of <strong>${formatted}</strong>, ${diff}.`, 78, key);
+      if (bucket === "lower") return makeInsight(`The borough’s median age is a little younger than London overall, at <strong>${formatted}</strong>.`, 56, key);
+      return makeInsight(`Median age is close to the London-wide figure, at <strong>${formatted}</strong>.`, 22, key);
+    }
+
     if (key === "greenspace_share_pct") {
       if (bucket === "much-higher" || rank === "top-5") return makeInsight(`In the GLUD 2005 baseline, a notably large <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 74, key);
       if (bucket === "higher") return makeInsight(`The GLUD 2005 baseline shows a higher-than-average greenspace land share here, reaching <strong>${formatted}</strong>.`, 60, key);
@@ -1865,6 +1917,7 @@ async function init() {
     const priceCtx = spotlightMetricContext(feature, "house_price_proxy_gbp");
     const earningsCtx = spotlightMetricContext(feature, "median_weekly_earnings_gbp");
     const childrenCtx = spotlightMetricContext(feature, "children_share_pct");
+    const ageCtx = spotlightMetricContext(feature, "median_age_years");
     const greenspaceCtx = spotlightMetricContext(feature, "greenspace_share_pct");
     const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
 
@@ -1873,6 +1926,7 @@ async function init() {
       buildSpotlightMetricInsight(priceCtx),
       buildSpotlightMetricInsight(earningsCtx),
       buildSpotlightMetricInsight(childrenCtx),
+      buildSpotlightMetricInsight(ageCtx),
       buildSpotlightMetricInsight(greenspaceCtx),
       buildSpotlightMetricInsight(internationalCtx),
     ].filter(Boolean);
@@ -1889,6 +1943,10 @@ async function init() {
       insights.push(makeInsight(`Lower density and a larger child population make this feel more family-oriented than much of inner London.`, 88, "family-outer"));
     }
 
+    if (ageCtx && childrenCtx && (ageCtx.bucket === "much-lower" || ageCtx.bucket === "lower") && (childrenCtx.bucket === "higher" || childrenCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`A younger median age alongside a larger child share gives the borough a distinctly younger family profile.`, 86, "young-family"));
+    }
+
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "much-higher" || greenspaceCtx.bucket === "higher") && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower")) {
       insights.push(makeInsight(`In the GLUD 2005 land-use baseline, higher greenspace share and lower density give the borough a noticeably greener, more spacious profile.`, 86, "green-spacious"));
     }
@@ -1899,6 +1957,10 @@ async function init() {
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "lower" || greenspaceCtx.bucket === "much-lower") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
       insights.push(makeInsight(`A low GLUD 2005 greenspace share alongside high density reinforces a compact inner-urban borough profile.`, 84, "compact-urban"));
+    }
+
+    if (ageCtx && greenspaceCtx && densityCtx && (ageCtx.bucket === "higher" || ageCtx.bucket === "much-higher") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`An older age profile, more greenspace, and lower density together point to a calmer outer-borough pattern.`, 82, "older-green-spacious"));
     }
 
     if (priceCtx && childrenCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (childrenCtx.bucket === "lower" || childrenCtx.bucket === "much-lower")) {
@@ -1930,6 +1992,9 @@ async function init() {
       const notUk = feature.properties?.not_born_uk_share_pct;
       const ukBorn = Number.isFinite(notUk) ? 100 - notUk : null;
       if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) return `UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`;
+    }
+    if (boroughMetric === "median_age_years") {
+      return "Census 2021 median age of usual residents";
     }
     if (boroughMetric === "greenspace_share_pct") {
       return "Historical land-use baseline · GLUD 2005 Greenspace class";
@@ -2259,6 +2324,9 @@ async function init() {
       }
     } else if (metricKey === "children_share_pct") {
       support.push("Share of residents aged 0–15");
+    } else if (metricKey === "median_age_years") {
+      support.push("Census 2021 median age of usual residents");
+      support.push("Derived from single-year age counts at borough level");
     } else if (metricKey === "greenspace_share_pct") {
       support.push("Share of borough area in the GLUD 2005 Greenspace class");
       support.push("Historical land-use baseline, not a current live greenspace measure");

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough median age metric
+
+- Added borough-level median age as a first-class metric using ONS Census 2021 single-year age counts, derived into a borough median-age measure.
+- Wired median age into borough choropleths, legend copy, tooltips, comparison, and spotlight insight rules without changing the small-area flow.
+
 ## 2026-04-01 — Greenspace trust-cues pass
 
 - Tightened the borough greenspace wording so the metric reads consistently as a GLUD 2005 land-use baseline rather than a current live environmental measure.
