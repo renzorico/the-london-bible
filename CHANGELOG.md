@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Tube interaction and branding polish
+
+- Fixed only-tube interaction so station and line hover/click stay tube-centric, while selected Tube lines now sync cleanly with the legend and visually de-emphasize other lines.
+- Tightened the title/subtitle lockup, softened the footer credit styling, and nudged Tube label spacing closer to their lines without changing the wider atlas structure.
+
 ## 2026-04-01 — Atlas UI refinement pass
 
 - Refined the atlas typography with a sharper one-line `THE LONDON BIBLE` wordmark, the subtitle `One city, every layer`, a stronger footer credit, and more readable analysis-panel text.

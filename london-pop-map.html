@@ -129,7 +129,7 @@
   }
   #title {
     pointer-events: none;
-    padding: 16px 17px 14px;
+    padding: 16px 17px 13px;
   }
   #title h1 {
     font-family: var(--font-display);
@@ -142,11 +142,11 @@
     white-space: nowrap;
   }
   #title p  {
-    margin-top: 8px;
+    margin-top: 5px;
     font-family: var(--font-ui);
-    font-size: .78rem;
-    font-weight: 600;
-    letter-spacing: .02em;
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .12em;
     color: var(--subtitle);
   }
 
@@ -1072,11 +1072,10 @@
   }
   #footer-credit a {
     font-family: var(--font-ui);
-    font-size: .72rem;
-    font-weight: 800;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--title) 88%, var(--subtitle) 12%);
+    font-size: .63rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    color: color-mix(in srgb, var(--subtitle) 88%, var(--title) 12%);
     text-decoration: none;
   }
   #footer-credit a:hover { color: var(--legend-accent); }
@@ -1200,7 +1199,7 @@
 <div id="left-stack">
   <div id="title" class="rail-card">
     <h1>THE LONDON BIBLE</h1>
-    <p>One city, every layer</p>
+    <p>One city, every layer.</p>
   </div>
 
   <div class="control-group rail-card" id="layer-group">
@@ -3309,8 +3308,17 @@ async function init() {
       filled: false,
       pickable: false,
       lineWidthUnits: "pixels",
-      getLineColor: THEMES[currentTheme].lineCase,
-      getLineWidth: () => (onlyTubeMode() ? THEMES[currentTheme].lineCaseWidthOnly : THEMES[currentTheme].lineCaseWidthMixed) * tubeZoomFactor(),
+      getLineColor: (f) => {
+        if (!onlyTubeMode() || !selectedTubeLineKey) return THEMES[currentTheme].lineCase;
+        const active = f.properties?.lineKey === selectedTubeLineKey;
+        const base = THEMES[currentTheme].lineCase;
+        return [base[0], base[1], base[2], active ? base[3] : Math.round(base[3] * 0.42)];
+      },
+      getLineWidth: (f) => {
+        const base = (onlyTubeMode() ? THEMES[currentTheme].lineCaseWidthOnly : THEMES[currentTheme].lineCaseWidthMixed) * tubeZoomFactor();
+        if (!onlyTubeMode() || !selectedTubeLineKey) return base;
+        return f.properties?.lineKey === selectedTubeLineKey ? base : base * 0.84;
+      },
       lineCapRounded: true,
       lineJointRounded: true,
       opacity: 1,
@@ -3329,11 +3337,13 @@ async function init() {
       getLineColor: (f) => {
         const active = selectedTubeLineKey && f.properties?.lineKey === selectedTubeLineKey;
         const base = currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay;
-        return [...base, active ? 255 : 235];
+        if (!onlyTubeMode() || !selectedTubeLineKey) return [...base, 235];
+        return [...base, active ? 255 : 96];
       },
       getLineWidth: (f) => {
         const base = (onlyTubeMode() ? THEMES[currentTheme].lineWidthOnly : THEMES[currentTheme].lineWidthMixed) * tubeZoomFactor();
-        return selectedTubeLineKey && f.properties?.lineKey === selectedTubeLineKey ? base * 1.3 : base;
+        if (!onlyTubeMode() || !selectedTubeLineKey) return base;
+        return f.properties?.lineKey === selectedTubeLineKey ? base : base * 0.82;
       },
       lineCapRounded: true,
       lineJointRounded: true,
@@ -4357,6 +4367,13 @@ async function init() {
 
     onClick: ({ object, coordinate, x, y }) => {
       if (!coordinate) return;
+      if (onlyTubeMode() && !object) {
+        tooltipPinned = false;
+        pinnedCoord = null;
+        tooltipEl.classList.remove("pinned");
+        tooltipEl.style.display = "none";
+        return;
+      }
 
       if (currentDataset === "municipi" && isAnalysisMode("compare") && comparisonAvailable() && object?.properties?.[NAME_FIELD]) {
         handleComparisonSelection(object);
@@ -4444,6 +4461,9 @@ async function init() {
             map.setPaintProperty(layer.id, "text-color", currentTheme === "night" ? "#8b98a6" : "#91979e");
             map.setPaintProperty(layer.id, "text-halo-color", currentTheme === "night" ? "#0d1319" : "#f7f7f6");
             map.setPaintProperty(layer.id, "text-halo-width", currentTheme === "night" ? 0.35 : 0.55);
+            if (id.includes("transit") || id.includes("rail") || id.includes("station")) {
+              map.setLayoutProperty(layer.id, "text-radial-offset", 0.2);
+            }
           }
         } catch (err) {}
       }
