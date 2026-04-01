@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough correlation view
+
+- Added a borough-only Correlation tool with a compact linked scatterplot for comparing two existing borough metrics at once.
+- Linked map hover and pin state to the scatter so borough highlights and X/Y summaries stay in sync without adding new data.
+
 ## 2026-04-01 — Story chapters v1
 
 - Added compact borough-only story chapters that preset key analytical views such as inner vs outer London, family suburbs, and the high-rent core.

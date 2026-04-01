@@ -717,6 +717,171 @@
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
+  #correlation-panel {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-46%);
+    z-index: 10;
+    display: none;
+    width: clamp(420px, 34vw, 620px);
+    max-width: calc(100vw - 48px);
+    padding: 15px 16px 14px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #correlation-panel .corr-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #correlation-panel .corr-title {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #correlation-panel .corr-kicker {
+    font-family: var(--font-ui);
+    font-size: .59rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--legend-accent);
+  }
+  #correlation-panel .corr-selectors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  #correlation-panel .corr-select-group {
+    min-width: 0;
+  }
+  #correlation-panel .corr-label {
+    margin-bottom: 6px;
+    font-family: var(--font-ui);
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #correlation-panel .corr-select {
+    width: 100%;
+    appearance: none;
+    border: 1px solid var(--button-border);
+    background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
+    color: var(--title);
+    border-radius: 10px;
+    padding: 9px 11px 8px;
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.2;
+  }
+  #correlation-panel .corr-chart-wrap {
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
+    padding: 12px 0 10px;
+  }
+  #correlation-panel .corr-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  #correlation-panel .corr-axis,
+  #correlation-panel .corr-gridline {
+    stroke: color-mix(in srgb, var(--panel-border) 80%, transparent);
+    stroke-width: 1;
+  }
+  #correlation-panel .corr-gridline {
+    stroke-dasharray: 3 4;
+    opacity: .6;
+  }
+  #correlation-panel .corr-axis-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    fill: var(--hint);
+  }
+  #correlation-panel .corr-point {
+    fill: rgba(121, 136, 150, .8);
+    stroke: rgba(255,255,255,.78);
+    stroke-width: 1.1;
+    cursor: pointer;
+    transition: fill .14s ease, r .14s ease, stroke-width .14s ease;
+  }
+  #correlation-panel .corr-point.hovered {
+    fill: #115f63;
+    stroke-width: 1.6;
+  }
+  #correlation-panel .corr-point.pinned {
+    fill: #844a5c;
+    stroke-width: 2;
+  }
+  #correlation-panel .corr-point.hovered.pinned {
+    fill: #5f4669;
+  }
+  #correlation-panel .corr-detail {
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+  }
+  #correlation-panel .corr-detail-kicker,
+  #correlation-panel .corr-foot {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #correlation-panel .corr-detail-kicker {
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--legend-accent);
+  }
+  #correlation-panel .corr-detail-name {
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.02;
+    letter-spacing: .03em;
+    color: var(--title);
+  }
+  #correlation-panel .corr-detail-values {
+    margin-top: 7px;
+    display: grid;
+    gap: 5px;
+  }
+  #correlation-panel .corr-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    font-family: var(--font-ui);
+    font-size: .71rem;
+    line-height: 1.45;
+    color: var(--title);
+  }
+  #correlation-panel .corr-detail-row span:first-child {
+    color: var(--hint);
+  }
+  #correlation-panel .corr-helper,
+  #correlation-panel .corr-foot {
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #correlation-panel .corr-foot {
+    margin-top: 10px;
+  }
 
   #tube-legend {
     position: absolute; top: 50%; right: 24px;
@@ -1054,9 +1219,11 @@
     #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #similar-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #chapter-panel { right: 14px; left: 14px; top: 118px; width: auto; max-width: none; }
+    #correlation-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
     #comparison-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
     #comparison-panel .c-mid { padding-top: 0; }
+    #correlation-panel .corr-selectors { grid-template-columns: 1fr; }
     #credit         { right: 14px; bottom: 82px; }
     #chapter-toggle { max-width: none; }
   }
@@ -1118,6 +1285,7 @@
         <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
         <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
         <button id="btn-similar" class="toggle-btn secondary-btn tool-btn" onclick="toggleSimilar()">Similar areas</button>
+        <button id="btn-correlation" class="toggle-btn secondary-btn tool-btn" onclick="toggleCorrelation()">Correlation</button>
         <button id="btn-chapters" class="toggle-btn secondary-btn tool-btn" onclick="toggleChapterPicker()">Stories</button>
       </div>
     </div>
@@ -1196,6 +1364,14 @@
     <div class="sim-kicker">Borough profile match</div>
   </div>
   <div id="similar-content"></div>
+</div>
+
+<div id="correlation-panel">
+  <div class="corr-head">
+    <div class="corr-title">Correlation view</div>
+    <div class="corr-kicker">Linked scatter</div>
+  </div>
+  <div id="correlation-content"></div>
 </div>
 
 <div id="chapter-panel">
@@ -1736,7 +1912,7 @@ function paletteGradient(stops) {
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
-let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleChapterPicker, applyChapter, clearChapter;
+let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter;
 
 async function init() {
   const bodyEl = document.body;
@@ -1753,6 +1929,8 @@ async function init() {
   const spotlightContentEl = document.getElementById("spotlight-content");
   const similarPanelEl = document.getElementById("similar-panel");
   const similarContentEl = document.getElementById("similar-content");
+  const correlationPanelEl = document.getElementById("correlation-panel");
+  const correlationContentEl = document.getElementById("correlation-content");
   const chapterPanelEl = document.getElementById("chapter-panel");
   const chapterContentEl = document.getElementById("chapter-content");
   const chapterToggleEl = document.getElementById("chapter-toggle");
@@ -1777,6 +1955,7 @@ async function init() {
   const btnCompare = document.getElementById("btn-compare");
   const btnSpotlight = document.getElementById("btn-spotlight");
   const btnSimilar = document.getElementById("btn-similar");
+  const btnCorrelation = document.getElementById("btn-correlation");
   const btnChapters = document.getElementById("btn-chapters");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
@@ -1806,6 +1985,10 @@ async function init() {
   let comparisonB = null;
   let spotlightEnabled = false;
   let similarEnabled = false;
+  let correlationEnabled = false;
+  let correlationXMetric = "house_price_proxy_gbp";
+  let correlationYMetric = "median_weekly_earnings_gbp";
+  let correlationHoverName = null;
   let chapterPickerOpen = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
@@ -1828,6 +2011,16 @@ async function init() {
     { key: "greenspace_share_pct", label: "greenspace share" },
     { key: "median_age_years", label: "median age" },
     { key: "station_access_per_10k", label: "station coverage" },
+  ];
+  const CORRELATION_METRICS = [
+    "density",
+    "house_price_proxy_gbp",
+    "median_weekly_earnings_gbp",
+    "children_share_pct",
+    "country_of_birth_pct",
+    "greenspace_share_pct",
+    "median_age_years",
+    "station_access_per_10k",
   ];
 
   function getAvailableYearsForState(metricKey = boroughMetric, geography = activeGeography) {
@@ -1864,6 +2057,7 @@ async function init() {
       tooltipEl.style.display = "none";
       renderSpotlightPanel();
       renderSimilarPanel();
+      renderCorrelationPanel();
     }
   });
 
@@ -2151,12 +2345,87 @@ async function init() {
     return currentDataset === "municipi" && activeGeography === "borough";
   }
 
+  function correlationAvailable() {
+    return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
   function chapterAvailable() {
     return currentDataset === "municipi" && activeGeography === "borough";
   }
 
   function activeChapter() {
     return STORY_CHAPTERS.find((chapter) => chapter.id === activeChapterId) || null;
+  }
+
+  function correlationMetricConfig(metricKey) {
+    return getMetricConfigFor(metricKey, metricKey === "country_of_birth_pct" ? "ALL" : selectedCountryBirth);
+  }
+
+  function correlationMetricValue(feature, metricKey) {
+    return metricValue(feature, metricKey, metricKey === "country_of_birth_pct" ? "ALL" : selectedCountryBirth);
+  }
+
+  function correlationFeatureByName(name) {
+    if (!name || !municipiGeoJSON?.features) return null;
+    return municipiGeoJSON.features.find((feature) => feature.properties?.[NAME_FIELD] === name) || null;
+  }
+
+  function correlationPinnedFeature() {
+    if (!tooltipPinned || !pinnedCoord || currentDataset !== "municipi") return null;
+    const feature = featureAt(...pinnedCoord);
+    return feature?.properties?.[NAME_FIELD] ? feature : null;
+  }
+
+  function correlationFocusFeature() {
+    return correlationPinnedFeature() || correlationFeatureByName(correlationHoverName) || null;
+  }
+
+  function correlationAxisLabel(metricKey) {
+    const metric = correlationMetricConfig(metricKey);
+    if (metricKey === "density") return "Density (res/km²)";
+    if (metricKey === "house_price_proxy_gbp") return "House prices (£)";
+    if (metricKey === "median_weekly_earnings_gbp") return "Earnings (£/week)";
+    if (metricKey === "children_share_pct") return "Children (%)";
+    if (metricKey === "country_of_birth_pct") return "Born outside UK (%)";
+    if (metricKey === "greenspace_share_pct") return "Greenspace share (2005, %)";
+    if (metricKey === "median_age_years") return "Median age (years)";
+    if (metricKey === "station_access_per_10k") return "Stations / 10k residents";
+    return metric.label;
+  }
+
+  function correlationScatterData() {
+    if (!municipiGeoJSON?.features) return [];
+    return municipiGeoJSON.features
+      .map((feature) => {
+        const x = correlationMetricValue(feature, correlationXMetric);
+        const y = correlationMetricValue(feature, correlationYMetric);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+        return {
+          feature,
+          name: feature.properties?.[NAME_FIELD],
+          x,
+          y,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function correlationMetricOptionsHtml(selectedMetric) {
+    return CORRELATION_METRICS
+      .map((metricKey) => {
+        const metric = correlationMetricConfig(metricKey);
+        const selected = selectedMetric === metricKey ? " selected" : "";
+        return `<option value="${metricKey}"${selected}>${metric.label}</option>`;
+      })
+      .join("");
+  }
+
+  function setCorrelationHover(name) {
+    const next = name || null;
+    if (correlationHoverName === next) return;
+    correlationHoverName = next;
+    deckgl.setProps({ layers: getLayers() });
+    renderCorrelationPanel();
   }
 
   function spotlightFeature() {
@@ -3034,6 +3303,32 @@ async function init() {
     });
   }
 
+  function makeCorrelationSelectionLayer(feature, mode = "hover") {
+    if (!feature || !correlationEnabled || !correlationAvailable()) return null;
+    const styles = mode === "pinned"
+      ? {
+          fill: currentTheme === "night" ? [132, 74, 92, 44] : [132, 74, 92, 28],
+          line: currentTheme === "night" ? [232, 175, 193, 255] : [132, 74, 92, 255],
+          width: 4.5,
+        }
+      : {
+          fill: currentTheme === "night" ? [17, 95, 99, 34] : [17, 95, 99, 20],
+          line: currentTheme === "night" ? [126, 222, 214, 255] : [17, 95, 99, 255],
+          width: 3.5,
+        };
+    return new deck.GeoJsonLayer({
+      id: `correlation-${mode}`,
+      data: { type: "FeatureCollection", features: [feature] },
+      filled: true,
+      stroked: true,
+      pickable: false,
+      getFillColor: styles.fill,
+      getLineColor: styles.line,
+      lineWidthUnits: "pixels",
+      getLineWidth: styles.width,
+    });
+  }
+
   function getLayers() {
     const layers = [];
     if (currentMainLayer) layers.push(currentMainLayer);
@@ -3049,6 +3344,15 @@ async function init() {
     if (comparisonLayerA) layers.push(comparisonLayerA);
     const comparisonLayerB = makeComparisonSelectionLayer(comparisonFeature(comparisonB), "B");
     if (comparisonLayerB) layers.push(comparisonLayerB);
+    const correlationPinnedLayer = makeCorrelationSelectionLayer(correlationPinnedFeature(), "pinned");
+    if (correlationPinnedLayer) layers.push(correlationPinnedLayer);
+    const correlationHoverLayer = makeCorrelationSelectionLayer(
+      correlationHoverName && correlationPinnedFeature()?.properties?.[NAME_FIELD] !== correlationHoverName
+        ? correlationFeatureByName(correlationHoverName)
+        : null,
+      "hover"
+    );
+    if (correlationHoverLayer) layers.push(correlationHoverLayer);
     const hl = makeHighlightLayer(highlightedFeature);
     if (hl) layers.push(hl);
     const pin = makePinLayer(pinData);
@@ -3129,6 +3433,7 @@ async function init() {
     btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && spotlightEnabled && !comparisonEnabled);
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && similarEnabled && !comparisonEnabled && !spotlightEnabled);
+    btnCorrelation.classList.toggle("active", currentDataset === "municipi" && correlationEnabled && !comparisonEnabled && !spotlightEnabled && !similarEnabled);
     btnChapters.classList.toggle("active", currentDataset === "municipi" && (chapterPickerOpen || !!activeChapterId));
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
@@ -3171,6 +3476,15 @@ async function init() {
       : (spotlightEnabled
         ? "Disable the borough spotlight to find similar areas"
         : (similarityAvailable() ? "Find boroughs with a similar profile" : "Similarity is available in borough geography only"));
+    btnCorrelation.style.display = compareMode ? "" : "none";
+    btnCorrelation.disabled = !correlationAvailable() || comparisonEnabled || spotlightEnabled || similarEnabled;
+    btnCorrelation.title = comparisonEnabled
+      ? "Disable comparison to use the correlation view"
+      : (spotlightEnabled
+        ? "Disable the borough spotlight to use the correlation view"
+        : (similarEnabled
+          ? "Disable similar areas to use the correlation view"
+          : (correlationAvailable() ? "Compare two borough metrics in a linked scatterplot" : "Correlation is available in borough geography only")));
     btnChapters.style.display = compareMode ? "" : "none";
     btnChapters.disabled = !chapterAvailable();
     btnChapters.title = chapterAvailable()
@@ -3389,6 +3703,118 @@ async function init() {
     `;
   }
 
+  function renderCorrelationPanel() {
+    const visible = correlationEnabled && correlationAvailable() && !comparisonEnabled && !spotlightEnabled && !similarEnabled;
+    correlationPanelEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      correlationContentEl.innerHTML = "";
+      return;
+    }
+
+    const points = correlationScatterData();
+    const focusFeature = correlationFocusFeature();
+    const focusName = focusFeature?.properties?.[NAME_FIELD] || null;
+    const xMetric = correlationMetricConfig(correlationXMetric);
+    const yMetric = correlationMetricConfig(correlationYMetric);
+
+    if (!points.length) {
+      correlationContentEl.innerHTML = `
+        <div class="corr-helper">No reliable borough values are available for the selected metric pair.</div>
+        <div class="corr-foot">Choose a different pair of borough metrics to continue.</div>
+      `;
+      return;
+    }
+
+    const width = 560;
+    const height = 238;
+    const margin = { top: 10, right: 18, bottom: 34, left: 46 };
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
+    const xMin = Math.min(...xs);
+    const xMax = Math.max(...xs);
+    const yMin = Math.min(...ys);
+    const yMax = Math.max(...ys);
+    const xPad = xMax > xMin ? (xMax - xMin) * 0.08 : 1;
+    const yPad = yMax > yMin ? (yMax - yMin) * 0.08 : 1;
+    const xDomain = [xMin - xPad, xMax + xPad];
+    const yDomain = [yMin - yPad, yMax + yPad];
+    const xScale = (value) => margin.left + ((value - xDomain[0]) / (xDomain[1] - xDomain[0] || 1)) * plotWidth;
+    const yScale = (value) => height - margin.bottom - ((value - yDomain[0]) / (yDomain[1] - yDomain[0] || 1)) * plotHeight;
+    const xMid = margin.left + plotWidth / 2;
+    const yMid = margin.top + plotHeight / 2;
+
+    const pointMarkup = points.map((point) => {
+      const hovered = focusName && point.name === focusName;
+      const pinned = correlationPinnedFeature()?.properties?.[NAME_FIELD] === point.name;
+      const classes = ["corr-point"];
+      if (hovered) classes.push("hovered");
+      if (pinned) classes.push("pinned");
+      return `<circle class="${classes.join(" ")}" data-borough="${point.name}" cx="${xScale(point.x).toFixed(2)}" cy="${yScale(point.y).toFixed(2)}" r="${pinned ? 5.6 : hovered ? 5.1 : 3.9}" />`;
+    }).join("");
+
+    const detailFeature = focusFeature;
+    const detailKicker = correlationPinnedFeature()
+      ? "Selected borough"
+      : (correlationHoverName ? "Hovered borough" : "Pinned borough");
+    const detailHtml = detailFeature
+      ? `
+        <div class="corr-detail">
+          <div class="corr-detail-kicker">${detailKicker}</div>
+          <div class="corr-detail-name">${detailFeature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+          <div class="corr-detail-values">
+            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationXMetric)}</span><span>${formatMetricValueFor(correlationXMetric, correlationMetricValue(detailFeature, correlationXMetric), correlationXMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
+            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationYMetric)}</span><span>${formatMetricValueFor(correlationYMetric, correlationMetricValue(detailFeature, correlationYMetric), correlationYMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
+          </div>
+        </div>
+      `
+      : `
+        <div class="corr-detail">
+          <div class="corr-helper">Hover a borough or point to inspect it, or pin a borough on the map to keep it selected here.</div>
+        </div>
+      `;
+
+    correlationContentEl.innerHTML = `
+      <div class="corr-selectors">
+        <div class="corr-select-group">
+          <div class="corr-label">X metric</div>
+          <select id="corr-x-select" class="corr-select">
+            ${correlationMetricOptionsHtml(correlationXMetric)}
+          </select>
+        </div>
+        <div class="corr-select-group">
+          <div class="corr-label">Y metric</div>
+          <select id="corr-y-select" class="corr-select">
+            ${correlationMetricOptionsHtml(correlationYMetric)}
+          </select>
+        </div>
+      </div>
+      <div class="corr-chart-wrap">
+        <svg class="corr-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Scatterplot of ${xMetric.label} against ${yMetric.label}">
+          <line class="corr-gridline" x1="${margin.left}" y1="${yMid}" x2="${width - margin.right}" y2="${yMid}" />
+          <line class="corr-gridline" x1="${xMid}" y1="${margin.top}" x2="${xMid}" y2="${height - margin.bottom}" />
+          <line class="corr-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" />
+          <line class="corr-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" />
+          ${pointMarkup}
+          <text class="corr-axis-label" x="${margin.left}" y="${height - 8}">${correlationAxisLabel(correlationXMetric)}</text>
+          <text class="corr-axis-label" transform="translate(12 ${height - margin.bottom}) rotate(-90)">${correlationAxisLabel(correlationYMetric)}</text>
+        </svg>
+      </div>
+      ${detailHtml}
+      <div class="corr-foot">Each point is a borough. Hover links the map and scatter; pinned boroughs stay highlighted in both views.</div>
+    `;
+
+    const xSelect = correlationContentEl.querySelector("#corr-x-select");
+    const ySelect = correlationContentEl.querySelector("#corr-y-select");
+    if (xSelect) xSelect.onchange = (event) => setCorrelationAxis("x", event.target.value);
+    if (ySelect) ySelect.onchange = (event) => setCorrelationAxis("y", event.target.value);
+    correlationContentEl.querySelectorAll(".corr-point").forEach((pointEl) => {
+      pointEl.addEventListener("mouseenter", () => setCorrelationHover(pointEl.dataset.borough));
+      pointEl.addEventListener("mouseleave", () => setCorrelationHover(null));
+    });
+  }
+
   function renderChapterPanel() {
     const chapter = activeChapter();
     const visible = !!chapter;
@@ -3423,6 +3849,7 @@ async function init() {
     renderComparisonPanel();
     renderSpotlightPanel();
     renderSimilarPanel();
+    renderCorrelationPanel();
     renderChapterPanel();
   }
 
@@ -3462,6 +3889,7 @@ async function init() {
     tooltipEl.style.display = "none";
     renderSpotlightPanel();
     renderSimilarPanel();
+    renderCorrelationPanel();
   }
 
   function handleComparisonSelection(feature) {
@@ -3495,6 +3923,16 @@ async function init() {
     },
 
     onHover: ({ object, coordinate, x, y }) => {
+      if (correlationEnabled && correlationAvailable()) {
+        const hoveredName = currentDataset === "municipi" && object?.properties?.[NAME_FIELD]
+          ? object.properties[NAME_FIELD]
+          : null;
+        if (correlationHoverName !== hoveredName) {
+          correlationHoverName = hoveredName;
+          deckgl.setProps({ layers: getLayers() });
+          renderCorrelationPanel();
+        }
+      }
       if (tooltipPinned) return;
       if (!object) { tooltipEl.style.display = "none"; return; }
       tooltipEl.classList.remove("pinned");
@@ -3545,6 +3983,7 @@ async function init() {
         positionTooltip(x, y);
         renderSpotlightPanel();
         renderSimilarPanel();
+        renderCorrelationPanel();
         return;
       }
       if (object?.layer?.id === "tube-lines") {
@@ -3553,6 +3992,7 @@ async function init() {
         positionTooltip(x, y);
         renderSpotlightPanel();
         renderSimilarPanel();
+        renderCorrelationPanel();
         return;
       }
 
@@ -3562,6 +4002,7 @@ async function init() {
         positionTooltip(x, y);
         renderSpotlightPanel();
         renderSimilarPanel();
+        renderCorrelationPanel();
         return;
       }
 
@@ -3573,6 +4014,7 @@ async function init() {
       positionTooltip(x, y);
       renderSpotlightPanel();
       renderSimilarPanel();
+      renderCorrelationPanel();
     },
   });
 
@@ -3714,10 +4156,12 @@ async function init() {
       selectedCountryBirth = "ALL";
       spotlightEnabled = false;
       similarEnabled = false;
+      correlationEnabled = false;
       chapterPickerOpen = false;
     } else {
       spotlightEnabled = false;
       similarEnabled = false;
+      correlationEnabled = false;
       chapterPickerOpen = false;
     }
     clearPinnedTooltip();
@@ -3740,6 +4184,7 @@ async function init() {
     spotlightEnabled = !spotlightEnabled;
     if (spotlightEnabled) {
       similarEnabled = false;
+      correlationEnabled = false;
       chapterPickerOpen = false;
     }
     refreshMapState();
@@ -3757,9 +4202,36 @@ async function init() {
       comparisonEnabled = false;
       comparisonA = null;
       comparisonB = null;
+      correlationEnabled = false;
       chapterPickerOpen = false;
     }
     refreshMapState();
+  };
+
+  toggleCorrelation = function() {
+    if (!correlationAvailable() || comparisonEnabled || spotlightEnabled || similarEnabled) {
+      correlationEnabled = false;
+      refreshMapState();
+      return;
+    }
+    correlationEnabled = !correlationEnabled;
+    if (correlationEnabled) {
+      comparisonEnabled = false;
+      comparisonA = null;
+      comparisonB = null;
+      spotlightEnabled = false;
+      similarEnabled = false;
+      chapterPickerOpen = false;
+      correlationHoverName = null;
+    }
+    refreshMapState();
+  };
+
+  setCorrelationAxis = function(axis, metricKey) {
+    if (!CORRELATION_METRICS.includes(metricKey)) return;
+    if (axis === "x") correlationXMetric = metricKey;
+    if (axis === "y") correlationYMetric = metricKey;
+    renderCorrelationPanel();
   };
 
   toggleChapterPicker = function() {
@@ -3790,6 +4262,8 @@ async function init() {
     comparisonB = null;
     spotlightEnabled = false;
     similarEnabled = false;
+    correlationEnabled = false;
+    correlationHoverName = null;
     chapterPickerOpen = false;
     activeChapterId = chapter.id;
     highlightedFeature = null;
