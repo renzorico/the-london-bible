@@ -1284,8 +1284,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background:
-      radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--panel-strong) 84%, transparent) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 42%, var(--bg) 100%);
+    background: transparent;
     opacity: 1;
     visibility: visible;
     transition: opacity .58s ease, visibility .58s ease;
@@ -1296,46 +1295,31 @@
     pointer-events: none;
   }
   .loading-shell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
     padding: 30px 34px;
   }
   .loading-logo-wrap {
-    width: 124px;
-    height: 124px;
+    width: 228px;
+    height: 228px;
     display: grid;
     place-items: center;
-    border-radius: 30px;
-    border: 1px solid color-mix(in srgb, var(--panel-border) 94%, transparent);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 92%, transparent), color-mix(in srgb, var(--panel) 94%, transparent));
-    box-shadow: 0 22px 48px rgba(79, 49, 38, 0.10);
+    background: transparent;
   }
   .loading-logo {
-    width: 88px;
-    height: 88px;
+    width: 196px;
+    height: 196px;
     object-fit: contain;
     animation: logoBreath 2.9s ease-in-out infinite;
     transform-origin: center;
   }
   #loading h2 {
-    font-family: var(--font-display);
-    font-size: 1.82rem;
-    font-weight: 800;
-    letter-spacing: .12em;
-    line-height: 1;
-    color: var(--title);
-    text-transform: uppercase;
-    white-space: nowrap;
+    display: none;
   }
   #loading .lstatus  {
-    font-size: .63rem;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-    font-family: var(--font-ui);
+    display: none;
   }
   @keyframes logoBreath {
     0%, 100% { transform: scale(0.985); }
@@ -2188,10 +2172,18 @@ async function init() {
   let currentMainLayer = null;
   let viewState = { longitude: -0.118, latitude: 51.505, zoom: 10.5, pitch: 0, bearing: 0 };
   let loadingOverlayDismissed = false;
+  const LOADER_MIN_DISPLAY_MS = 5000;
+  const loadingStartedAt = performance.now();
+  let atlasReadyForReveal = false;
+  let loadingDismissTimer = null;
 
   function dismissLoadingOverlay() {
     if (loadingOverlayDismissed || !loadingOverlayEl) return;
     loadingOverlayDismissed = true;
+    if (loadingDismissTimer) {
+      clearTimeout(loadingDismissTimer);
+      loadingDismissTimer = null;
+    }
     loadingOverlayEl.classList.add("is-hidden");
     const cleanup = () => {
       loadingOverlayEl.hidden = true;
@@ -2203,8 +2195,24 @@ async function init() {
     setTimeout(cleanup, 800);
   }
 
-  function markAtlasReady() {
+  function maybeDismissLoadingOverlay() {
+    if (!atlasReadyForReveal || loadingOverlayDismissed) return;
+    const elapsed = performance.now() - loadingStartedAt;
+    const remaining = Math.max(0, LOADER_MIN_DISPLAY_MS - elapsed);
+    if (remaining > 0) {
+      if (loadingDismissTimer) clearTimeout(loadingDismissTimer);
+      loadingDismissTimer = setTimeout(() => {
+        loadingDismissTimer = null;
+        requestAnimationFrame(() => requestAnimationFrame(dismissLoadingOverlay));
+      }, remaining);
+      return;
+    }
     requestAnimationFrame(() => requestAnimationFrame(dismissLoadingOverlay));
+  }
+
+  function markAtlasReady() {
+    atlasReadyForReveal = true;
+    maybeDismissLoadingOverlay();
   }
   const OUTLIER_THRESHOLD = 50000;
   const MIN_HEX_SPIKE_AREA_KM2 = 0.18;
