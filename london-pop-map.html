@@ -157,7 +157,7 @@
   }
   #layer-toggle {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     align-items: stretch;
   }
@@ -230,9 +230,10 @@
     color: color-mix(in srgb, var(--button-active) 68%, var(--title) 32%);
   }
   #year-row .metric-option-label {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     display: block;
-    padding-top: 2px;
+    padding-top: 5px;
+    line-height: 1.2;
   }
   .metric-subtoggle {
     display: flex;
@@ -1194,6 +1195,9 @@
     line-height: 1.4;
     text-align: right;
   }
+  #footer-utility span {
+    display: block;
+  }
   #footer-credit {
     justify-self: center;
     padding: 7px 11px 6px;
@@ -1298,7 +1302,7 @@
     #left-stack     { top: 14px; left: 14px; right: 14px; width: calc(100vw - 28px); max-width: calc(100vw - 28px); gap: 9px; }
     #title h1       { font-size: 1.72rem; }
     #title p        { font-size: .68rem; }
-    #layer-toggle { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    #layer-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #metric-toggle  { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); }
     #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
     #country-toggle { max-width: 100%; gap: 4px; }
@@ -1466,7 +1470,7 @@
 <div id="footer-bar">
   <div></div>
   <div id="footer-credit"><a href="https://www.linkedin.com/in/renzorico" target="_blank" rel="noopener noreferrer">BY RENZO RICO</a></div>
-  <div id="footer-utility">Drag\nScroll to zoom\nClick to pin\nSearch any London address</div>
+  <div id="footer-utility"><span>Drag</span><span>Scroll to zoom</span><span>Click to pin</span><span>Search any London address</span></div>
 </div>
 
 <script>
