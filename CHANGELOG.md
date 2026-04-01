@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Compact metric icons and origin flags
+
+- Shortened the METRICS panel by replacing the text metric buttons with a compact icon grid, keeping full metric names available through hover/focus labels and aria-labels while preserving the existing metric-switching behavior.
+- Replaced the Origin country labels with compact flag buttons plus hover/focus labels, using lightweight CSS-rendered flag swatches instead of emoji so the picker stays cleaner and visually consistent.
+
 ## 2026-04-01 — Metrics rail repair and MSOA audit
 
 - Repaired the METRICS panel with a cleaner single-column metric list, restored clearer nested metric controls, moved the pinned borough summary into a fixed top card so it no longer blocks the center of the map, and removed the redundant selected-year chip from the Density time control.

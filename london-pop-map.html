@@ -177,8 +177,8 @@
     text-align: center;
   }
   #metric-toggle {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 7px;
     align-items: stretch;
     max-width: none;
@@ -362,6 +362,100 @@
     justify-content: flex-start;
     min-height: 35px;
     text-align: left;
+  }
+  .toggle-btn.icon-btn {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    min-height: 42px;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    text-align: center;
+    overflow: visible;
+  }
+  .toggle-btn.icon-btn::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    padding: 6px 8px 5px;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 90%, transparent);
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    color: var(--tooltip-text);
+    font-family: var(--font-ui);
+    font-size: .56rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    box-shadow: var(--panel-shadow);
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 30;
+  }
+  .toggle-btn.icon-btn:hover::after,
+  .toggle-btn.icon-btn:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .icon-glyph {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--title) 88%, var(--subtitle) 12%);
+  }
+  .icon-glyph svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .toggle-btn.icon-btn.active .icon-glyph {
+    color: var(--button-active-text);
+  }
+  .toggle-btn.flag-btn {
+    min-height: 38px;
+  }
+  .flag-swatch {
+    display: inline-flex;
+    width: 18px;
+    height: 13px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,.14);
+    box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.25);
+    overflow: hidden;
+  }
+  .flag-overview {
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 46%, rgba(255,255,255,.0) 46%),
+      linear-gradient(90deg, transparent 42%, rgba(255,255,255,.8) 42%, rgba(255,255,255,.8) 58%, transparent 58%),
+      linear-gradient(transparent 42%, rgba(255,255,255,.8) 42%, rgba(255,255,255,.8) 58%, transparent 58%),
+      linear-gradient(180deg, #7ea8b6, #4f7486);
+  }
+  .flag-india { background: linear-gradient(180deg, #f09332 0 33.33%, #f7f3ea 33.33% 66.66%, #158046 66.66% 100%); }
+  .flag-poland { background: linear-gradient(180deg, #f7f4ee 0 50%, #d4495d 50% 100%); }
+  .flag-romania { background: linear-gradient(90deg, #2348a6 0 33.33%, #f0c230 33.33% 66.66%, #c73b42 66.66% 100%); }
+  .flag-nigeria { background: linear-gradient(90deg, #1f8f5c 0 33.33%, #f5f4ef 33.33% 66.66%, #1f8f5c 66.66% 100%); }
+  .flag-pakistan {
+    background:
+      radial-gradient(circle at 62% 46%, #f5f4ef 0 14%, transparent 14%),
+      radial-gradient(circle at 58% 46%, #1c6b4a 0 14%, transparent 14%),
+      linear-gradient(90deg, #f5f4ef 0 22%, #1c6b4a 22% 100%);
+  }
+  .flag-bangladesh {
+    background:
+      radial-gradient(circle at 56% 50%, #cf3f4e 0 24%, transparent 24%),
+      #14714f;
   }
   .toggle-btn.secondary-btn {
     padding: 6px 10px 5px;
@@ -1194,7 +1288,7 @@
     #title h1       { font-size: 1.72rem; }
     #title p        { font-size: .68rem; }
     #layer-toggle .toggle-btn { flex-basis: calc(50% - 7px); }
-    #metric-toggle  { max-width: none; }
+    #metric-toggle  { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); }
     #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
     #country-toggle { max-width: 100%; }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
@@ -1259,16 +1353,16 @@
   <div class="control-group rail-card" id="metric-group">
     <div id="metric-label" class="control-title">Metrics</div>
     <div id="metric-toggle">
-      <button id="metric-density" class="toggle-btn metric-btn active" onclick="setMetric('density')">Density</button>
-      <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn" onclick="setMetric('house_price_proxy_gbp')">House prices</button>
-      <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
-      <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
-      <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
-      <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
-      <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetricFamily('pubs')">Pubs density</button>
-      <button id="metric-buildings_per_km2" class="toggle-btn metric-btn" onclick="setMetric('buildings_per_km2')">Buildings density</button>
-      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace</button>
-      <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Origin</button>
+      <button id="metric-density" class="toggle-btn metric-btn icon-btn active" data-label="Density" title="Density" aria-label="Density" onclick="setMetric('density')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="5" height="5"/><rect x="12" y="3" width="5" height="5"/><rect x="3" y="12" width="5" height="5"/><rect x="12" y="12" width="5" height="5"/></svg></span></button>
+      <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn icon-btn" data-label="House prices" title="House prices" aria-label="House prices" onclick="setMetric('house_price_proxy_gbp')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 9.5 10 4l7 5.5"/><path d="M5.5 8.5V16h9V8.5"/><path d="M8.5 16v-4.5h3V16"/></svg></span></button>
+      <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn icon-btn" data-label="Earnings" title="Earnings" aria-label="Earnings" onclick="setMetric('median_weekly_earnings_gbp')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M12.8 5.5c-.7-.7-1.7-1.1-2.9-1.1-2.3 0-3.8 1.4-3.8 3 0 1.9 1.7 2.5 3.4 2.9 1.8.4 3.5.8 3.5 2.7 0 1.5-1.4 2.6-3.5 2.6-1.4 0-2.6-.4-3.6-1.3"/><path d="M10 2.5v15"/></svg></span></button>
+      <button id="metric-gender_balance_pp" class="toggle-btn metric-btn icon-btn" data-label="Gender balance" title="Gender balance" aria-label="Gender balance" onclick="setMetric('gender_balance_pp')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="7" cy="7" r="3.5"/><path d="M7 10.5v6"/><path d="M4.5 14h5"/><circle cx="13" cy="7" r="3.5"/><path d="M15.6 4.4 18 2"/><path d="M15.5 2H18v2.5"/></svg></span></button>
+      <button id="metric-children_share_pct" class="toggle-btn metric-btn icon-btn" data-label="Children" title="Children" aria-label="Children" onclick="setMetric('children_share_pct')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.4"/><path d="M10 7.7v6.2"/><path d="M6.8 10.2 10 8.4l3.2 1.8"/><path d="M8 17l2-3.2L12 17"/></svg></span></button>
+      <button id="metric-median_age_years" class="toggle-btn metric-btn icon-btn" data-label="Median age" title="Median age" aria-label="Median age" onclick="setMetric('median_age_years')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5"/><path d="M10 6.3v4.2l2.8 1.8"/></svg></span></button>
+      <button id="metric-pubs_per_km2" class="toggle-btn metric-btn icon-btn" data-label="Pubs density" title="Pubs density" aria-label="Pubs density" onclick="setMetricFamily('pubs')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M6 4h6v5.3a3.8 3.8 0 0 1-3.8 3.7H9.8A3.8 3.8 0 0 1 6 9.3V4Z"/><path d="M12 5.2h2.2c.8 0 1.5.7 1.5 1.5v1c0 1-.8 1.8-1.8 1.8H12"/><path d="M7.2 16h4.6"/><path d="M8.3 13v3"/><path d="M10.7 13v3"/></svg></span></button>
+      <button id="metric-buildings_per_km2" class="toggle-btn metric-btn icon-btn" data-label="Buildings density" title="Buildings density" aria-label="Buildings density" onclick="setMetric('buildings_per_km2')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3.5 16.5V8l4-2.2v10.7"/><path d="M7.5 16.5V4.8l4.8-2.3v14"/><path d="M12.3 16.5v-8l4.2 2v6"/><path d="M9.2 6.6h1.5"/><path d="M9.2 9.2h1.5"/><path d="M9.2 11.8h1.5"/></svg></span></button>
+      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn icon-btn" data-label="Greenspace" title="Greenspace" aria-label="Greenspace" onclick="setMetric('greenspace_share_pct')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 11.5c0-3.4 2.3-5.8 6.8-6.7 0 4.6-2.2 6.9-6.8 6.7Z"/><path d="M8.1 10.8c.2 2.8 1.7 4.7 4.9 5.2 0-3.3-1.5-5-4.9-5.2Z"/><path d="M9.2 11.2V17"/></svg></span></button>
+      <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn icon-btn" data-label="Origin" title="Origin" aria-label="Origin" onclick="setMetric('country_of_birth_pct')"><span class="icon-glyph" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.6"/><path d="M3.8 10h12.4"/><path d="M10 3.4c1.9 1.7 3 4 3 6.6s-1.1 4.9-3 6.6c-1.9-1.7-3-4-3-6.6s1.1-4.9 3-6.6Z"/></svg></span></button>
     </div>
 
     <div id="metric-options">
@@ -1298,13 +1392,13 @@
       <div class="metric-option-row" id="country-row">
         <div class="metric-option-label">Origin focus</div>
         <div id="country-toggle" class="metric-subtoggle">
-          <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">Overview</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
-          <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="ALL" data-label="Overview" title="Overview" aria-label="Overview" onclick="setCountryMetric('ALL')"><span class="flag-swatch flag-overview" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="India" data-label="India" title="India" aria-label="India" onclick="setCountryMetric('India')"><span class="flag-swatch flag-india" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="Poland" data-label="Poland" title="Poland" aria-label="Poland" onclick="setCountryMetric('Poland')"><span class="flag-swatch flag-poland" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="Romania" data-label="Romania" title="Romania" aria-label="Romania" onclick="setCountryMetric('Romania')"><span class="flag-swatch flag-romania" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="Nigeria" data-label="Nigeria" title="Nigeria" aria-label="Nigeria" onclick="setCountryMetric('Nigeria')"><span class="flag-swatch flag-nigeria" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="Pakistan" data-label="Pakistan" title="Pakistan" aria-label="Pakistan" onclick="setCountryMetric('Pakistan')"><span class="flag-swatch flag-pakistan" aria-hidden="true"></span></button>
+          <button class="toggle-btn metric-btn icon-btn flag-btn country-btn" data-country="Bangladesh" data-label="Bangladesh" title="Bangladesh" aria-label="Bangladesh" onclick="setCountryMetric('Bangladesh')"><span class="flag-swatch flag-bangladesh" aria-hidden="true"></span></button>
         </div>
       </div>
     </div>
