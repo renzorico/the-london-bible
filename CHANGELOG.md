@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — POI priority and bikes intensity
+
+- Fixed POI interaction so hover and click now prefer places over borough or tube geometry in Boroughs and ONLY-TUBE view, and clicking a POI keeps the card POI-specific instead of falling through to the normal metric pin state.
+- Increased the bike overlay’s visual intensity with brighter jade-to-mint linework, stronger halos, and heavier city-scale widths so the cycling network reads more clearly in both day and night themes.
+
 ## 2026-04-01 — POI interaction cleanup
 
 - Fixed POI hover and click behavior so place names remain easy to inspect in Boroughs and ONLY-TUBE view, and clicking a POI now opens POI-specific info instead of the normal metric pin card.
