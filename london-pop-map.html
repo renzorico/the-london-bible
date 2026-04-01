@@ -1274,6 +1274,7 @@
       <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
       <button id="metric-station_access_per_10k" class="toggle-btn metric-btn" onclick="setMetric('station_access_per_10k')">Stations / 10k</button>
       <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2')">Pubs / km²</button>
+      <button id="metric-buildings_per_km2" class="toggle-btn metric-btn" onclick="setMetric('buildings_per_km2')">Buildings / km²</button>
       <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
@@ -1484,6 +1485,8 @@ const MEDIAN_AGE_DATA = {"Barking and Dagenham":33.4,"Barnet":37.9,"Bexley":39.5
 const MEDIAN_AGE_LONDON = 35.8;
 const PUB_DENSITY_DATA = {"Barking and Dagenham":{"pub_count":19,"pubs_per_km2":0.53},"Barnet":{"pub_count":56,"pubs_per_km2":0.65},"Bexley":{"pub_count":81,"pubs_per_km2":1.34},"Brent":{"pub_count":57,"pubs_per_km2":1.32},"Bromley":{"pub_count":102,"pubs_per_km2":0.68},"Camden":{"pub_count":224,"pubs_per_km2":10.28},"City of London":{"pub_count":121,"pubs_per_km2":41.67},"Croydon":{"pub_count":76,"pubs_per_km2":0.88},"Ealing":{"pub_count":76,"pubs_per_km2":1.37},"Enfield":{"pub_count":64,"pubs_per_km2":0.78},"Greenwich":{"pub_count":81,"pubs_per_km2":1.71},"Hackney":{"pub_count":121,"pubs_per_km2":6.35},"Hammersmith and Fulham":{"pub_count":106,"pubs_per_km2":6.46},"Haringey":{"pub_count":77,"pubs_per_km2":2.6},"Harrow":{"pub_count":34,"pubs_per_km2":0.67},"Havering":{"pub_count":54,"pubs_per_km2":0.48},"Hillingdon":{"pub_count":77,"pubs_per_km2":0.67},"Hounslow":{"pub_count":77,"pubs_per_km2":1.38},"Islington":{"pub_count":184,"pubs_per_km2":12.39},"Kensington and Chelsea":{"pub_count":81,"pubs_per_km2":6.68},"Kingston upon Thames":{"pub_count":59,"pubs_per_km2":1.58},"Lambeth":{"pub_count":149,"pubs_per_km2":5.56},"Lewisham":{"pub_count":85,"pubs_per_km2":2.42},"Merton":{"pub_count":46,"pubs_per_km2":1.22},"Newham":{"pub_count":44,"pubs_per_km2":1.22},"Redbridge":{"pub_count":29,"pubs_per_km2":0.51},"Richmond upon Thames":{"pub_count":117,"pubs_per_km2":2.04},"Southwark":{"pub_count":194,"pubs_per_km2":6.72},"Sutton":{"pub_count":42,"pubs_per_km2":0.96},"Tower Hamlets":{"pub_count":129,"pubs_per_km2":6.52},"Waltham Forest":{"pub_count":62,"pubs_per_km2":1.6},"Wandsworth":{"pub_count":114,"pubs_per_km2":3.33},"Westminster":{"pub_count":334,"pubs_per_km2":15.54}};
 const PUB_DENSITY_LONDON_AVG = 2.02;
+const BUILDING_DENSITY_DATA = {"Barking and Dagenham":{"building_count":16337,"buildings_per_km2":452.45},"Barnet":{"building_count":66129,"buildings_per_km2":762.31},"Bexley":{"building_count":42671,"buildings_per_km2":704.37},"Brent":{"building_count":22102,"buildings_per_km2":511.23},"Bromley":{"building_count":61675,"buildings_per_km2":410.8},"Camden":{"building_count":26516,"buildings_per_km2":1216.93},"City of London":{"building_count":2060,"buildings_per_km2":709.38},"Croydon":{"building_count":44972,"buildings_per_km2":519.94},"Ealing":{"building_count":34942,"buildings_per_km2":629.08},"Enfield":{"building_count":38399,"buildings_per_km2":467.14},"Greenwich":{"building_count":51535,"buildings_per_km2":1088.75},"Hackney":{"building_count":18081,"buildings_per_km2":949.18},"Hammersmith and Fulham":{"building_count":15848,"buildings_per_km2":966.48},"Haringey":{"building_count":33644,"buildings_per_km2":1136.68},"Harrow":{"building_count":11169,"buildings_per_km2":221.33},"Havering":{"building_count":43897,"buildings_per_km2":390.72},"Hillingdon":{"building_count":32399,"buildings_per_km2":280.02},"Hounslow":{"building_count":13365,"buildings_per_km2":238.98},"Islington":{"building_count":22840,"buildings_per_km2":1537.36},"Kensington and Chelsea":{"building_count":15136,"buildings_per_km2":1248.45},"Kingston upon Thames":{"building_count":30913,"buildings_per_km2":829.63},"Lambeth":{"building_count":34637,"buildings_per_km2":1291.94},"Lewisham":{"building_count":40396,"buildings_per_km2":1149.28},"Merton":{"building_count":38923,"buildings_per_km2":1034.51},"Newham":{"building_count":53531,"buildings_per_km2":1478.69},"Redbridge":{"building_count":20437,"buildings_per_km2":362.23},"Richmond upon Thames":{"building_count":39796,"buildings_per_km2":693.87},"Southwark":{"building_count":31941,"buildings_per_km2":1106.68},"Sutton":{"building_count":26538,"buildings_per_km2":605.24},"Tower Hamlets":{"building_count":18786,"buildings_per_km2":949.85},"Waltham Forest":{"building_count":75065,"buildings_per_km2":1934.27},"Wandsworth":{"building_count":47374,"buildings_per_km2":1382.61},"Westminster":{"building_count":28686,"buildings_per_km2":1335.04}};
+const BUILDING_DENSITY_LONDON_AVG = 699.59;
 const GREENSPACE_SHARE_DATA = {"City of London":4.8,"Barking and Dagenham":33.6,"Barnet":41.3,"Bexley":31.7,"Brent":21.9,"Bromley":57.8,"Camden":24.8,"Croydon":37.1,"Ealing":30.9,"Enfield":45.6,"Greenwich":34.4,"Hackney":23.2,"Hammersmith and Fulham":19.1,"Haringey":25.5,"Harrow":34.6,"Havering":59.3,"Hillingdon":49.2,"Hounslow":39.6,"Islington":12.4,"Kensington and Chelsea":15.1,"Kingston upon Thames":36.4,"Lambeth":17.3,"Lewisham":22.5,"Merton":34.6,"Newham":23.9,"Redbridge":40.6,"Richmond upon Thames":50.8,"Southwark":24.9,"Sutton":32,"Tower Hamlets":15.2,"Waltham Forest":31.4,"Wandsworth":26.9,"Westminster":21.5};
 const GREENSPACE_LONDON_AVG = 38.2;
 const COUNTRY_BIRTH_SHORTLIST = ["ALL", "India", "Poland", "Romania", "Nigeria", "Pakistan", "Bangladesh"];
@@ -1704,6 +1707,7 @@ const METRIC_PALETTES = {
   median_age_years: [[241, 244, 236, 220], [205, 218, 193, 232], [166, 185, 153, 242], [125, 144, 111, 250], [76, 92, 67, 255]],
   station_access_per_10k: [[236, 241, 244, 220], [190, 210, 222, 232], [138, 176, 196, 242], [85, 131, 159, 250], [41, 82, 109, 255]],
   pubs_per_km2: [[244, 239, 228, 220], [225, 194, 158, 232], [198, 147, 100, 242], [150, 95, 54, 250], [90, 52, 27, 255]],
+  buildings_per_km2: [[238, 242, 244, 220], [197, 210, 214, 232], [149, 166, 171, 242], [103, 122, 129, 250], [54, 69, 75, 255]],
   greenspace_share_pct: [[239, 244, 232, 220], [199, 218, 174, 232], [146, 186, 123, 242], [94, 144, 78, 250], [45, 92, 53, 255]],
   country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
 };
@@ -1845,6 +1849,24 @@ const METRICS = {
     summaryLabel: "London avg",
     tooltipTag: "Pub density",
     note: "Community-maintained pub locations aggregated to borough polygons; station or nightlife quality is not implied",
+  },
+  buildings_per_km2: {
+    key: "buildings_per_km2",
+    label: "Mapped buildings per km²",
+    button: "Buildings / km²",
+    legendLabel: "Mapped building footprints per km²",
+    unit: "buildings/km²",
+    year: "Snapshot 2026-04-01",
+    source: "OpenStreetMap building footprint snapshot via Overpass API",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "buildings_per_km2",
+    views: ["municipi"],
+    formatter: (v) => `${Math.round(v).toLocaleString()} buildings/km²`,
+    diffFormatter: (v) => `${Math.round(v).toLocaleString()} buildings/km²`,
+    summaryLabel: "London avg",
+    tooltipTag: "Built form",
+    note: "Community-maintained mapped building footprints aggregated to borough polygons; this does not measure height, floor area, or occupancy",
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
@@ -2031,6 +2053,7 @@ async function init() {
     { key: "children_share_pct", label: "child share" },
     { key: "country_of_birth_pct", label: "international mix", countrySelection: "ALL" },
     { key: "pubs_per_km2", label: "pub density" },
+    { key: "buildings_per_km2", label: "built form density" },
     { key: "greenspace_share_pct", label: "greenspace share" },
     { key: "median_age_years", label: "median age" },
     { key: "station_access_per_10k", label: "station coverage" },
@@ -2042,6 +2065,7 @@ async function init() {
     "children_share_pct",
     "country_of_birth_pct",
     "pubs_per_km2",
+    "buildings_per_km2",
     "greenspace_share_pct",
     "median_age_years",
     "station_access_per_10k",
@@ -2108,6 +2132,9 @@ async function init() {
   }
   for (const [boroughName, pubMetrics] of Object.entries(PUB_DENSITY_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) Object.assign(BOROUGH_METRIC_DATA[boroughName], pubMetrics);
+  }
+  for (const [boroughName, buildingMetrics] of Object.entries(BUILDING_DENSITY_DATA)) {
+    if (BOROUGH_METRIC_DATA[boroughName]) Object.assign(BOROUGH_METRIC_DATA[boroughName], buildingMetrics);
   }
   for (const [boroughName, greenspaceShare] of Object.entries(GREENSPACE_SHARE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].greenspace_share_pct = greenspaceShare;
@@ -2314,6 +2341,12 @@ async function init() {
         avg: PUB_DENSITY_LONDON_AVG,
       };
     }
+    if (metricKey === "buildings_per_km2") {
+      return {
+        ...boroughStats[metricKey],
+        avg: BUILDING_DENSITY_LONDON_AVG,
+      };
+    }
     if (metricKey === "greenspace_share_pct") {
       return {
         ...boroughStats[metricKey],
@@ -2421,6 +2454,7 @@ async function init() {
     if (metricKey === "children_share_pct") return "Children (%)";
     if (metricKey === "country_of_birth_pct") return "Born outside UK (%)";
     if (metricKey === "pubs_per_km2") return "Pubs / km²";
+    if (metricKey === "buildings_per_km2") return "Buildings / km²";
     if (metricKey === "greenspace_share_pct") return "Greenspace share (2005, %)";
     if (metricKey === "median_age_years") return "Median age (years)";
     if (metricKey === "station_access_per_10k") return "Stations / 10k residents";
@@ -2673,6 +2707,14 @@ async function init() {
       if (ratio != null && ratio <= 0.85) return "lower";
       return "similar";
     }
+    if (metricKey === "buildings_per_km2") {
+      const ratio = average ? value / average : null;
+      if (ratio != null && ratio >= 1.55) return "much-higher";
+      if (ratio != null && ratio >= 1.12) return "higher";
+      if (ratio != null && ratio <= 0.6) return "much-lower";
+      if (ratio != null && ratio <= 0.88) return "lower";
+      return "similar";
+    }
     if (metricKey === "median_age_years") {
       const delta = value - average;
       if (delta >= 2) return "much-higher";
@@ -2725,6 +2767,11 @@ async function init() {
       const delta = Math.abs(value - average);
       const direction = value >= average ? "above" : "below";
       return `${delta.toFixed(2)} pubs/km² ${direction} the London average`;
+    }
+    if (metricKey === "buildings_per_km2") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${Math.round(delta).toLocaleString()} buildings/km² ${direction} the London average`;
     }
     if (metricKey === "station_access_per_10k") {
       const delta = Math.abs(value - average);
@@ -2821,6 +2868,14 @@ async function init() {
       return makeInsight(`Pub density is close to the London average, at <strong>${formatted}</strong>.`, 22, key);
     }
 
+    if (key === "buildings_per_km2") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`One of London’s more tightly built borough fabrics, with <strong>${formatted}</strong>, ${diff}.`, 72, key);
+      if (bucket === "higher") return makeInsight(`Mapped building footprint density runs above the London average at <strong>${formatted}</strong>.`, 56, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`The mapped building fabric is relatively sparse by London standards, at <strong>${formatted}</strong>, ${diff}.`, 70, key);
+      if (bucket === "lower") return makeInsight(`Mapped building density sits a little below the London average, at <strong>${formatted}</strong>.`, 52, key);
+      return makeInsight(`Mapped building density is close to the London average, at <strong>${formatted}</strong>.`, 22, key);
+    }
+
     if (key === "greenspace_share_pct") {
       if (bucket === "much-higher" || rank === "top-5") return makeInsight(`In the GLUD 2005 baseline, a notably large <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 74, key);
       if (bucket === "higher") return makeInsight(`The GLUD 2005 baseline shows a higher-than-average greenspace land share here, reaching <strong>${formatted}</strong>.`, 60, key);
@@ -2848,6 +2903,7 @@ async function init() {
     const ageCtx = spotlightMetricContext(feature, "median_age_years");
     const transportCtx = spotlightMetricContext(feature, "station_access_per_10k");
     const pubsCtx = spotlightMetricContext(feature, "pubs_per_km2");
+    const buildingsCtx = spotlightMetricContext(feature, "buildings_per_km2");
     const greenspaceCtx = spotlightMetricContext(feature, "greenspace_share_pct");
     const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
 
@@ -2859,6 +2915,7 @@ async function init() {
       buildSpotlightMetricInsight(ageCtx),
       buildSpotlightMetricInsight(transportCtx),
       buildSpotlightMetricInsight(pubsCtx),
+      buildSpotlightMetricInsight(buildingsCtx),
       buildSpotlightMetricInsight(greenspaceCtx),
       buildSpotlightMetricInsight(internationalCtx),
     ].filter(Boolean);
@@ -2873,6 +2930,10 @@ async function init() {
 
     if (transportCtx && densityCtx && (transportCtx.bucket === "much-higher" || transportCtx.bucket === "higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
       insights.push(makeInsight(`Strong station coverage and high density reinforce a well-connected inner-urban borough profile.`, 83, "transport-dense"));
+    }
+
+    if (buildingsCtx && densityCtx && (buildingsCtx.bucket === "higher" || buildingsCtx.bucket === "much-higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`A tightly packed building fabric lines up with high population density, reinforcing an intensely urban borough profile.`, 82, "buildings-dense-core"));
     }
 
     if (densityCtx && childrenCtx && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower") && (childrenCtx.bucket === "much-higher" || childrenCtx.bucket === "higher")) {
@@ -2891,8 +2952,16 @@ async function init() {
       insights.push(makeInsight(`In the GLUD 2005 land-use baseline, higher greenspace share and lower density give the borough a noticeably greener, more spacious profile.`, 86, "green-spacious"));
     }
 
+    if (buildingsCtx && greenspaceCtx && densityCtx && (buildingsCtx.bucket === "lower" || buildingsCtx.bucket === "much-lower") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`A sparser mapped building fabric, more greenspace, and lower density together point to a more spacious outer-borough pattern.`, 81, "buildings-green-spacious"));
+    }
+
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
       insights.push(makeInsight(`The GLUD 2005 baseline shows a relatively high greenspace share despite solid density, giving the borough a less expected mixed urban profile.`, 80, "green-dense-mix"));
+    }
+
+    if (buildingsCtx && transportCtx && (buildingsCtx.bucket === "higher" || buildingsCtx.bucket === "much-higher") && (transportCtx.bucket === "higher" || transportCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`A denser mapped building fabric and stronger station coverage suggest a more connected urban form than many outer boroughs.`, 78, "buildings-transport-urban"));
     }
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "lower" || greenspaceCtx.bucket === "much-lower") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
@@ -2964,6 +3033,12 @@ async function init() {
       return Number.isFinite(pubCount)
         ? `${pubCount.toLocaleString()} mapped pubs in the OSM snapshot`
         : "OpenStreetMap amenity=pub snapshot aggregated to borough polygons";
+    }
+    if (boroughMetric === "buildings_per_km2") {
+      const buildingCount = feature.properties?.building_count;
+      return Number.isFinite(buildingCount)
+        ? `${buildingCount.toLocaleString()} mapped building footprints in the OSM snapshot`
+        : "OpenStreetMap building footprint snapshot aggregated to borough polygons";
     }
     if (boroughMetric === "median_age_years") {
       return "Census 2021 median age of usual residents";
@@ -3307,6 +3382,11 @@ async function init() {
       if (Number.isFinite(pubCount)) support.push(`${pubCount.toLocaleString()} mapped pubs in the OpenStreetMap snapshot`);
       support.push("OpenStreetMap amenity=pub points aggregated to borough polygons");
       support.push("Community-maintained pub location baseline, not a measure of pint price or venue quality");
+    } else if (metricKey === "buildings_per_km2") {
+      const buildingCount = feature.properties?.building_count;
+      if (Number.isFinite(buildingCount)) support.push(`${buildingCount.toLocaleString()} mapped building footprints in the OpenStreetMap snapshot`);
+      support.push("OpenStreetMap building ways and relations aggregated to borough polygons");
+      support.push("Community-maintained building footprint baseline, not a measure of height, floor area, or occupancy");
     } else if (metricKey === "median_age_years") {
       support.push("Census 2021 median age of usual residents");
       support.push("Derived from single-year age counts at borough level");

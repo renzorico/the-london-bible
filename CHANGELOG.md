@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough building density metric
+
+- Added a borough-level mapped-buildings-per-km² metric using an OpenStreetMap building footprint snapshot aggregated to London borough polygons.
+- Wired the built-form metric into borough choropleths, tooltips, comparison, spotlight, and correlation, while explicitly leaving average building height out because the available London-wide height data was not borough-complete enough for a truthful average-height measure.
+
 ## 2026-04-01 — Borough pub density metric
 
 - Added a borough-level pubs-per-km² metric using an OpenStreetMap amenity=pub snapshot aggregated to London borough polygons.
