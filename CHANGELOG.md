@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Schools insight visibility and rating-scale controls
+
+- Surfaced borough school analysis more clearly in the selected-borough and Why here? views, and redesigned the Schools rating filters into a compact single-row quality scale so the Ofsted controls read faster and stay tidy.
+
 ## 2026-04-01 — Schools filters, borough insights, and day-only app
 
 - Added Ofsted outcome filters to the Schools overlay, surfaced borough-level school quality summaries in the borough insight flow, and removed the old night-mode toggle so the atlas now runs on a single day-theme map and overlay treatment.

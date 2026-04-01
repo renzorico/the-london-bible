@@ -174,13 +174,28 @@
     color: var(--subtitle);
     letter-spacing: .04em;
   }
-  #school-toggle,
-  #school-rating-toggle {
+  #school-controls {
     display: none;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
+    align-items: center;
+    gap: 8px;
     width: 100%;
     margin-top: 8px;
+  }
+  #school-toggle {
+    display: flex;
+    gap: 6px;
+    flex: 0 0 auto;
+    width: auto;
+    margin-top: 0;
+  }
+  #school-rating-toggle {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    flex: 1 1 auto;
+    width: 100%;
+    margin-top: 0;
+    min-width: 0;
   }
   #school-toggle .toggle-btn,
   #school-rating-toggle .toggle-btn {
@@ -190,8 +205,65 @@
     font-size: .56rem;
     letter-spacing: .11em;
   }
-  #school-rating-toggle {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  #school-toggle .toggle-btn {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+  #school-rating-toggle .toggle-btn {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 6px 6px 5px;
+  }
+  .school-quality-btn {
+    position: relative;
+    overflow: visible;
+  }
+  .school-signal {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .school-signal i {
+    display: block;
+    width: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--title) 22%, transparent);
+  }
+  .school-signal i:nth-child(1) { height: 4px; }
+  .school-signal i:nth-child(2) { height: 7px; }
+  .school-signal i:nth-child(3) { height: 10px; }
+  .school-signal i:nth-child(4) { height: 13px; }
+  .school-quality-btn[data-school-rating="Inadequate"] .school-signal i:nth-child(-n+1),
+  .school-quality-btn[data-school-rating="Requires improvement"] .school-signal i:nth-child(-n+2),
+  .school-quality-btn[data-school-rating="Good"] .school-signal i:nth-child(-n+3),
+  .school-quality-btn[data-school-rating="Outstanding"] .school-signal i:nth-child(-n+4) {
+    background: currentColor;
+  }
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal {
+    height: 13px;
+    justify-content: center;
+  }
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .7;
+  }
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i:not(:first-child) {
+    opacity: .22;
+  }
+  .school-quality-btn[data-school-rating="Outstanding"] { color: #2b845a; }
+  .school-quality-btn[data-school-rating="Good"] { color: #45a584; }
+  .school-quality-btn[data-school-rating="Requires improvement"] { color: #d19640; }
+  .school-quality-btn[data-school-rating="Inadequate"] { color: #bf4949; }
+  .school-quality-btn[data-school-rating="Ungraded"] { color: #7a8792; }
+  .school-quality-btn.active {
+    color: var(--button-active-text);
+  }
+  .school-quality-btn.active .school-signal i {
+    background: color-mix(in srgb, currentColor 92%, rgba(255,255,255,.2) 8%);
   }
   #school-note {
     display: none;
@@ -598,6 +670,43 @@
   #tooltip .tarea  { color: var(--tooltip-text); font-size: .92rem; font-weight: 700; }
   #tooltip .tval   { color: var(--legend-accent); font-weight: 700; }
   #tooltip .tsub   { color: var(--tooltip-subtle); font-size: .66rem; letter-spacing: .03em; }
+  #tooltip .tblock {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 76%, transparent);
+  }
+  #tooltip .tgrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    margin-top: 8px;
+  }
+  #tooltip .tcell {
+    min-width: 0;
+  }
+  #tooltip .tkicker {
+    display: block;
+    font-size: .54rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--tooltip-subtle);
+  }
+  #tooltip .tmetric {
+    display: block;
+    margin-top: 2px;
+    color: var(--tooltip-text);
+    font-size: .84rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  #tooltip .tnote {
+    display: block;
+    margin-top: 8px;
+    color: var(--tooltip-subtle);
+    font-size: .63rem;
+    line-height: 1.45;
+  }
   #tooltip .tclose {
     float: right; margin-left: 10px; cursor: pointer;
     color: var(--subtitle); font-size: .7rem; line-height: 1;
@@ -750,6 +859,41 @@
   #analysis-panel .s-story strong {
     color: var(--legend-accent);
     font-weight: 800;
+  }
+  #analysis-panel .school-insight-card {
+    margin-top: 14px;
+    padding: 14px 15px 15px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-strong) 90%, transparent);
+  }
+  #analysis-panel .school-insight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+    margin-top: 10px;
+  }
+  #analysis-panel .school-insight-kicker {
+    display: block;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #analysis-panel .school-insight-value {
+    display: block;
+    margin-top: 3px;
+    font-size: .95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--title);
+  }
+  #analysis-panel .school-insight-note {
+    margin-top: 10px;
+    font-size: .73rem;
+    line-height: 1.55;
+    color: var(--hint);
   }
   #analysis-panel .s-foot {
     margin-top: 12px;
@@ -1511,17 +1655,19 @@
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="landmarks" title="Landmarks" aria-label="Landmarks" onclick="togglePoiCategory('landmarks')">Landmarks</button>
     </div>
     <div id="poi-note" aria-live="polite"></div>
-    <div id="school-toggle">
-      <button class="toggle-btn secondary-btn school-filter-btn active" data-school-phase="all" title="All mainstream schools" aria-label="All mainstream schools" onclick="toggleSchoolPhase('all')">All</button>
-      <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">Primary</button>
-      <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">Secondary</button>
-    </div>
-    <div id="school-rating-toggle">
-      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Outstanding" title="Outstanding" aria-label="Outstanding" onclick="toggleSchoolRating('Outstanding')">Outstanding</button>
-      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Good" title="Good" aria-label="Good" onclick="toggleSchoolRating('Good')">Good</button>
-      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Requires improvement" title="Requires improvement" aria-label="Requires improvement" onclick="toggleSchoolRating('Requires improvement')">Requires improvement</button>
-      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Inadequate" title="Inadequate" aria-label="Inadequate" onclick="toggleSchoolRating('Inadequate')">Inadequate</button>
-      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Ungraded" title="Ungraded" aria-label="Ungraded" onclick="toggleSchoolRating('Ungraded')">Ungraded</button>
+    <div id="school-controls">
+      <div id="school-toggle">
+        <button class="toggle-btn secondary-btn school-filter-btn active" data-school-phase="all" title="All mainstream schools" aria-label="All mainstream schools" onclick="toggleSchoolPhase('all')">All</button>
+        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">Primary</button>
+        <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">Secondary</button>
+      </div>
+      <div id="school-rating-toggle">
+        <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Inadequate" data-label="Inadequate" title="Inadequate" aria-label="Inadequate" onclick="toggleSchoolRating('Inadequate')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Requires improvement" data-label="Requires improvement" title="Requires improvement" aria-label="Requires improvement" onclick="toggleSchoolRating('Requires improvement')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Good" data-label="Good" title="Good" aria-label="Good" onclick="toggleSchoolRating('Good')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Outstanding" data-label="Outstanding" title="Outstanding" aria-label="Outstanding" onclick="toggleSchoolRating('Outstanding')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        <button class="toggle-btn secondary-btn school-rating-btn school-quality-btn active" data-school-rating="Ungraded" data-label="Ungraded" title="Ungraded" aria-label="Ungraded" onclick="toggleSchoolRating('Ungraded')"><span class="school-signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+      </div>
     </div>
     <div id="school-note" aria-live="polite"></div>
   </div>
@@ -2285,6 +2431,7 @@ async function init() {
   const pubsToggleEl = document.getElementById("pubs-toggle");
   const overlayToggleEl = document.getElementById("overlay-toggle");
   const poiToggleEl = document.getElementById("poi-toggle");
+  const schoolControlsEl = document.getElementById("school-controls");
   const schoolToggleEl = document.getElementById("school-toggle");
   const schoolRatingToggleEl = document.getElementById("school-rating-toggle");
   const poiNoteEl = document.getElementById("poi-note");
@@ -4610,50 +4757,91 @@ async function init() {
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${rating}</span><br><span class="tarea">${props.school_name || "School"}</span>${phase}${inspectionDate}${detail}`;
   }
 
-  function boroughSchoolSummaryHtml(feature) {
+  function boroughSchoolSummaryHtml(feature, pinned) {
     const stats = schoolInsightsForFeature(feature);
     if (!stats || !stats.total) return "";
-    const lines = [
-      `${stats.total.toLocaleString()} mainstream schools`,
-      `${stats.outstanding} Outstanding · ${stats.good} Good · ${stats.requiresImprovement} Requires improvement · ${stats.inadequate} Inadequate`,
-    ];
-    if (Number.isFinite(stats.goodOrOutstandingShare)) {
-      lines.push(`${stats.goodOrOutstandingShare.toFixed(1)}% Good or Outstanding`);
+    if (!pinned) {
+      const share = Number.isFinite(stats.goodOrOutstandingShare)
+        ? `${stats.goodOrOutstandingShare.toFixed(1)}% Good or Outstanding`
+        : `${stats.total.toLocaleString()} mainstream schools`;
+      return `<br><span class="ttag">Schools</span><br><span class="tsub">${share}</span>`;
     }
-    if (Number.isFinite(stats.belowGoodShare)) {
-      lines.push(`${stats.belowGoodShare.toFixed(1)}% below Good`);
-    }
-    if (Number.isFinite(stats.scoreAvg)) {
-      lines.push(`Average Ofsted score ${stats.scoreAvg.toFixed(2)} / 4 across graded schools`);
-    }
-    if (Number.isFinite(stats.rankGoodOrOutstanding)) {
-      lines.push(`London rank #${stats.rankGoodOrOutstanding} by Good or Outstanding share`);
-    }
-    if (stats.ungraded > 0) {
-      lines.push(`${stats.ungraded} schools still ungraded or without a current 4-grade outcome`);
-    }
-    return `<br><span class="ttag">Schools</span><br><span class="tsub">${lines.join("<br>")}</span>`;
+    return `
+      <div class="tblock">
+        <span class="ttag">Schools</span>
+        <div class="tgrid">
+          <div class="tcell">
+            <span class="tkicker">Total</span>
+            <span class="tmetric">${stats.total.toLocaleString()}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Good / Outstanding</span>
+            <span class="tmetric">${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}%` : "No graded data"}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Outstanding</span>
+            <span class="tmetric">${stats.outstanding}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Average score</span>
+            <span class="tmetric">${Number.isFinite(stats.scoreAvg) ? `${stats.scoreAvg.toFixed(2)} / 4` : "No graded data"}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Good</span>
+            <span class="tmetric">${stats.good}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">London rank</span>
+            <span class="tmetric">${Number.isFinite(stats.rankGoodOrOutstanding) ? `#${stats.rankGoodOrOutstanding}` : "N/A"}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Requires improvement</span>
+            <span class="tmetric">${stats.requiresImprovement}</span>
+          </div>
+          <div class="tcell">
+            <span class="tkicker">Inadequate</span>
+            <span class="tmetric">${stats.inadequate}</span>
+          </div>
+        </div>
+        <span class="tnote">Good / Outstanding share and the 4-point average use graded schools only. Ungraded schools: ${stats.ungraded}.</span>
+      </div>
+    `;
   }
 
   function boroughSchoolInsightPanelHtml(feature) {
     const stats = schoolInsightsForFeature(feature);
     if (!stats || !stats.total) return "";
-    const gradedLabel = stats.graded ? `${stats.graded.toLocaleString()} graded schools` : "No current graded schools";
-    const averageLabel = Number.isFinite(stats.scoreAvg) ? `${stats.scoreAvg.toFixed(2)} / 4 average Ofsted score` : "Average score unavailable";
-    const leadingLine = Number.isFinite(stats.rankGoodOrOutstanding)
-      ? `London rank #${stats.rankGoodOrOutstanding} by Good or Outstanding share`
-      : "No London ranking available";
     return `
-      <div class="s-story">
-        <strong>Schools snapshot.</strong> ${stats.total.toLocaleString()} mainstream schools, with ${stats.outstanding} Outstanding and ${stats.good} Good. ${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}% of graded schools are Good or Outstanding.` : gradedLabel + "."}
+      <div class="school-insight-card">
+        <div class="s-lens">Schools overlay</div>
+        <div class="school-insight-grid">
+          <div>
+            <span class="school-insight-kicker">Total schools</span>
+            <span class="school-insight-value">${stats.total.toLocaleString()}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Good / Outstanding</span>
+            <span class="school-insight-value">${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}%` : "No graded data"}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Average Ofsted score</span>
+            <span class="school-insight-value">${Number.isFinite(stats.scoreAvg) ? `${stats.scoreAvg.toFixed(2)} / 4` : "No graded data"}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">London rank</span>
+            <span class="school-insight-value">${Number.isFinite(stats.rankGoodOrOutstanding) ? `#${stats.rankGoodOrOutstanding}` : "N/A"}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Outstanding / Good</span>
+            <span class="school-insight-value">${stats.outstanding} / ${stats.good}</span>
+          </div>
+          <div>
+            <span class="school-insight-kicker">Below Good</span>
+            <span class="school-insight-value">${stats.requiresImprovement + stats.inadequate}</span>
+          </div>
+        </div>
+        <div class="school-insight-note">Ofsted summary uses the joined local schools overlay. Average score maps Outstanding = 4, Good = 3, Requires improvement = 2, Inadequate = 1 and excludes ${stats.ungraded} ungraded schools.</div>
       </div>
-      <div class="s-story">
-        <strong>Quality profile.</strong> ${averageLabel}. ${Number.isFinite(stats.belowGoodShare) ? `${stats.belowGoodShare.toFixed(1)}% of graded schools are below Good.` : gradedLabel + "."}
-      </div>
-      <div class="s-story">
-        <strong>London standing.</strong> ${leadingLine}. ${stats.ungraded ? `${stats.ungraded} schools are currently ungraded or outside the latest four-grade outcome set.` : gradedLabel + "."}
-      </div>
-      <div class="s-helper">Schools summary uses the local Ofsted overlay join. Average score maps Outstanding = 4, Good = 3, Requires improvement = 2, Inadequate = 1 and excludes ungraded schools.</div>
     `;
   }
 
@@ -4722,7 +4910,7 @@ async function init() {
       support.push("Median sale price proxy");
     }
     const supportHtml = support.length ? `<br><span class="tsub">${support.join("<br>")}</span>` : "";
-    const schoolHtml = boroughSchoolSummaryHtml(feature);
+    const schoolHtml = boroughSchoolSummaryHtml(feature, pinned);
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}${schoolHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
   }
 
@@ -5053,8 +5241,7 @@ async function init() {
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
     poiToggleEl.style.display = !sectionsMode && showPois ? "grid" : "none";
-    schoolToggleEl.style.display = !sectionsMode && showSchools ? "grid" : "none";
-    schoolRatingToggleEl.style.display = !sectionsMode && showSchools ? "grid" : "none";
+    schoolControlsEl.style.display = !sectionsMode && showSchools ? "flex" : "none";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
