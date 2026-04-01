@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Wider homepage framing
+
+- Zoomed the default homepage map view out to a noticeably wider London framing and updated the loading intro handoff so it still lands cleanly on the same final home camera.
+
 ## 2026-04-01 — Loading intro alignment refinement
 
 - Tuned the logo spin-down to finish in the correct upright orientation and refined the intro map choreography so the logo more convincingly transforms into the homepage map view before settling into the default framing.
