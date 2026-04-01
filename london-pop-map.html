@@ -818,6 +818,7 @@
       <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
       <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
+      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
   </div>
@@ -983,6 +984,8 @@ const TUBE_LINE_COLOURS = {
 };
 
 const BOROUGH_METRIC_DATA = {"City of London":{"house_price_proxy_gbp":835000,"median_weekly_earnings_gbp":null,"male_share_pct":55.76,"female_share_pct":44.24,"children_share_pct":8,"not_born_uk_share_pct":36.7},"Barking and Dagenham":{"house_price_proxy_gbp":300000,"median_weekly_earnings_gbp":744.1,"male_share_pct":48.88,"female_share_pct":51.12,"children_share_pct":26.12,"not_born_uk_share_pct":31.26},"Barnet":{"house_price_proxy_gbp":533500,"median_weekly_earnings_gbp":862.4,"male_share_pct":49.09,"female_share_pct":50.91,"children_share_pct":20.87,"not_born_uk_share_pct":39.08},"Bexley":{"house_price_proxy_gbp":342500,"median_weekly_earnings_gbp":849.1,"male_share_pct":48.18,"female_share_pct":51.82,"children_share_pct":20.22,"not_born_uk_share_pct":14.11},"Brent":{"house_price_proxy_gbp":499950,"median_weekly_earnings_gbp":747.6,"male_share_pct":50.64,"female_share_pct":49.36,"children_share_pct":20.6,"not_born_uk_share_pct":55.18},"Bromley":{"house_price_proxy_gbp":440000,"median_weekly_earnings_gbp":958.2,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":19.7,"not_born_uk_share_pct":14.5},"Camden":{"house_price_proxy_gbp":760000,"median_weekly_earnings_gbp":864.8,"male_share_pct":49.73,"female_share_pct":50.27,"children_share_pct":15.41,"not_born_uk_share_pct":42.52},"Croydon":{"house_price_proxy_gbp":365000,"median_weekly_earnings_gbp":829.8,"male_share_pct":48.54,"female_share_pct":51.46,"children_share_pct":21.73,"not_born_uk_share_pct":29.66},"Ealing":{"house_price_proxy_gbp":485000,"median_weekly_earnings_gbp":784.9,"male_share_pct":50.18,"female_share_pct":49.82,"children_share_pct":20.81,"not_born_uk_share_pct":48.29},"Enfield":{"house_price_proxy_gbp":402500,"median_weekly_earnings_gbp":838.4,"male_share_pct":48.6,"female_share_pct":51.4,"children_share_pct":22.09,"not_born_uk_share_pct":35.11},"Greenwich":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":852.1,"male_share_pct":50.1,"female_share_pct":49.9,"children_share_pct":21.81,"not_born_uk_share_pct":31.11},"Hackney":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":882,"male_share_pct":49.67,"female_share_pct":50.33,"children_share_pct":20.38,"not_born_uk_share_pct":39.12},"Hammersmith and Fulham":{"house_price_proxy_gbp":777475,"median_weekly_earnings_gbp":862.4,"male_share_pct":48.93,"female_share_pct":51.07,"children_share_pct":16.79,"not_born_uk_share_pct":42.81},"Haringey":{"house_price_proxy_gbp":540000,"median_weekly_earnings_gbp":814.5,"male_share_pct":50.12,"female_share_pct":49.88,"children_share_pct":19.4,"not_born_uk_share_pct":44.69},"Harrow":{"house_price_proxy_gbp":500000,"median_weekly_earnings_gbp":853.8,"male_share_pct":49.66,"female_share_pct":50.34,"children_share_pct":20.28,"not_born_uk_share_pct":44.8},"Havering":{"house_price_proxy_gbp":350000,"median_weekly_earnings_gbp":822.5,"male_share_pct":48.05,"female_share_pct":51.95,"children_share_pct":18.88,"not_born_uk_share_pct":10.36},"Hillingdon":{"house_price_proxy_gbp":415000,"median_weekly_earnings_gbp":804.1,"male_share_pct":49.89,"female_share_pct":50.11,"children_share_pct":21.11,"not_born_uk_share_pct":30},"Hounslow":{"house_price_proxy_gbp":395000,"median_weekly_earnings_gbp":766.6,"male_share_pct":50.6,"female_share_pct":49.4,"children_share_pct":20.92,"not_born_uk_share_pct":43.34},"Islington":{"house_price_proxy_gbp":615000,"median_weekly_earnings_gbp":935,"male_share_pct":49.79,"female_share_pct":50.21,"children_share_pct":15.89,"not_born_uk_share_pct":35.44},"Kensington and Chelsea":{"house_price_proxy_gbp":1315000,"median_weekly_earnings_gbp":988,"male_share_pct":49.46,"female_share_pct":50.54,"children_share_pct":15.69,"not_born_uk_share_pct":51.61},"Kingston upon Thames":{"house_price_proxy_gbp":487250,"median_weekly_earnings_gbp":844,"male_share_pct":49.08,"female_share_pct":50.92,"children_share_pct":19.28,"not_born_uk_share_pct":28.28},"Lambeth":{"house_price_proxy_gbp":518110,"median_weekly_earnings_gbp":883.5,"male_share_pct":50.14,"female_share_pct":49.86,"children_share_pct":17.81,"not_born_uk_share_pct":38.89},"Lewisham":{"house_price_proxy_gbp":430000,"median_weekly_earnings_gbp":843,"male_share_pct":49.16,"female_share_pct":50.84,"children_share_pct":20.68,"not_born_uk_share_pct":33.82},"Merton":{"house_price_proxy_gbp":470000,"median_weekly_earnings_gbp":876.3,"male_share_pct":49.12,"female_share_pct":50.88,"children_share_pct":20.59,"not_born_uk_share_pct":37.79},"Newham":{"house_price_proxy_gbp":390500,"median_weekly_earnings_gbp":758.8,"male_share_pct":52.17,"female_share_pct":47.83,"children_share_pct":22.21,"not_born_uk_share_pct":53.61},"Redbridge":{"house_price_proxy_gbp":420000,"median_weekly_earnings_gbp":820.1,"male_share_pct":49.54,"female_share_pct":50.46,"children_share_pct":22.9,"not_born_uk_share_pct":37.05},"Richmond upon Thames":{"house_price_proxy_gbp":650000,"median_weekly_earnings_gbp":962,"male_share_pct":48.58,"female_share_pct":51.42,"children_share_pct":20.49,"not_born_uk_share_pct":24.29},"Southwark":{"house_price_proxy_gbp":530000,"median_weekly_earnings_gbp":880.4,"male_share_pct":49.57,"female_share_pct":50.43,"children_share_pct":18.5,"not_born_uk_share_pct":39.49},"Sutton":{"house_price_proxy_gbp":367000,"median_weekly_earnings_gbp":853.2,"male_share_pct":48.71,"female_share_pct":51.29,"children_share_pct":20.38,"not_born_uk_share_pct":19.89},"Tower Hamlets":{"house_price_proxy_gbp":490000,"median_weekly_earnings_gbp":882.2,"male_share_pct":51.74,"female_share_pct":48.26,"children_share_pct":19.59,"not_born_uk_share_pct":43.16},"Waltham Forest":{"house_price_proxy_gbp":445000,"median_weekly_earnings_gbp":839.7,"male_share_pct":49.95,"female_share_pct":50.05,"children_share_pct":22,"not_born_uk_share_pct":38.64},"Wandsworth":{"house_price_proxy_gbp":654000,"median_weekly_earnings_gbp":921.1,"male_share_pct":48.06,"female_share_pct":51.94,"children_share_pct":17.59,"not_born_uk_share_pct":35.43},"Westminster":{"house_price_proxy_gbp":1025000,"median_weekly_earnings_gbp":958.2,"male_share_pct":51.64,"female_share_pct":48.36,"children_share_pct":14.71,"not_born_uk_share_pct":53.32}};
+const GREENSPACE_SHARE_DATA = {"City of London":4.8,"Barking and Dagenham":33.6,"Barnet":41.3,"Bexley":31.7,"Brent":21.9,"Bromley":57.8,"Camden":24.8,"Croydon":37.1,"Ealing":30.9,"Enfield":45.6,"Greenwich":34.4,"Hackney":23.2,"Hammersmith and Fulham":19.1,"Haringey":25.5,"Harrow":34.6,"Havering":59.3,"Hillingdon":49.2,"Hounslow":39.6,"Islington":12.4,"Kensington and Chelsea":15.1,"Kingston upon Thames":36.4,"Lambeth":17.3,"Lewisham":22.5,"Merton":34.6,"Newham":23.9,"Redbridge":40.6,"Richmond upon Thames":50.8,"Southwark":24.9,"Sutton":32,"Tower Hamlets":15.2,"Waltham Forest":31.4,"Wandsworth":26.9,"Westminster":21.5};
+const GREENSPACE_LONDON_AVG = 38.2;
 const COUNTRY_BIRTH_SHORTLIST = ["ALL", "India", "Poland", "Romania", "Nigeria", "Pakistan", "Bangladesh"];
 const BOROUGH_COUNTRY_BIRTH_DATA = {"Barking and Dagenham":{"India":3.05,"Poland":1.06,"Romania":4.3,"Nigeria":4.31,"Pakistan":3.32,"Bangladesh":4.24,"top_country":"Nigeria","top_country_pct":4.31},"Barnet":{"India":2.91,"Poland":1.94,"Romania":3.45,"Nigeria":0.99,"Pakistan":0.78,"Bangladesh":0.33,"top_country":"Romania","top_country_pct":3.45},"Bexley":{"India":2.23,"Poland":0.84,"Romania":0.98,"Nigeria":3.58,"Pakistan":0.28,"Bangladesh":0.34,"top_country":"Nigeria","top_country_pct":3.58},"Brent":{"India":10.36,"Poland":2.13,"Romania":5.22,"Nigeria":0.75,"Pakistan":1.94,"Bangladesh":0.28,"top_country":"India","top_country_pct":10.36},"Bromley":{"India":2.07,"Poland":0.86,"Romania":0.74,"Nigeria":1.07,"Pakistan":0.25,"Bangladesh":0.22,"top_country":"India","top_country_pct":2.07},"Camden":{"India":1.56,"Poland":0.9,"Romania":0.53,"Nigeria":0.51,"Pakistan":0.37,"Bangladesh":2.77,"top_country":"Bangladesh","top_country_pct":2.77},"City of London":{"India":2.04,"Poland":1.53,"Romania":0.58,"Nigeria":0.24,"Pakistan":0.19,"Bangladesh":1.36,"top_country":"India","top_country_pct":2.04},"Croydon":{"India":3.92,"Poland":2.17,"Romania":1.32,"Nigeria":1.68,"Pakistan":1.9,"Bangladesh":0.4,"top_country":"India","top_country_pct":3.92},"Ealing":{"India":8.14,"Poland":4.82,"Romania":1.28,"Nigeria":0.41,"Pakistan":1.99,"Bangladesh":0.54,"top_country":"India","top_country_pct":8.14},"Enfield":{"India":1.13,"Poland":1.79,"Romania":2.06,"Nigeria":1.17,"Pakistan":0.45,"Bangladesh":1.07,"top_country":"Romania","top_country_pct":2.06},"Greenwich":{"India":1.99,"Poland":1.19,"Romania":1.66,"Nigeria":4.97,"Pakistan":0.55,"Bangladesh":0.36,"top_country":"Nigeria","top_country_pct":4.97},"Hackney":{"India":1.21,"Poland":1.36,"Romania":0.47,"Nigeria":2.02,"Pakistan":0.39,"Bangladesh":0.97,"top_country":"Nigeria","top_country_pct":2.02},"Hammersmith and Fulham":{"India":1.09,"Poland":1.39,"Romania":0.65,"Nigeria":0.51,"Pakistan":0.5,"Bangladesh":0.3,"top_country":"Poland","top_country_pct":1.39},"Haringey":{"India":0.81,"Poland":2.73,"Romania":2.4,"Nigeria":0.9,"Pakistan":0.37,"Bangladesh":0.81,"top_country":"Poland","top_country_pct":2.73},"Harrow":{"India":10.1,"Poland":1.38,"Romania":8.07,"Nigeria":0.46,"Pakistan":1.72,"Bangladesh":0.31,"top_country":"India","top_country_pct":10.1},"Havering":{"India":1.76,"Poland":0.71,"Romania":2.06,"Nigeria":1.58,"Pakistan":0.96,"Bangladesh":0.73,"top_country":"Romania","top_country_pct":2.06},"Hillingdon":{"India":9.07,"Poland":2.09,"Romania":1.82,"Nigeria":0.49,"Pakistan":2.11,"Bangladesh":0.63,"top_country":"India","top_country_pct":9.07},"Hounslow":{"India":13.2,"Poland":3.85,"Romania":1.89,"Nigeria":0.42,"Pakistan":2.86,"Bangladesh":0.48,"top_country":"India","top_country_pct":13.2},"Islington":{"India":0.85,"Poland":0.83,"Romania":0.57,"Nigeria":0.68,"Pakistan":0.21,"Bangladesh":1.1,"top_country":"Bangladesh","top_country_pct":1.1},"Kensington and Chelsea":{"India":1.18,"Poland":0.81,"Romania":0.56,"Nigeria":0.39,"Pakistan":0.44,"Bangladesh":0.41,"top_country":"India","top_country_pct":1.18},"Kingston upon Thames":{"India":2.2,"Poland":1.53,"Romania":0.69,"Nigeria":0.27,"Pakistan":1.18,"Bangladesh":0.26,"top_country":"India","top_country_pct":2.2},"Lambeth":{"India":0.78,"Poland":1.52,"Romania":0.49,"Nigeria":1.62,"Pakistan":0.51,"Bangladesh":0.32,"top_country":"Nigeria","top_country_pct":1.62},"Lewisham":{"India":0.85,"Poland":1.28,"Romania":1.31,"Nigeria":3.09,"Pakistan":0.34,"Bangladesh":0.26,"top_country":"Nigeria","top_country_pct":3.09},"Merton":{"India":2.18,"Poland":3.22,"Romania":1.36,"Nigeria":0.62,"Pakistan":2.29,"Bangladesh":0.51,"top_country":"Poland","top_country_pct":3.22},"Newham":{"India":6.22,"Poland":1.22,"Romania":4.97,"Nigeria":1.66,"Pakistan":3.94,"Bangladesh":7.65,"top_country":"Bangladesh","top_country_pct":7.65},"Redbridge":{"India":7.62,"Poland":0.83,"Romania":3.58,"Nigeria":0.75,"Pakistan":5.96,"Bangladesh":4.54,"top_country":"India","top_country_pct":7.62},"Richmond upon Thames":{"India":1.69,"Poland":1.27,"Romania":0.48,"Nigeria":0.19,"Pakistan":0.4,"Bangladesh":0.22,"top_country":"India","top_country_pct":1.69},"Southwark":{"India":0.98,"Poland":0.92,"Romania":0.57,"Nigeria":3.63,"Pakistan":0.31,"Bangladesh":0.71,"top_country":"Nigeria","top_country_pct":3.63},"Sutton":{"India":3.29,"Poland":1.63,"Romania":0.9,"Nigeria":0.55,"Pakistan":1.48,"Bangladesh":0.4,"top_country":"India","top_country_pct":3.29},"Tower Hamlets":{"India":2.04,"Poland":0.99,"Romania":0.89,"Nigeria":0.47,"Pakistan":0.5,"Bangladesh":14.04,"top_country":"Bangladesh","top_country_pct":14.04},"Waltham Forest":{"India":1.2,"Poland":1.97,"Romania":3.96,"Nigeria":0.73,"Pakistan":3.96,"Bangladesh":0.82,"top_country":"Romania","top_country_pct":3.96},"Wandsworth":{"India":1.31,"Poland":1.74,"Romania":0.53,"Nigeria":0.49,"Pakistan":1.99,"Bangladesh":0.23,"top_country":"Pakistan","top_country_pct":1.99},"Westminster":{"India":2.18,"Poland":0.95,"Romania":0.7,"Nigeria":0.55,"Pakistan":0.61,"Bangladesh":1.56,"top_country":"India","top_country_pct":2.18}};
 
@@ -1138,6 +1141,7 @@ const METRIC_PALETTES = {
   house_price_proxy_gbp: [[245, 236, 225, 220], [224, 181, 143, 232], [199, 132, 84, 242], [149, 74, 45, 252], [88, 34, 27, 255]],
   median_weekly_earnings_gbp: [[229, 245, 243, 220], [172, 220, 214, 232], [106, 186, 177, 242], [41, 129, 137, 250], [14, 70, 87, 255]],
   children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
+  greenspace_share_pct: [[239, 244, 232, 220], [199, 218, 174, 232], [146, 186, 123, 242], [94, 144, 78, 250], [45, 92, 53, 255]],
   country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
 };
 
@@ -1224,6 +1228,24 @@ const METRICS = {
     summaryLabel: "London avg",
     tooltipTag: "Children",
     note: "Used as the first-phase family / children metric",
+  },
+  greenspace_share_pct: {
+    key: "greenspace_share_pct",
+    label: "Greenspace share",
+    button: "Greenspace",
+    legendLabel: "Borough area classified as greenspace",
+    unit: "%",
+    year: "2005",
+    source: "London Datastore Land Use by Borough and Ward (GLUD 2005 Enhanced Basemap)",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "greenspace_share_pct",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(1)}%`,
+    diffFormatter: (v) => `${v.toFixed(1)} pp`,
+    summaryLabel: "London share",
+    tooltipTag: "Greenspace share",
+    note: "Percent of borough area in the GLUD 2005 Greenspace land-use class",
   },
   country_of_birth_pct: {
     key: "country_of_birth_pct",
@@ -1365,6 +1387,9 @@ async function init() {
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
+  for (const [boroughName, greenspaceShare] of Object.entries(GREENSPACE_SHARE_DATA)) {
+    if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].greenspace_share_pct = greenspaceShare;
+  }
   if (municipiGeoJSON?.features) {
     for (const feature of municipiGeoJSON.features) {
       const boroughName = feature.properties?.[NAME_FIELD];
@@ -1549,6 +1574,12 @@ async function init() {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
     }
+    if (metricKey === "greenspace_share_pct") {
+      return {
+        ...boroughStats[metricKey],
+        avg: GREENSPACE_LONDON_AVG,
+      };
+    }
     if (metricKey === "country_of_birth_pct") {
       const values = municipiGeoJSON.features
         .map((feature) => metricValue(feature, metricKey, countrySelection))
@@ -1645,6 +1676,8 @@ async function init() {
     if (!Number.isFinite(delta)) return "n/a";
     const sign = delta > 0 ? "+" : delta < 0 ? "−" : "±";
     const absValue = Math.abs(delta);
+    const metric = getMetricConfigFor(metricKey, comparisonCountrySelection());
+    if (metric.diffFormatter) return `${sign}${metric.diffFormatter(absValue)}`;
     return `${sign}${formatMetricValueFor(metricKey, absValue, comparisonCountrySelection())}`;
   }
 
@@ -1707,6 +1740,14 @@ async function init() {
       if (delta <= -2) return "lower";
       return "similar";
     }
+    if (metricKey === "greenspace_share_pct") {
+      const delta = value - average;
+      if (delta >= 10) return "much-higher";
+      if (delta >= 4) return "higher";
+      if (delta <= -10) return "much-lower";
+      if (delta <= -4) return "lower";
+      return "similar";
+    }
     return "similar";
   }
 
@@ -1734,7 +1775,7 @@ async function init() {
       const direction = value >= average ? "above" : "below";
       return `${formatMetricValueFor(metricKey, delta, countrySelection)} ${direction} the London average`;
     }
-    if (metricKey === "children_share_pct" || metricKey === "country_of_birth_pct") {
+    if (metricKey === "children_share_pct" || metricKey === "country_of_birth_pct" || metricKey === "greenspace_share_pct") {
       const delta = Math.abs(value - average);
       const direction = value >= average ? "above" : "below";
       return `${delta.toFixed(1)} pp ${direction} the London average`;
@@ -1800,6 +1841,14 @@ async function init() {
       return makeInsight(`Its child population looks close to the London average, at <strong>${formatted}</strong>.`, 24, key);
     }
 
+    if (key === "greenspace_share_pct") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`A notably greener borough, with <strong>${formatted}</strong> of its area in the GLUD Greenspace class, ${diff}.`, 74, key);
+      if (bucket === "higher") return makeInsight(`Greenspace covers more of the borough than the London average, reaching <strong>${formatted}</strong>.`, 60, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Greenspace is scarce by outer-London standards, with only <strong>${formatted}</strong> of borough area in the GLUD Greenspace class, ${diff}.`, 72, key);
+      if (bucket === "lower") return makeInsight(`Greenspace takes up a smaller share of borough land than London overall, at <strong>${formatted}</strong>.`, 56, key);
+      return makeInsight(`Greenspace land share is close to the London average, at <strong>${formatted}</strong>.`, 24, key);
+    }
+
     if (key === "country_of_birth_pct") {
       if (bucket === "much-higher" || rank === "top-5") return makeInsight(`More international than average, with <strong>${formatted}</strong> of residents born outside the UK, ${diff}.`, 80, key);
       if (bucket === "higher") return makeInsight(`A more internationally mixed borough than London overall, with <strong>${formatted}</strong> born outside the UK.`, 60, key);
@@ -1816,6 +1865,7 @@ async function init() {
     const priceCtx = spotlightMetricContext(feature, "house_price_proxy_gbp");
     const earningsCtx = spotlightMetricContext(feature, "median_weekly_earnings_gbp");
     const childrenCtx = spotlightMetricContext(feature, "children_share_pct");
+    const greenspaceCtx = spotlightMetricContext(feature, "greenspace_share_pct");
     const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
 
     const insights = [
@@ -1823,6 +1873,7 @@ async function init() {
       buildSpotlightMetricInsight(priceCtx),
       buildSpotlightMetricInsight(earningsCtx),
       buildSpotlightMetricInsight(childrenCtx),
+      buildSpotlightMetricInsight(greenspaceCtx),
       buildSpotlightMetricInsight(internationalCtx),
     ].filter(Boolean);
 
@@ -1836,6 +1887,18 @@ async function init() {
 
     if (densityCtx && childrenCtx && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower") && (childrenCtx.bucket === "much-higher" || childrenCtx.bucket === "higher")) {
       insights.push(makeInsight(`Lower density and a larger child population make this feel more family-oriented than much of inner London.`, 88, "family-outer"));
+    }
+
+    if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "much-higher" || greenspaceCtx.bucket === "higher") && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower")) {
+      insights.push(makeInsight(`Higher greenspace share and lower density give the borough a noticeably greener, more spacious profile.`, 86, "green-spacious"));
+    }
+
+    if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`A relatively high greenspace share despite solid density gives the borough a less expected mixed urban profile.`, 80, "green-dense-mix"));
+    }
+
+    if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "lower" || greenspaceCtx.bucket === "much-lower") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`Low greenspace share alongside high density reinforces a compact inner-urban borough profile.`, 84, "compact-urban"));
     }
 
     if (priceCtx && childrenCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (childrenCtx.bucket === "lower" || childrenCtx.bucket === "much-lower")) {
@@ -1867,6 +1930,9 @@ async function init() {
       const notUk = feature.properties?.not_born_uk_share_pct;
       const ukBorn = Number.isFinite(notUk) ? 100 - notUk : null;
       if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) return `UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`;
+    }
+    if (boroughMetric === "greenspace_share_pct") {
+      return "Share of borough area in the GLUD 2005 Greenspace class";
     }
     return "";
   }
@@ -2193,6 +2259,8 @@ async function init() {
       }
     } else if (metricKey === "children_share_pct") {
       support.push("Share of residents aged 0–15");
+    } else if (metricKey === "greenspace_share_pct") {
+      support.push("Share of borough area in the GLUD 2005 Greenspace class");
     } else if (metricKey === "median_weekly_earnings_gbp") {
       support.push("Resident-based, full-time median pay");
     } else if (metricKey === "house_price_proxy_gbp") {

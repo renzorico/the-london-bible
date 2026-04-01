@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough greenspace metric
+
+- Added borough-level greenspace share as a first-class metric using the London Datastore GLUD 2005 Greenspace land-use class.
+- Wired greenspace into borough choropleths, legend copy, tooltips, comparison, and spotlight insight rules without changing the small-area flow.
+
 ## 2026-04-01 — Spotlight cross-metric insight pass
 
 - Deepened the borough `Why here?` spotlight to rank and surface the strongest cross-metric patterns instead of listing one blurb per metric.
