@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Curated POI overlay
+
+- Added a new POIs overlay that reveals London through a curated set of city-life categories, combining an OSM cafe extract with London Datastore cultural infrastructure points for nightlife, culture, landmarks, and urban sport.
+- Styled the layer as compact art-directed dots with category filters, zoom-based visibility, and lightweight hover/click cards so the city lights up without turning into directory clutter.
+
 ## 2026-04-01 — London bikes overlay
 
 - Added a new Bikes overlay built from TfL’s published London cycle routes, preprocessed into a local GeoJSON with a clean major / primary / connector hierarchy and a dedicated toggle alongside Contours.

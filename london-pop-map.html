@@ -174,7 +174,7 @@
   }
   #overlay-toggle {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     width: 100%;
@@ -182,6 +182,20 @@
   #overlay-toggle .toggle-btn {
     width: 100%;
     justify-content: center;
+  }
+  #poi-toggle {
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    width: 100%;
+    margin-top: 8px;
+  }
+  #poi-toggle .toggle-btn {
+    justify-content: center;
+    min-height: 34px;
+    padding: 6px 8px 5px;
+    font-size: .56rem;
+    letter-spacing: .11em;
   }
   #metric-toggle {
     display: grid;
@@ -1490,6 +1504,14 @@
     <div id="overlay-toggle">
       <button id="btn-contours" class="toggle-btn secondary-btn" title="Contours" aria-label="Contours" onclick="toggleContours()">Contours</button>
       <button id="btn-bikes" class="toggle-btn secondary-btn" title="Bikes" aria-label="Bikes" onclick="toggleBikes()">Bikes</button>
+      <button id="btn-pois" class="toggle-btn secondary-btn" title="POIs" aria-label="POIs" onclick="togglePois()">POIs</button>
+    </div>
+    <div id="poi-toggle">
+      <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="coffee" title="Coffee" aria-label="Coffee" onclick="togglePoiCategory('coffee')">Coffee</button>
+      <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="nightlife" title="Nightlife" aria-label="Nightlife" onclick="togglePoiCategory('nightlife')">Nightlife</button>
+      <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="culture" title="Culture" aria-label="Culture" onclick="togglePoiCategory('culture')">Culture</button>
+      <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="sport" title="Urban sport" aria-label="Urban sport" onclick="togglePoiCategory('sport')">Sport</button>
+      <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="landmarks" title="Landmarks" aria-label="Landmarks" onclick="togglePoiCategory('landmarks')">Landmarks</button>
     </div>
   </div>
 
@@ -1634,6 +1656,8 @@ const BIKE_LAYER_IDS = [
   "bikes-line-primary",
   "bikes-line-connector",
 ];
+const POI_DATA_URL = "data/london_pois.geojson";
+const POI_CATEGORIES = ["coffee", "nightlife", "culture", "sport", "landmarks"];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -1682,8 +1706,8 @@ const ZONES = [
 ];
 
 const THEMES = {
-  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b", bikeHaloMajor: "rgba(108, 197, 171, 0.30)", bikeHaloPrimary: "rgba(101, 185, 161, 0.18)", bikeMajor: "#147a69", bikePrimary: "#2d9a85", bikeConnector: "#6db3a4" },
-  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff", bikeHaloMajor: "rgba(98, 255, 225, 0.28)", bikeHaloPrimary: "rgba(63, 212, 184, 0.18)", bikeMajor: "#8effd8", bikePrimary: "#42dfbf", bikeConnector: "#1f9f90" },
+  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b", bikeHaloMajor: "rgba(108, 197, 171, 0.30)", bikeHaloPrimary: "rgba(101, 185, 161, 0.18)", bikeMajor: "#147a69", bikePrimary: "#2d9a85", bikeConnector: "#6db3a4", poiColors: { coffee: [191, 133, 64, 228], nightlife: [125, 52, 88, 228], culture: [70, 104, 170, 232], sport: [67, 143, 115, 228], landmarks: [149, 128, 62, 234] }, poiHalo: { coffee: [230, 188, 132, 74], nightlife: [184, 118, 152, 72], culture: [127, 158, 222, 76], sport: [129, 196, 167, 70], landmarks: [210, 185, 108, 76] } },
+  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff", bikeHaloMajor: "rgba(98, 255, 225, 0.28)", bikeHaloPrimary: "rgba(63, 212, 184, 0.18)", bikeMajor: "#8effd8", bikePrimary: "#42dfbf", bikeConnector: "#1f9f90", poiColors: { coffee: [244, 190, 104, 236], nightlife: [218, 117, 173, 234], culture: [144, 181, 255, 238], sport: [114, 232, 184, 236], landmarks: [235, 211, 123, 240] }, poiHalo: { coffee: [255, 214, 146, 78], nightlife: [246, 156, 206, 74], culture: [171, 210, 255, 80], sport: [149, 255, 206, 78], landmarks: [255, 227, 146, 82] } },
 };
 
 const TUBE_LINE_COLOURS = {
@@ -2222,7 +2246,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2252,6 +2276,7 @@ async function init() {
   const pubsRowEl = document.getElementById("pubs-row");
   const pubsToggleEl = document.getElementById("pubs-toggle");
   const overlayToggleEl = document.getElementById("overlay-toggle");
+  const poiToggleEl = document.getElementById("poi-toggle");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
     msoa: document.getElementById("pubs-msoa"),
@@ -2275,6 +2300,7 @@ async function init() {
   const btnTubeMap = document.getElementById("btn-tube-map");
   const btnContours = document.getElementById("btn-contours");
   const btnBikes = document.getElementById("btn-bikes");
+  const btnPois = document.getElementById("btn-pois");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
@@ -2283,6 +2309,9 @@ async function init() {
     borough: document.getElementById("geo-borough"),
     msoa: document.getElementById("geo-msoa"),
   };
+  const poiButtons = Object.fromEntries(
+    [...poiToggleEl.querySelectorAll("[data-poi-category]")].map((button) => [button.dataset.poiCategory, button])
+  );
 
   let tooltipPinned = false;
   let pinnedCoord = null;
@@ -2303,17 +2332,20 @@ async function init() {
   let selectedTubeLineKey = null;
   let showContours = false;
   let showBikes = false;
+  let showPois = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let contoursGeoJSON = null;
   let bikesGeoJSON = null;
+  let poisGeoJSON = null;
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
   let highlightedFeature = null;
   let pinData = [];
   let currentMainLayer = null;
+  let activePoiCategories = new Set(POI_CATEGORIES);
   const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 };
   const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 8.72, pitch: 0, bearing: 0 };
   let viewState = { ...INTRO_VIEW_STATE };
@@ -2463,13 +2495,14 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, bikesData, poisData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_pubs.json").then((r) => r.json()).catch(() => null),
     fetch(CONTOUR_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch(BIKES_DATA_URL).then((r) => r.json()).catch(() => null),
+    fetch(POI_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2479,6 +2512,7 @@ async function init() {
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (contoursData?.features) contoursGeoJSON = contoursData;
   if (bikesData?.features) bikesGeoJSON = bikesData;
+  if (poisData?.features) poisGeoJSON = poisData;
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
     SMALL_AREA_DENSITY.years = discoverMsoaSeriesYears(msoaGeoJSON, "density", "population");
@@ -3601,6 +3635,14 @@ async function init() {
     return showBikes && !!bikesGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
   }
 
+  function poisVisible() {
+    return showPois && !!poisGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
+  }
+
+  function poiButtonActive(category) {
+    return activePoiCategories.has(category);
+  }
+
   function firstLabelLayerId(map) {
     const layers = map.getStyle?.().layers || [];
     return layers.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"])?.id || null;
@@ -3893,6 +3935,79 @@ async function init() {
     });
   }
 
+  function visiblePoiFeatures() {
+    if (!poisVisible()) return [];
+    const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    return poisGeoJSON.features.filter((feature) => {
+      const props = feature.properties || {};
+      return activePoiCategories.has(props.category) && zoom >= (props.min_zoom ?? 10);
+    });
+  }
+
+  function poiBaseRadius(feature) {
+    const props = feature.properties || {};
+    const category = props.category;
+    if (category === "landmarks") return 5.2;
+    if (category === "culture") return 4.5;
+    if (category === "nightlife") return props.subcategory === "Nightclub" ? 4.4 : 3.8;
+    if (category === "sport") return 4.1;
+    return 3.4;
+  }
+
+  function poiColorFor(category, key) {
+    return THEMES[currentTheme][key][category] || THEMES[currentTheme][key].culture;
+  }
+
+  function makePoiHaloLayer() {
+    const data = visiblePoiFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "poi-halo",
+      data,
+      pickable: false,
+      stroked: false,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 3,
+      radiusMaxPixels: 13,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => poiBaseRadius(f) * 2.4,
+      getFillColor: (f) => poiColorFor(f.properties?.category, "poiHalo"),
+      opacity: 1,
+      updateTriggers: {
+        data: [showPois, currentDataset, viewState.zoom, Array.from(activePoiCategories).join("|")],
+        getFillColor: [currentTheme],
+      },
+    });
+  }
+
+  function makePoiLayer() {
+    const data = visiblePoiFeatures();
+    if (!data.length) return null;
+    return new deck.ScatterplotLayer({
+      id: "poi-markers",
+      data,
+      pickable: true,
+      stroked: true,
+      filled: true,
+      radiusUnits: "pixels",
+      radiusMinPixels: 2.5,
+      radiusMaxPixels: 10,
+      lineWidthMinPixels: 1.2,
+      getPosition: (f) => f.geometry.coordinates,
+      getRadius: (f) => poiBaseRadius(f),
+      getFillColor: (f) => poiColorFor(f.properties?.category, "poiColors"),
+      getLineColor: currentTheme === "night" ? [7, 13, 22, 245] : [255, 250, 244, 238],
+      getLineWidth: () => 1.2,
+      opacity: 1,
+      updateTriggers: {
+        data: [showPois, currentDataset, viewState.zoom, Array.from(activePoiCategories).join("|")],
+        getFillColor: [currentTheme],
+        getLineColor: [currentTheme],
+      },
+    });
+  }
+
   function makeTubeLineCaseLayer() {
     if (!transportOverlayVisible() || !tubeLinesGeoJSON) return null;
     return new deck.GeoJsonLayer({
@@ -3956,6 +4071,7 @@ async function init() {
   function zoneLabel(object, coordinate) {
     if (object?.layer?.id === "stations") return object.properties.stationName || "Station";
     if (object?.layer?.id === "tube-lines") return object.properties.lineName || "Tube line";
+    if (object?.layer?.id === "poi-markers") return object.properties.name || "Place";
     if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
     if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
     if (object?.properties?.[NAME_FIELD] && currentDataset !== "sections") return object.properties[NAME_FIELD];
@@ -4100,6 +4216,14 @@ async function init() {
 
   function lineTooltipHtml(line, pinned) {
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Line</span><br><span class="tarea">${line.properties.lineName}</span>`;
+  }
+
+  function poiTooltipHtml(poi, pinned) {
+    const props = poi.properties || {};
+    const category = props.category_label || props.category || "POI";
+    const subcategory = props.subcategory ? `<br><span class="tsub">${props.subcategory}</span>` : "";
+    const source = props.source_type ? `<br><span class="tsub">${props.source_type}</span>` : "";
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${category}</span><br><span class="tarea">${props.name || "Place"}</span>${subcategory}${source}`;
   }
 
   function formatMetricValue(metricKey, value) {
@@ -4281,6 +4405,10 @@ async function init() {
     if (tubeCase) layers.push(tubeCase);
     const tubeLines = makeTubeLineLayer();
     if (tubeLines) layers.push(tubeLines);
+    const poiHalo = makePoiHaloLayer();
+    if (poiHalo) layers.push(poiHalo);
+    const poiLayer = makePoiLayer();
+    if (poiLayer) layers.push(poiLayer);
     const stations = makeStationsLayer();
     if (stations) layers.push(stations);
     const comparisonLayerA = makeComparisonSelectionLayer(comparisonFeature(comparisonA), "A");
@@ -4400,6 +4528,13 @@ async function init() {
     }).join("");
   }
 
+  function updatePoiButtons() {
+    for (const [category, button] of Object.entries(poiButtons)) {
+      if (!button) continue;
+      button.classList.toggle("active", poiButtonActive(category));
+    }
+  }
+
   function updateModeButtons() {
     document.getElementById("btn-sections").classList.toggle("active", currentDataset === "sections");
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
@@ -4407,6 +4542,7 @@ async function init() {
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
     btnContours.classList.toggle("active", contoursVisible());
     btnBikes.classList.toggle("active", bikesVisible());
+    btnPois.classList.toggle("active", poisVisible());
     btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
@@ -4431,6 +4567,7 @@ async function init() {
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
     overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
+    poiToggleEl.style.display = !sectionsMode && showPois ? "grid" : "none";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -4552,6 +4689,7 @@ async function init() {
     if (metric.note && metricKey !== "density") metaParts.push(metric.note);
     if (contoursVisible()) metaParts.push("Contours · elevation in meters above sea level");
     if (bikesVisible()) metaParts.push("Bikes · major and local cycle routes");
+    if (poisVisible()) metaParts.push("POIs · curated city places");
     legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
@@ -4949,6 +5087,7 @@ async function init() {
     updateYearControl();
     updateCountrySelector();
     updateChapterSelector();
+    updatePoiButtons();
     updateLegend();
     updateContourLayers();
     updateBikeLayers();
@@ -5027,6 +5166,12 @@ async function init() {
         positionTooltip(x, y);
         return;
       }
+      if (object.layer?.id === "poi-markers") {
+        tooltipEl.innerHTML = poiTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
+        return;
+      }
 
       if (onlyTubeMode()) {
         tooltipEl.style.display = "none";
@@ -5092,6 +5237,13 @@ async function init() {
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
         renderAnalysisPanel();
+        return;
+      }
+      if (object?.layer?.id === "poi-markers") {
+        tooltipEl.classList.remove("summary-card");
+        tooltipEl.innerHTML = poiTooltipHtml(object, true);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
         return;
       }
 
@@ -5400,6 +5552,18 @@ async function init() {
     updateBikeLayers();
     updateModeButtons();
     updateLegend();
+  };
+
+  togglePois = function() {
+    showPois = !showPois;
+    refreshMapState();
+  };
+
+  togglePoiCategory = function(category) {
+    if (!POI_CATEGORIES.includes(category)) return;
+    if (activePoiCategories.has(category)) activePoiCategories.delete(category);
+    else activePoiCategories.add(category);
+    refreshMapState();
   };
 
   toggleTheme = function() {
