@@ -1,3 +1,6 @@
+## 2026-04-02 — Mobile V2 QA polish
+- Tightened the feat/mobile-v2 phone shell with safer top and bottom spacing, calmer dense-overlay visibility, and more reliable tap-first cards and drawers so the branch is closer to merge-ready pending real-device QA.
+
 # Changelog
 
 ## 2026-04-01 — Mobile V2 branch pass

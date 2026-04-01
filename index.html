@@ -1682,14 +1682,17 @@
     display: none;
   }
 
-  @media (max-width: 820px) {
+  @media (max-width: 767px) {
     body.mobile-shell {
+      --safe-top: max(12px, env(safe-area-inset-top));
+      --safe-bottom: max(12px, env(safe-area-inset-bottom));
       overscroll-behavior: none;
+      overscroll-behavior-y: contain;
     }
     #mobile-brand-bar {
       display: flex;
       position: fixed;
-      top: 12px;
+      top: calc(var(--safe-top) + 4px);
       left: 12px;
       right: 12px;
       z-index: 24;
@@ -1717,13 +1720,14 @@
     .mobile-brand-context {
       margin-top: 4px;
       font-family: var(--font-ui);
-      font-size: .82rem;
+      font-size: .8rem;
       font-weight: 700;
-      line-height: 1.28;
+      line-height: 1.24;
       color: var(--title);
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
       overflow: hidden;
-      text-overflow: ellipsis;
     }
     #mobile-scrim {
       display: block;
@@ -1745,11 +1749,11 @@
       position: fixed;
       left: 12px;
       right: 12px;
-      bottom: 12px;
+      bottom: calc(var(--safe-bottom) + 4px);
       z-index: 24;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
-      padding: 10px;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom) * 0.18);
       border: 1px solid var(--panel-border);
       background: linear-gradient(180deg, var(--panel-strong), var(--panel));
       border-radius: 20px;
@@ -1758,8 +1762,8 @@
     }
     .mobile-dock-btn {
       min-width: 0;
-      min-height: 54px;
-      padding: 8px 4px 7px;
+      min-height: 56px;
+      padding: 9px 4px 8px;
       border-radius: 14px;
       flex-direction: column;
       gap: 6px;
@@ -1785,13 +1789,15 @@
       top: auto;
       left: 12px;
       right: 12px;
-      bottom: 84px;
+      bottom: calc(var(--safe-bottom) + 78px);
       width: auto;
       max-width: none;
       gap: 10px;
       z-index: 22;
-      max-height: min(56vh, 480px);
+      max-height: min(58vh, 500px);
       overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       transform: translateY(calc(100% + 24px));
       opacity: 0;
       transition: transform .24s ease, opacity .24s ease;
@@ -1821,7 +1827,7 @@
       margin-bottom: 8px;
     }
     body.mobile-shell #top-right-controls {
-      top: 78px;
+      top: calc(var(--safe-top) + 68px);
       left: 12px;
       right: 12px;
       gap: 10px;
@@ -1832,6 +1838,10 @@
     body.mobile-shell #search-input {
       width: 100%;
       min-width: 0;
+    }
+    body.mobile-shell #search-input {
+      min-height: 44px;
+      font-size: 16px;
     }
     body.mobile-shell #layer-toggle {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1895,12 +1905,14 @@
     body.mobile-shell #bottom-left-stack {
       left: 12px;
       right: 12px;
-      bottom: 84px;
+      bottom: calc(var(--safe-bottom) + 78px);
       width: auto;
       max-width: none;
       z-index: 22;
-      max-height: min(44vh, 340px);
+      max-height: min(46vh, 360px);
       overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       transform: translateY(calc(100% + 24px));
       opacity: 0;
       transition: transform .24s ease, opacity .24s ease;
@@ -1920,8 +1932,8 @@
     body.mobile-shell #analysis-panel {
       left: 12px;
       right: 12px;
-      top: 126px;
-      bottom: 84px;
+      top: calc(var(--safe-top) + 116px);
+      bottom: calc(var(--safe-bottom) + 78px);
       width: auto;
       max-width: none;
       z-index: 23;
@@ -1931,7 +1943,9 @@
       padding: 14px 14px 12px;
     }
     body.mobile-shell #analysis-panel .analysis-panel-body {
-      padding: 14px 14px 16px;
+      padding: 14px 14px calc(18px + env(safe-area-inset-bottom) * 0.35);
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     body.mobile-shell #analysis-panel .c-grid,
     body.mobile-shell #analysis-panel .corr-selectors {
@@ -1944,10 +1958,13 @@
       left: 12px !important;
       right: 12px !important;
       top: auto !important;
-      bottom: 86px !important;
+      bottom: calc(var(--safe-bottom) + 82px) !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: none !important;
+      max-height: min(34vh, 260px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 12px 14px 13px;
       border-radius: 18px;
       z-index: 25;
@@ -1963,16 +1980,16 @@
 
   @media (max-width: 430px) {
     body.mobile-shell #mobile-brand-bar {
-      padding: 11px 12px;
+      padding: 10px 12px;
     }
     body.mobile-shell .mobile-brand-context {
-      font-size: .78rem;
+      font-size: .76rem;
     }
     body.mobile-shell #top-right-controls {
-      top: 74px;
+      top: calc(var(--safe-top) + 64px);
     }
     body.mobile-shell #analysis-panel {
-      top: 122px;
+      top: calc(var(--safe-top) + 110px);
     }
     body.mobile-shell #metric-toggle {
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3024,7 +3041,7 @@ async function init() {
   }
 
   function isMobileLayout() {
-    return window.matchMedia("(max-width: 820px)").matches;
+    return window.matchMedia("(max-width: 767px)").matches;
   }
 
   function prefersTouchUi() {
@@ -4810,26 +4827,28 @@ async function init() {
   function visiblePoiFeatures() {
     if (!poisVisible()) return [];
     const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    const mobile = isMobileLayout();
     return poisGeoJSON.features.filter((feature) => {
       const props = feature.properties || {};
       if (!activePoiCategories.has(props.category)) return false;
-      if (props.category === "coffee") return zoom >= 10.75;
-      if (props.category === "nightlife") return zoom >= 10.05;
-      if (props.category === "culture") return zoom >= 9.7;
-      if (props.category === "sport") return zoom >= 10.25;
-      if (props.category === "landmarks") return zoom >= 9.55;
-      return zoom >= (props.min_zoom ?? 10);
+      if (props.category === "coffee") return zoom >= (mobile ? 11.0 : 10.75);
+      if (props.category === "nightlife") return zoom >= (mobile ? 10.35 : 10.05);
+      if (props.category === "culture") return zoom >= (mobile ? 9.95 : 9.7);
+      if (props.category === "sport") return zoom >= (mobile ? 10.45 : 10.25);
+      if (props.category === "landmarks") return zoom >= (mobile ? 9.7 : 9.55);
+      return zoom >= ((props.min_zoom ?? 10) + (mobile ? 0.15 : 0));
     });
   }
 
   function poiBaseRadius(feature) {
     const props = feature.properties || {};
     const category = props.category;
-    if (category === "landmarks") return 5.2;
-    if (category === "culture") return 4.5;
-    if (category === "nightlife") return props.subcategory === "Nightclub" ? 4.4 : 3.8;
-    if (category === "sport") return 4.1;
-    return 3.4;
+    const multiplier = isMobileLayout() ? 0.88 : 1;
+    if (category === "landmarks") return 5.2 * multiplier;
+    if (category === "culture") return 4.5 * multiplier;
+    if (category === "nightlife") return (props.subcategory === "Nightclub" ? 4.4 : 3.8) * multiplier;
+    if (category === "sport") return 4.1 * multiplier;
+    return 3.4 * multiplier;
   }
 
   function poiColorFor(category, key) {
@@ -4911,24 +4930,26 @@ async function init() {
   function visibleSchoolFeatures() {
     if (!schoolsVisible()) return [];
     const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    const mobile = isMobileLayout();
     return schoolsGeoJSON.features.filter((feature) => {
       const props = feature.properties || {};
       if (!activeSchoolRatings.has(props.ofsted_rating || "Ungraded")) return false;
       if (activeSchoolPhase === "Primary" && props.phase !== "Primary") return false;
       if (activeSchoolPhase === "Secondary" && props.phase !== "Secondary" && props.phase !== "All-through") return false;
-      if (props.phase === "Primary") return zoom >= 10.15;
-      if (props.phase === "All-through") return zoom >= 9.95;
-      return zoom >= 9.7;
+      if (props.phase === "Primary") return zoom >= (mobile ? 10.35 : 10.15);
+      if (props.phase === "All-through") return zoom >= (mobile ? 10.15 : 9.95);
+      return zoom >= (mobile ? 9.9 : 9.7);
     });
   }
 
   function visibleHospitalFeatures() {
     if (!hospitalsVisible()) return [];
     const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
+    const mobile = isMobileLayout();
     return hospitalsGeoJSON.features.filter((feature) => {
       const props = feature.properties || {};
       if (!activeHospitalRatings.has(props.cqc_rating || "Not rated")) return false;
-      return zoom >= 9.55;
+      return zoom >= (mobile ? 9.8 : 9.55);
     });
   }
 
@@ -4970,9 +4991,10 @@ async function init() {
 
   function schoolBaseRadius(feature) {
     const props = feature.properties || {};
-    if (props.phase === "Secondary") return 4.6;
-    if (props.phase === "All-through") return 4.8;
-    return 3.8;
+    const multiplier = isMobileLayout() ? 0.9 : 1;
+    if (props.phase === "Secondary") return 4.6 * multiplier;
+    if (props.phase === "All-through") return 4.8 * multiplier;
+    return 3.8 * multiplier;
   }
 
   function hospitalColorFor(rating) {
@@ -4998,7 +5020,8 @@ async function init() {
   }
 
   function hospitalBaseRadius(feature) {
-    return feature.properties?.type === "Hospital" ? 4.6 : 4.2;
+    const multiplier = isMobileLayout() ? 0.92 : 1;
+    return (feature.properties?.type === "Hospital" ? 4.6 : 4.2) * multiplier;
   }
 
   function makeSchoolHitLayer() {
@@ -6616,7 +6639,7 @@ async function init() {
     mapStyle: THEMES.day.mapStyle,
     initialViewState: viewState,
     controller: { scrollZoom: { smooth: true, speed: 0.02 }, inertia: 0, doubleClickZoom: false },
-    pickingRadius: 6,
+    pickingRadius: 8,
     layers: [],
     onViewStateChange: ({ viewState: vs, oldViewState }) => {
       if (oldViewState) {
