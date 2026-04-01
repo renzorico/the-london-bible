@@ -3324,6 +3324,10 @@ async function init() {
       },
       lineCapRounded: true,
       lineJointRounded: true,
+      updateTriggers: {
+        getLineColor: [currentTheme, selectedTubeLineKey, currentDataset],
+        getLineWidth: [currentTheme, selectedTubeLineKey, currentDataset, viewState.zoom],
+      },
       opacity: 1,
     });
   }
@@ -3350,6 +3354,10 @@ async function init() {
       },
       lineCapRounded: true,
       lineJointRounded: true,
+      updateTriggers: {
+        getLineColor: [currentTheme, selectedTubeLineKey, currentDataset],
+        getLineWidth: [currentTheme, selectedTubeLineKey, currentDataset, viewState.zoom],
+      },
       opacity: 1,
     });
   }
@@ -4393,6 +4401,15 @@ async function init() {
         clearTubeInteractionState();
         deckgl.setProps({ layers: getLayers() });
         renderTubeLegend();
+        return;
+      }
+
+      if (onlyTubeMode() && object?.layer?.id === "tube-lines") {
+        const lineKey = object.properties?.lineKey || null;
+        setSelectedTubeLine(lineKey);
+        tooltipEl.innerHTML = lineTooltipHtml(object, false);
+        tooltipEl.style.display = "block";
+        positionTooltip(x, y);
         return;
       }
 
