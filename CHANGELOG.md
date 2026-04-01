@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — POI name-path fix
+
+- Fixed the POI hover/click name path so the overlay now shows the real venue name from the local POI dataset whenever one exists, falling back to a generic label only for genuinely unnamed places.
+
 ## 2026-04-01 — POI priority and bikes intensity
 
 - Fixed POI interaction so hover and click now prefer places over borough or tube geometry in Boroughs and ONLY-TUBE view, and clicking a POI keeps the card POI-specific instead of falling through to the normal metric pin state.

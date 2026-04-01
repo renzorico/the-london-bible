@@ -4304,11 +4304,19 @@ async function init() {
     return object?.layer?.id === "poi-markers" || object?.layer?.id === "poi-hit-area";
   }
 
+  function normalizePickedObject(item) {
+    if (item?.object && item?.layer) {
+      return { ...item.object, layer: item.layer };
+    }
+    return item;
+  }
+
   function resolveInteractionObject(x, y, fallbackObject = null) {
     if (!Number.isFinite(x) || !Number.isFinite(y)) return fallbackObject;
-    const picked = deckgl.pickMultipleObjects?.({ x, y, radius: 10, depth: 12 }) || [];
+    const picked = (deckgl.pickMultipleObjects?.({ x, y, radius: 10, depth: 12 }) || []).map(normalizePickedObject);
     const candidates = [];
-    if (fallbackObject) candidates.push(fallbackObject);
+    const normalizedFallback = normalizePickedObject(fallbackObject);
+    if (normalizedFallback) candidates.push(normalizedFallback);
     for (const item of picked) {
       if (item && !candidates.includes(item)) candidates.push(item);
     }
