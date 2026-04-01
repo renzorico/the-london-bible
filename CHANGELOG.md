@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough similarity search
+
+- Added a borough-only Similar areas analysis tool that finds the top three profile matches using the existing normalized borough metrics.
+- Added compact similarity explanations based on the closest matching dimensions without introducing new datasets or a black-box model.
+
 ## 2026-04-01 — Borough station-access transport metric
 
 - Added a borough-level transport proxy based on mapped TfL / rail stations per 10,000 residents, aggregated from the official TfL stations feed.

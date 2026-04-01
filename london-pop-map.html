@@ -521,6 +521,109 @@
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
+  #similar-panel {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-46%);
+    z-index: 10;
+    display: none;
+    width: min(368px, calc(100vw - 48px));
+    padding: 15px 16px 14px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #similar-panel .sim-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #similar-panel .sim-title {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #similar-panel .sim-kicker {
+    font-family: var(--font-ui);
+    font-size: .59rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--legend-accent);
+  }
+  #similar-panel .sim-name {
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    line-height: 1.02;
+    letter-spacing: .03em;
+    color: var(--title);
+  }
+  #similar-panel .sim-lens,
+  #similar-panel .sim-helper,
+  #similar-panel .sim-foot,
+  #similar-panel .sim-reason {
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #similar-panel .sim-helper { margin-top: 4px; }
+  #similar-panel .sim-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #similar-panel .sim-item {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 10px;
+    padding-top: 9px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
+  }
+  #similar-panel .sim-rank {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-ui);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--button-active);
+  }
+  #similar-panel .sim-item-name {
+    font-family: var(--font-ui);
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--title);
+  }
+  #similar-panel .sim-item-meta {
+    margin-top: 3px;
+    font-family: var(--font-ui);
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--legend-accent);
+  }
+  #similar-panel .sim-reason {
+    margin-top: 4px;
+  }
+  #similar-panel .sim-foot {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+  }
 
   #tube-legend {
     position: absolute; top: 50%; right: 24px;
@@ -856,6 +959,7 @@
     #hint           { display: none; }
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
     #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
+    #similar-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
     #comparison-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
     #comparison-panel .c-mid { padding-top: 0; }
@@ -918,6 +1022,7 @@
       <div class="metric-subtoggle">
         <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
         <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
+        <button id="btn-similar" class="toggle-btn secondary-btn tool-btn" onclick="toggleSimilar()">Similar areas</button>
       </div>
     </div>
     <div class="metric-option-row" id="geography-row">
@@ -979,6 +1084,14 @@
     <div class="s-kicker">Borough spotlight</div>
   </div>
   <div id="spotlight-content"></div>
+</div>
+
+<div id="similar-panel">
+  <div class="sim-head">
+    <div class="sim-title">Similar areas</div>
+    <div class="sim-kicker">Borough profile match</div>
+  </div>
+  <div id="similar-content"></div>
 </div>
 
 <div id="tube-legend">
@@ -1473,7 +1586,7 @@ function paletteGradient(stops) {
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
-let setGeography, setYear, setYearFromIndex;
+let setGeography, setYear, setYearFromIndex, toggleSimilar;
 
 async function init() {
   const bodyEl = document.body;
@@ -1488,6 +1601,8 @@ async function init() {
   const comparisonContentEl = document.getElementById("comparison-content");
   const spotlightPanelEl = document.getElementById("spotlight-panel");
   const spotlightContentEl = document.getElementById("spotlight-content");
+  const similarPanelEl = document.getElementById("similar-panel");
+  const similarContentEl = document.getElementById("similar-content");
   const countryToggleEl = document.getElementById("country-toggle");
   const viewGroupEl = document.getElementById("view-group");
   const viewLabelEl = document.getElementById("view-label");
@@ -1508,6 +1623,7 @@ async function init() {
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
   const btnSpotlight = document.getElementById("btn-spotlight");
+  const btnSimilar = document.getElementById("btn-similar");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
@@ -1532,6 +1648,7 @@ async function init() {
   let comparisonA = null;
   let comparisonB = null;
   let spotlightEnabled = false;
+  let similarEnabled = false;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
@@ -1543,6 +1660,16 @@ async function init() {
   const OUTLIER_THRESHOLD = 50000;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
+  const SIMILARITY_METRICS = [
+    { key: "density", label: "density" },
+    { key: "house_price_proxy_gbp", label: "house prices" },
+    { key: "median_weekly_earnings_gbp", label: "earnings" },
+    { key: "children_share_pct", label: "child share" },
+    { key: "country_of_birth_pct", label: "international mix", countrySelection: "ALL" },
+    { key: "greenspace_share_pct", label: "greenspace share" },
+    { key: "median_age_years", label: "median age" },
+    { key: "station_access_per_10k", label: "station coverage" },
+  ];
 
   function getAvailableYearsForState(metricKey = boroughMetric, geography = activeGeography) {
     if (currentDataset !== "municipi") return [];
@@ -1577,6 +1704,7 @@ async function init() {
       tooltipEl.classList.remove("pinned");
       tooltipEl.style.display = "none";
       renderSpotlightPanel();
+      renderSimilarPanel();
     }
   });
 
@@ -1860,8 +1988,18 @@ async function init() {
     return currentDataset === "municipi" && activeGeography === "borough";
   }
 
+  function similarityAvailable() {
+    return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
   function spotlightFeature() {
     if (!spotlightEnabled || !spotlightAvailable() || comparisonEnabled || !tooltipPinned || !pinnedCoord) return null;
+    const feature = featureAt(...pinnedCoord);
+    return feature?.properties?.[NAME_FIELD] ? feature : null;
+  }
+
+  function similarityFeature() {
+    if (!similarEnabled || !similarityAvailable() || comparisonEnabled || spotlightEnabled || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -1891,6 +2029,89 @@ async function init() {
 
   function comparisonMetricConfig() {
     return getMetricConfigFor(boroughMetric, comparisonCountrySelection());
+  }
+
+  function similarityMetricValue(feature, metricDef) {
+    if (!feature || !metricDef) return null;
+    return metricValue(feature, metricDef.key, metricDef.countrySelection ?? selectedCountryBirth);
+  }
+
+  function similarityMetricStats(metricDef) {
+    if (!municipiGeoJSON?.features?.length) return null;
+    const values = municipiGeoJSON.features
+      .map((feature) => similarityMetricValue(feature, metricDef))
+      .filter((value) => Number.isFinite(value));
+    if (!values.length) return null;
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
+    const std = Math.sqrt(variance);
+    if (!Number.isFinite(std) || std === 0) return null;
+    return { mean, std };
+  }
+
+  function similarityReasonLabel(metricDef) {
+    return metricDef.reasonLabel || metricDef.label;
+  }
+
+  function similarityDirectionLabel(metricDef, value, otherValue) {
+    if (!Number.isFinite(value) || !Number.isFinite(otherValue)) return null;
+    if (Math.abs(value - otherValue) < 1e-9) return "nearly identical";
+    const direction = otherValue > value ? "slightly higher" : "slightly lower";
+    return `${direction} ${similarityReasonLabel(metricDef)}`;
+  }
+
+  function similarityExplanation(differences, target, candidate) {
+    if (!differences.length) return "Closest overall borough profile.";
+    const closest = differences.slice(0, 2);
+    if (closest.length === 1) return `Closest on ${similarityReasonLabel(closest[0].metric)}.`;
+    const [first, second] = closest;
+    const primary = `Similar ${similarityReasonLabel(first.metric)} and ${similarityReasonLabel(second.metric)}.`;
+    const direction = similarityDirectionLabel(first.metric, first.targetValue, first.candidateValue);
+    return direction ? `${primary} ${candidate.properties?.[NAME_FIELD]} is ${direction}.` : primary;
+  }
+
+  function similarityResultsForFeature(feature) {
+    if (!feature || !municipiGeoJSON?.features?.length) return [];
+
+    const metricContexts = SIMILARITY_METRICS
+      .map((metric) => ({ metric, stats: similarityMetricStats(metric) }))
+      .filter((entry) => entry.stats);
+
+    const results = [];
+    for (const candidate of municipiGeoJSON.features) {
+      if (!candidate?.properties?.[NAME_FIELD]) continue;
+      if (candidate.properties[NAME_FIELD] === feature.properties?.[NAME_FIELD]) continue;
+
+      const diffs = [];
+      for (const entry of metricContexts) {
+        const targetValue = similarityMetricValue(feature, entry.metric);
+        const candidateValue = similarityMetricValue(candidate, entry.metric);
+        if (!Number.isFinite(targetValue) || !Number.isFinite(candidateValue)) continue;
+        const targetZ = (targetValue - entry.stats.mean) / entry.stats.std;
+        const candidateZ = (candidateValue - entry.stats.mean) / entry.stats.std;
+        diffs.push({
+          metric: entry.metric,
+          diff: Math.abs(targetZ - candidateZ),
+          targetValue,
+          candidateValue,
+        });
+      }
+
+      if (diffs.length < 4) continue;
+      diffs.sort((a, b) => a.diff - b.diff);
+      const distance = Math.sqrt(diffs.reduce((sum, entry) => sum + (entry.diff ** 2), 0) / diffs.length);
+      results.push({
+        feature: candidate,
+        distance,
+        reasons: diffs,
+        explanation: similarityExplanation(diffs, feature, candidate),
+      });
+    }
+
+    return results
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 3)
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
   }
 
   function formatMetricValueFor(metricKey, value, countrySelection = selectedCountryBirth) {
@@ -2740,6 +2961,7 @@ async function init() {
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
     btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && spotlightEnabled && !comparisonEnabled);
+    btnSimilar.classList.toggle("active", currentDataset === "municipi" && similarEnabled && !comparisonEnabled && !spotlightEnabled);
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
   }
@@ -2774,6 +2996,13 @@ async function init() {
     btnSpotlight.title = comparisonEnabled
       ? "Disable comparison to use the borough spotlight"
       : (spotlightAvailable() ? "Explain how the selected borough stands out" : "Spotlight is available in borough geography only");
+    btnSimilar.style.display = compareMode ? "" : "none";
+    btnSimilar.disabled = !similarityAvailable() || comparisonEnabled || spotlightEnabled;
+    btnSimilar.title = comparisonEnabled
+      ? "Disable comparison to find similar areas"
+      : (spotlightEnabled
+        ? "Disable the borough spotlight to find similar areas"
+        : (similarityAvailable() ? "Find boroughs with a similar profile" : "Similarity is available in borough geography only"));
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
@@ -2933,6 +3162,52 @@ async function init() {
     `;
   }
 
+  function renderSimilarPanel() {
+    const visible = similarEnabled && similarityAvailable() && !comparisonEnabled && !spotlightEnabled;
+    similarPanelEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      similarContentEl.innerHTML = "";
+      return;
+    }
+
+    const feature = similarityFeature();
+    if (!feature) {
+      similarContentEl.innerHTML = `
+        <div class="sim-helper">Select a borough to find the closest matches across the current borough profile.</div>
+        <div class="sim-foot">Uses normalized borough metrics with equal weighting. Compare and spotlight are hidden while similarity search is active.</div>
+      `;
+      return;
+    }
+
+    const results = similarityResultsForFeature(feature);
+    if (!results.length) {
+      similarContentEl.innerHTML = `
+        <div class="sim-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+        <div class="sim-lens">Similarity uses the full borough profile, not just the current lens.</div>
+        <div class="sim-helper">No reliable similarity matches are available from the current borough metric set.</div>
+      `;
+      return;
+    }
+
+    similarContentEl.innerHTML = `
+      <div class="sim-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+      <div class="sim-lens">Top matches across density, housing, earnings, children, international mix, greenspace, age, and station coverage.</div>
+      <div class="sim-list">
+        ${results.map((result) => `
+          <div class="sim-item">
+            <div class="sim-rank">#${result.rank}</div>
+            <div class="sim-item-body">
+              <div class="sim-item-name">${result.feature.properties?.[NAME_FIELD] ?? "Borough"}</div>
+              <div class="sim-item-meta">Profile distance · ${result.distance.toFixed(2)}</div>
+              <div class="sim-reason">${result.explanation}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="sim-foot">Equal-weight similarity using normalized borough metrics; excludes the selected borough itself.</div>
+    `;
+  }
+
   function updateStopHoverBehavior() {
     return onlyTubeMode();
   }
@@ -2946,6 +3221,7 @@ async function init() {
     renderTubeLegend();
     renderComparisonPanel();
     renderSpotlightPanel();
+    renderSimilarPanel();
   }
 
   function refreshMapState(nextViewState = null) {
@@ -2982,6 +3258,7 @@ async function init() {
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
     renderSpotlightPanel();
+    renderSimilarPanel();
   }
 
   function handleComparisonSelection(feature) {
@@ -3064,6 +3341,7 @@ async function init() {
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
         renderSpotlightPanel();
+        renderSimilarPanel();
         return;
       }
       if (object?.layer?.id === "tube-lines") {
@@ -3071,6 +3349,7 @@ async function init() {
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
         renderSpotlightPanel();
+        renderSimilarPanel();
         return;
       }
 
@@ -3079,6 +3358,7 @@ async function init() {
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
         renderSpotlightPanel();
+        renderSimilarPanel();
         return;
       }
 
@@ -3089,6 +3369,7 @@ async function init() {
       tooltipEl.style.display = "block";
       positionTooltip(x, y);
       renderSpotlightPanel();
+      renderSimilarPanel();
     },
   });
 
@@ -3229,8 +3510,10 @@ async function init() {
     } else if (boroughMetric === "country_of_birth_pct") {
       selectedCountryBirth = "ALL";
       spotlightEnabled = false;
+      similarEnabled = false;
     } else {
       spotlightEnabled = false;
+      similarEnabled = false;
     }
     clearPinnedTooltip();
     refreshMapState();
@@ -3250,6 +3533,23 @@ async function init() {
       return;
     }
     spotlightEnabled = !spotlightEnabled;
+    if (spotlightEnabled) similarEnabled = false;
+    refreshMapState();
+  };
+
+  toggleSimilar = function() {
+    if (!similarityAvailable() || comparisonEnabled || spotlightEnabled) {
+      similarEnabled = false;
+      refreshMapState();
+      return;
+    }
+    similarEnabled = !similarEnabled;
+    if (similarEnabled) {
+      spotlightEnabled = false;
+      comparisonEnabled = false;
+      comparisonA = null;
+      comparisonB = null;
+    }
     refreshMapState();
   };
 
