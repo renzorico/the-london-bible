@@ -2011,7 +2011,6 @@ async function init() {
   const OUTLIER_THRESHOLD = 50000;
   const MIN_HEX_SPIKE_AREA_KM2 = 0.18;
   const SPIKE_RENDER_QUANTILE = 0.997;
-  const SPIKE_HEIGHT_EXPONENT = 0.86;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
   const SIMILARITY_METRICS = [
@@ -2191,7 +2190,11 @@ async function init() {
   const validSpikeFeatures = sectionsGeoJSON.features.filter((f) => validSectionDensity(f, "spike"));
   const sectionDensityMax = Math.max(...validSectionFeatures.map((f) => f.properties.density));
   const sortedSpikeDensities = validSpikeFeatures.map((f) => f.properties.density).sort((a, b) => a - b);
-  const spikeRenderMax = sortedSpikeDensities[Math.min(sortedSpikeDensities.length - 1, Math.floor((sortedSpikeDensities.length - 1) * SPIKE_RENDER_QUANTILE))] || sectionDensityMax;
+  const quantileFromSorted = (sorted, q) => sorted[Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * q))] || 0;
+  const spikeMedianDensity = quantileFromSorted(sortedSpikeDensities, 0.5) || sectionDensityMax;
+  const spikeUpperMidDensity = quantileFromSorted(sortedSpikeDensities, 0.85) || sectionDensityMax;
+  const spikeHighDensity = quantileFromSorted(sortedSpikeDensities, 0.97) || sectionDensityMax;
+  const spikeRenderMax = quantileFromSorted(sortedSpikeDensities, SPIKE_RENDER_QUANTILE) || sectionDensityMax;
   const boroughStats = {};
   const msoaDensityStats = (() => {
     if (!msoaGeoJSON?.features?.length) return {};
@@ -3152,7 +3155,24 @@ async function init() {
   function elevationFor(feature, dataset) {
     const density = feature.properties.density ?? 0;
     if (dataset === "sections" && !validSectionDensity(feature, "spike")) return 0;
-    const scaled = Math.pow(Math.min(density, spikeRenderMax) / spikeRenderMax, SPIKE_HEIGHT_EXPONENT);
+    const clamped = Math.min(density, spikeRenderMax);
+    let scaled = 0;
+    if (clamped <= spikeMedianDensity) {
+      const t = spikeMedianDensity > 0 ? clamped / spikeMedianDensity : 0;
+      scaled = Math.pow(t, 0.92) * 0.16;
+    } else if (clamped <= spikeUpperMidDensity) {
+      const span = Math.max(spikeUpperMidDensity - spikeMedianDensity, 1);
+      const t = (clamped - spikeMedianDensity) / span;
+      scaled = 0.16 + Math.pow(t, 0.9) * 0.3;
+    } else if (clamped <= spikeHighDensity) {
+      const span = Math.max(spikeHighDensity - spikeUpperMidDensity, 1);
+      const t = (clamped - spikeUpperMidDensity) / span;
+      scaled = 0.46 + Math.pow(t, 0.82) * 0.36;
+    } else {
+      const span = Math.max(spikeRenderMax - spikeHighDensity, 1);
+      const t = (clamped - spikeHighDensity) / span;
+      scaled = 0.82 + t * 0.18;
+    }
     return scaled * TARGET_HEIGHT_M;
   }
 

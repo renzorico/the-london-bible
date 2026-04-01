@@ -3,7 +3,7 @@
 ## 2026-04-01 — Hexes and spikes refinement
 
 - Restored HEXES spikes to proper extruded hex geometry, improved the density palette toward a cleaner stone-to-plum range, and tightened the HEXES style controls so Flat map, Spikes, and Reset distribute evenly.
-- Refined the Residents per km² legend with calmer typography, better alignment and width, capitalized Sparse / Dense labels, and corrected spike rendering by excluding clipped edge cells below `0.18 km²` from spike extrusion while switching to a less-compressed q99.7-capped power scale so valid density variation reads more clearly again.
+- Refined the Residents per km² legend with calmer typography, better alignment and width, capitalized Sparse / Dense labels, and corrected spike rendering by excluding clipped edge cells below `0.18 km²` from spike extrusion while switching to a quantile-anchored piecewise height scale with a q99.7 render cap so mid- and high-density variation reads more clearly again.
 
 ## 2026-04-01 — Tube interaction and branding polish
 
