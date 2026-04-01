@@ -818,7 +818,7 @@
       <button id="metric-median_weekly_earnings_gbp" class="toggle-btn metric-btn" onclick="setMetric('median_weekly_earnings_gbp')">Earnings</button>
       <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
-      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace</button>
+      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
   </div>
@@ -1231,21 +1231,21 @@ const METRICS = {
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
-    label: "Greenspace share",
-    button: "Greenspace",
-    legendLabel: "Borough area classified as greenspace",
+    label: "Greenspace share (2005)",
+    button: "Greenspace 2005",
+    legendLabel: "Share of borough area in the GLUD 2005 Greenspace class",
     unit: "%",
     year: "2005",
-    source: "London Datastore Land Use by Borough and Ward (GLUD 2005 Enhanced Basemap)",
+    source: "London Datastore Land Use by Borough and Ward",
     geography: "Borough",
     scale: "sequential",
     paletteKey: "greenspace_share_pct",
     views: ["municipi"],
     formatter: (v) => `${v.toFixed(1)}%`,
     diffFormatter: (v) => `${v.toFixed(1)} pp`,
-    summaryLabel: "London share",
-    tooltipTag: "Greenspace share",
-    note: "Percent of borough area in the GLUD 2005 Greenspace land-use class",
+    summaryLabel: "London 2005 share",
+    tooltipTag: "Greenspace share · 2005",
+    note: "Historical land-use baseline using the GLUD 2005 Greenspace class, not a current live greenspace measure",
   },
   country_of_birth_pct: {
     key: "country_of_birth_pct",
@@ -1842,11 +1842,11 @@ async function init() {
     }
 
     if (key === "greenspace_share_pct") {
-      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`A notably greener borough, with <strong>${formatted}</strong> of its area in the GLUD Greenspace class, ${diff}.`, 74, key);
-      if (bucket === "higher") return makeInsight(`Greenspace covers more of the borough than the London average, reaching <strong>${formatted}</strong>.`, 60, key);
-      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Greenspace is scarce by outer-London standards, with only <strong>${formatted}</strong> of borough area in the GLUD Greenspace class, ${diff}.`, 72, key);
-      if (bucket === "lower") return makeInsight(`Greenspace takes up a smaller share of borough land than London overall, at <strong>${formatted}</strong>.`, 56, key);
-      return makeInsight(`Greenspace land share is close to the London average, at <strong>${formatted}</strong>.`, 24, key);
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`In the GLUD 2005 baseline, a notably large <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 74, key);
+      if (bucket === "higher") return makeInsight(`The GLUD 2005 baseline shows a higher-than-average greenspace land share here, reaching <strong>${formatted}</strong>.`, 60, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`In the GLUD 2005 baseline, only <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 72, key);
+      if (bucket === "lower") return makeInsight(`The GLUD 2005 baseline shows a smaller greenspace land share than London overall, at <strong>${formatted}</strong>.`, 56, key);
+      return makeInsight(`The GLUD 2005 greenspace land share is close to the London average, at <strong>${formatted}</strong>.`, 24, key);
     }
 
     if (key === "country_of_birth_pct") {
@@ -1890,15 +1890,15 @@ async function init() {
     }
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "much-higher" || greenspaceCtx.bucket === "higher") && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower")) {
-      insights.push(makeInsight(`Higher greenspace share and lower density give the borough a noticeably greener, more spacious profile.`, 86, "green-spacious"));
+      insights.push(makeInsight(`In the GLUD 2005 land-use baseline, higher greenspace share and lower density give the borough a noticeably greener, more spacious profile.`, 86, "green-spacious"));
     }
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
-      insights.push(makeInsight(`A relatively high greenspace share despite solid density gives the borough a less expected mixed urban profile.`, 80, "green-dense-mix"));
+      insights.push(makeInsight(`The GLUD 2005 baseline shows a relatively high greenspace share despite solid density, giving the borough a less expected mixed urban profile.`, 80, "green-dense-mix"));
     }
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "lower" || greenspaceCtx.bucket === "much-lower") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
-      insights.push(makeInsight(`Low greenspace share alongside high density reinforces a compact inner-urban borough profile.`, 84, "compact-urban"));
+      insights.push(makeInsight(`A low GLUD 2005 greenspace share alongside high density reinforces a compact inner-urban borough profile.`, 84, "compact-urban"));
     }
 
     if (priceCtx && childrenCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (childrenCtx.bucket === "lower" || childrenCtx.bucket === "much-lower")) {
@@ -1932,7 +1932,7 @@ async function init() {
       if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) return `UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`;
     }
     if (boroughMetric === "greenspace_share_pct") {
-      return "Share of borough area in the GLUD 2005 Greenspace class";
+      return "Historical land-use baseline · GLUD 2005 Greenspace class";
     }
     return "";
   }
@@ -2261,6 +2261,7 @@ async function init() {
       support.push("Share of residents aged 0–15");
     } else if (metricKey === "greenspace_share_pct") {
       support.push("Share of borough area in the GLUD 2005 Greenspace class");
+      support.push("Historical land-use baseline, not a current live greenspace measure");
     } else if (metricKey === "median_weekly_earnings_gbp") {
       support.push("Resident-based, full-time median pay");
     } else if (metricKey === "house_price_proxy_gbp") {

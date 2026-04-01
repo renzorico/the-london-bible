@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Greenspace trust-cues pass
+
+- Tightened the borough greenspace wording so the metric reads consistently as a GLUD 2005 land-use baseline rather than a current live environmental measure.
+- Clarified greenspace labels, legend metadata, tooltips, comparison copy, and spotlight narratives without changing the underlying data.
+
 ## 2026-04-01 — Borough greenspace metric
 
 - Added borough-level greenspace share as a first-class metric using the London Datastore GLUD 2005 Greenspace land-use class.
