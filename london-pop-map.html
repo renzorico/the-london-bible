@@ -197,6 +197,14 @@
     font-size: .56rem;
     letter-spacing: .11em;
   }
+  #poi-note {
+    display: none;
+    margin-top: 7px;
+    font-size: .58rem;
+    line-height: 1.45;
+    color: var(--subtitle);
+    letter-spacing: .04em;
+  }
   #metric-toggle {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1513,6 +1521,7 @@
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="sport" title="Urban sport" aria-label="Urban sport" onclick="togglePoiCategory('sport')">Sport</button>
       <button class="toggle-btn secondary-btn poi-filter-btn active" data-poi-category="landmarks" title="Landmarks" aria-label="Landmarks" onclick="togglePoiCategory('landmarks')">Landmarks</button>
     </div>
+    <div id="poi-note" aria-live="polite"></div>
   </div>
 
   <div class="control-group rail-card" id="view-group">
@@ -2277,6 +2286,7 @@ async function init() {
   const pubsToggleEl = document.getElementById("pubs-toggle");
   const overlayToggleEl = document.getElementById("overlay-toggle");
   const poiToggleEl = document.getElementById("poi-toggle");
+  const poiNoteEl = document.getElementById("poi-note");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
     msoa: document.getElementById("pubs-msoa"),
@@ -2339,6 +2349,7 @@ async function init() {
   let contoursGeoJSON = null;
   let bikesGeoJSON = null;
   let poisGeoJSON = null;
+  let poiCategoryCounts = Object.fromEntries(POI_CATEGORIES.map((category) => [category, 0]));
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2512,7 +2523,15 @@ async function init() {
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (contoursData?.features) contoursGeoJSON = contoursData;
   if (bikesData?.features) bikesGeoJSON = bikesData;
-  if (poisData?.features) poisGeoJSON = poisData;
+  if (poisData?.features) {
+    poisGeoJSON = poisData;
+    const counts = Object.fromEntries(POI_CATEGORIES.map((category) => [category, 0]));
+    for (const feature of poisGeoJSON.features) {
+      const category = feature.properties?.category;
+      if (category in counts) counts[category] += 1;
+    }
+    poiCategoryCounts = counts;
+  }
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
     SMALL_AREA_DENSITY.years = discoverMsoaSeriesYears(msoaGeoJSON, "density", "population");
@@ -3643,6 +3662,10 @@ async function init() {
     return activePoiCategories.has(category);
   }
 
+  function poiFocusMode() {
+    return poisVisible();
+  }
+
   function firstLabelLayerId(map) {
     const layers = map.getStyle?.().layers || [];
     return layers.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"])?.id || null;
@@ -3862,14 +3885,17 @@ async function init() {
       id: "municipi",
       data,
       filled: true, stroked: true, extruded: false,
-      pickable: true, autoHighlight: true,
-      highlightColor: [255, 255, 255, currentTheme === "night" ? 70 : 55],
+      pickable: true, autoHighlight: !poiFocusMode(),
+      highlightColor: [255, 255, 255, poiFocusMode() ? 0 : (currentTheme === "night" ? 70 : 55)],
       getFillColor: (f) => {
         const colour = boroughMetricColor(f, metricState);
-        return [...colour.slice(0, 3), fillAlpha];
+        const alpha = poiFocusMode() ? Math.round(fillAlpha * 0.76) : fillAlpha;
+        return [...colour.slice(0, 3), alpha];
       },
-      getLineColor: THEMES[currentTheme].municipiLine,
-      getLineWidth: activeGeography === "msoa" ? 1 : 2, lineWidthMinPixels: activeGeography === "msoa" ? 0.5 : 1,
+      getLineColor: poiFocusMode()
+        ? [THEMES[currentTheme].municipiLine[0], THEMES[currentTheme].municipiLine[1], THEMES[currentTheme].municipiLine[2], Math.round(THEMES[currentTheme].municipiLine[3] * 0.7)]
+        : THEMES[currentTheme].municipiLine,
+      getLineWidth: poiFocusMode() ? (activeGeography === "msoa" ? 0.75 : 1.35) : (activeGeography === "msoa" ? 1 : 2), lineWidthMinPixels: activeGeography === "msoa" ? 0.5 : 1,
       updateTriggers: {
         getFillColor: [
           metricState.metricKey,
@@ -3878,10 +3904,13 @@ async function init() {
           metricState.year,
           metricState.fillAlpha,
           metricState.theme,
+          showPois,
           metricState.stats?.min ?? null,
           metricState.stats?.max ?? null,
           metricState.stats?.maxAbs ?? null,
         ],
+        getLineColor: [currentTheme, showPois],
+        getLineWidth: [activeGeography, showPois],
       },
       opacity: 1,
     });
@@ -3940,7 +3969,13 @@ async function init() {
     const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
     return poisGeoJSON.features.filter((feature) => {
       const props = feature.properties || {};
-      return activePoiCategories.has(props.category) && zoom >= (props.min_zoom ?? 10);
+      if (!activePoiCategories.has(props.category)) return false;
+      if (props.category === "coffee") return zoom >= 10.75;
+      if (props.category === "nightlife") return zoom >= 10.05;
+      if (props.category === "culture") return zoom >= 9.7;
+      if (props.category === "sport") return zoom >= 10.25;
+      if (props.category === "landmarks") return zoom >= 9.55;
+      return zoom >= (props.min_zoom ?? 10);
     });
   }
 
@@ -4531,8 +4566,24 @@ async function init() {
   function updatePoiButtons() {
     for (const [category, button] of Object.entries(poiButtons)) {
       if (!button) continue;
+      const available = (poiCategoryCounts[category] || 0) > 0;
+      button.disabled = !available;
       button.classList.toggle("active", poiButtonActive(category));
     }
+    if (!poiNoteEl) return;
+    if (!showPois) {
+      poiNoteEl.style.display = "none";
+      poiNoteEl.textContent = "";
+      return;
+    }
+    const visibleCount = visiblePoiFeatures().length;
+    if (visibleCount > 0) {
+      poiNoteEl.style.display = "none";
+      poiNoteEl.textContent = "";
+      return;
+    }
+    poiNoteEl.style.display = "block";
+    poiNoteEl.textContent = "Zoom in to reveal coffee, nightlife, and smaller local places.";
   }
 
   function updateModeButtons() {
@@ -5140,7 +5191,7 @@ async function init() {
     },
 
     onHover: ({ object, coordinate, x, y }) => {
-      if (isAnalysisMode("correlation") && correlationAvailable()) {
+      if (isAnalysisMode("correlation") && correlationAvailable() && !poiFocusMode()) {
         const hoveredName = currentDataset === "municipi" && object?.properties?.[NAME_FIELD]
           ? object.properties[NAME_FIELD]
           : null;
@@ -5170,6 +5221,11 @@ async function init() {
         tooltipEl.innerHTML = poiTooltipHtml(object, false);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        return;
+      }
+
+      if (poiFocusMode()) {
+        tooltipEl.style.display = "none";
         return;
       }
 
@@ -5555,14 +5611,20 @@ async function init() {
   };
 
   togglePois = function() {
+    if (!activePoiCategories.size) activePoiCategories = new Set(POI_CATEGORIES.filter((category) => (poiCategoryCounts[category] || 0) > 0));
     showPois = !showPois;
     refreshMapState();
   };
 
   togglePoiCategory = function(category) {
     if (!POI_CATEGORIES.includes(category)) return;
-    if (activePoiCategories.has(category)) activePoiCategories.delete(category);
-    else activePoiCategories.add(category);
+    if ((poiCategoryCounts[category] || 0) < 1) return;
+    if (activePoiCategories.has(category)) {
+      if (activePoiCategories.size === 1) return;
+      activePoiCategories.delete(category);
+    } else {
+      activePoiCategories.add(category);
+    }
     refreshMapState();
   };
 

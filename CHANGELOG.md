@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — POI overlay reliability and focus
+
+- Fixed the POIs overlay so categories reliably reappear when toggled, prevented the filter UI from ending in an all-off empty state, and added clearer zoom feedback when smaller place categories are not yet visible.
+- Refined the map into a POI-first hover mode by calming borough hover behavior while POIs are active, keeping the background readable and the points themselves visually dominant.
+
 ## 2026-04-01 — Curated POI overlay
 
 - Added a new POIs overlay that reveals London through a curated set of city-life categories, combining an OSM cafe extract with London Datastore cultural infrastructure points for nightlife, culture, landmarks, and urban sport.
