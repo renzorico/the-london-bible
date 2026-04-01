@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — MSOA density time-travel control
+
+- Replaced the temporary MSOA year buttons with a compact time-travel scrubber that appears only for Boroughs → Density → MSOA.
+- Wired the time control to the existing year-aware MSOA density data so map colours, tooltips, and legend metadata all stay in sync as the year changes.
+
 ## 2026-04-01 — Borough median age metric
 
 - Added borough-level median age as a first-class metric using ONS Census 2021 single-year age counts, derived into a borough median-age measure.

@@ -187,6 +187,93 @@
     flex-wrap: wrap;
     gap: 6px;
   }
+  .time-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+  .time-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .time-badge {
+    font-family: var(--font-ui);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--title);
+    background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--panel-border) 92%, transparent);
+    padding: 6px 9px;
+    border-radius: 999px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .time-slider-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+  }
+  .time-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    outline: none;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--subtitle) 35%, transparent), color-mix(in srgb, var(--title) 42%, transparent));
+  }
+  .time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--title);
+    border: 2px solid color-mix(in srgb, var(--panel) 72%, transparent);
+    box-shadow: 0 1px 8px rgba(0,0,0,.18);
+    cursor: pointer;
+  }
+  .time-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--title);
+    border: 2px solid color-mix(in srgb, var(--panel) 72%, transparent);
+    box-shadow: 0 1px 8px rgba(0,0,0,.18);
+    cursor: pointer;
+  }
+  .time-slider::-moz-range-track {
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--subtitle) 35%, transparent), color-mix(in srgb, var(--title) 42%, transparent));
+  }
+  .time-stops {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--font-ui);
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  .time-stop {
+    color: var(--subtitle);
+    opacity: .72;
+    transition: color .18s ease, opacity .18s ease;
+  }
+  .time-stop.active {
+    color: var(--title);
+    opacity: 1;
+  }
   #top-right-controls {
     position: absolute;
     top: 24px;
@@ -840,10 +927,15 @@
       </div>
     </div>
     <div class="metric-option-row" id="year-row">
-      <div class="metric-option-label">Year</div>
-      <div id="year-toggle" class="metric-subtoggle">
-        <button id="year-2021" class="toggle-btn secondary-btn" onclick="setYear(2021)">2021</button>
-        <button id="year-2024" class="toggle-btn secondary-btn active" onclick="setYear(2024)">2024</button>
+      <div class="metric-option-label">Time</div>
+      <div id="year-toggle" class="time-control">
+        <div class="time-head">
+          <div id="year-badge" class="time-badge">2024</div>
+        </div>
+        <div class="time-slider-wrap">
+          <input id="year-slider" class="time-slider" type="range" min="0" max="0" step="1" value="0" oninput="setYearFromIndex(this.value)" />
+          <div id="year-stops" class="time-stops"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1301,7 +1393,7 @@ function paletteGradient(stops) {
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
-let setGeography, setYear;
+let setGeography, setYear, setYearFromIndex;
 
 async function init() {
   const bodyEl = document.body;
@@ -1329,6 +1421,9 @@ async function init() {
   const geographyRowEl = document.getElementById("geography-row");
   const yearRowEl = document.getElementById("year-row");
   const yearToggleEl = document.getElementById("year-toggle");
+  const yearSliderEl = document.getElementById("year-slider");
+  const yearBadgeEl = document.getElementById("year-badge");
+  const yearStopsEl = document.getElementById("year-stops");
   const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
@@ -1341,10 +1436,6 @@ async function init() {
   const geographyButtons = {
     borough: document.getElementById("geo-borough"),
     msoa: document.getElementById("geo-msoa"),
-  };
-  const yearButtons = {
-    2021: document.getElementById("year-2021"),
-    2024: document.getElementById("year-2024"),
   };
 
   let tooltipPinned = false;
@@ -1371,6 +1462,18 @@ async function init() {
   const OUTLIER_THRESHOLD = 50000;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
+
+  function getAvailableYearsForState(metricKey = boroughMetric, geography = activeGeography) {
+    if (currentDataset !== "municipi") return [];
+    if (metricKey === "density" && geography === "msoa") return [...SMALL_AREA_DENSITY.years];
+    return [];
+  }
+
+  function resolvedActiveYear() {
+    const years = getAvailableYearsForState();
+    if (!years.length) return activeYear;
+    return years.includes(activeYear) ? activeYear : years[years.length - 1];
+  }
 
   function updatePinnedPosition(vs) {
     if (!tooltipPinned || !pinnedCoord) return;
@@ -2461,13 +2564,30 @@ async function init() {
     }
   }
 
-  function updateYearButtons() {
-    for (const [year, button] of Object.entries(yearButtons)) {
-      if (!button) continue;
-      const available = SMALL_AREA_DENSITY.years.includes(Number(year));
-      button.disabled = !available;
-      button.classList.toggle("active", activeYear === Number(year) && available);
+  function updateYearControl() {
+    const years = getAvailableYearsForState();
+    const visible = years.length > 1;
+    if (!visible) {
+      yearBadgeEl.textContent = "";
+      yearStopsEl.innerHTML = "";
+      yearSliderEl.min = 0;
+      yearSliderEl.max = 0;
+      yearSliderEl.value = 0;
+      yearSliderEl.disabled = true;
+      yearSliderEl.style.opacity = .55;
+      return;
     }
+
+    const resolvedYear = resolvedActiveYear();
+    if (resolvedYear !== activeYear) activeYear = resolvedYear;
+    const index = Math.max(0, years.indexOf(resolvedYear));
+    yearSliderEl.min = 0;
+    yearSliderEl.max = String(years.length - 1);
+    yearSliderEl.value = String(index);
+    yearSliderEl.disabled = false;
+    yearSliderEl.style.opacity = 1;
+    yearBadgeEl.textContent = String(resolvedYear);
+    yearStopsEl.innerHTML = years.map((year) => `<span class="time-stop${year === resolvedYear ? " active" : ""}">${year}</span>`).join("");
   }
 
   function updateModeButtons() {
@@ -2486,7 +2606,7 @@ async function init() {
     const boroughsMode = currentDataset === "municipi";
     const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && !comparisonEnabled;
     const geographyMode = boroughsMode && boroughMetric === "density";
-    const yearMode = geographyMode && activeGeography === "msoa";
+    const yearMode = geographyMode && getAvailableYearsForState().length > 1;
     const compareMode = boroughsMode && comparisonAvailable();
     const showMetricOptions = compareMode || geographyMode;
 
@@ -2701,7 +2821,7 @@ async function init() {
     updateControlVisibility();
     updateMetricButtons();
     updateGeographyButtons();
-    updateYearButtons();
+    updateYearControl();
     updateCountrySelector();
     updateLegend();
     refreshHighlightedFeature();
@@ -2928,18 +3048,26 @@ async function init() {
   setGeography = function(geography) {
     if (!geographyAvailableInCurrentView(geography)) return;
     activeGeography = geography;
+    activeYear = resolvedActiveYear();
     refreshMapState();
   };
 
   setYear = function(year) {
     const resolvedYear = Number(year);
-    if (!SMALL_AREA_DENSITY.years.includes(resolvedYear)) return;
+    if (!getAvailableYearsForState().includes(resolvedYear)) return;
     activeYear = resolvedYear;
     if (currentDataset === "municipi" && boroughMetric === "density" && activeGeography === "msoa") {
       refreshMapState();
     } else {
-      updateYearButtons();
+      updateYearControl();
     }
+  };
+
+  setYearFromIndex = function(index) {
+    const years = getAvailableYearsForState();
+    if (!years.length) return;
+    const resolvedIndex = Math.max(0, Math.min(years.length - 1, Number(index)));
+    setYear(years[resolvedIndex]);
   };
 
   toggleComparison = function() {
