@@ -305,10 +305,16 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
+  .time-stops.compact {
+    gap: 2px;
+    font-size: .5rem;
+    letter-spacing: .04em;
+  }
   .time-stop {
     color: var(--subtitle);
     opacity: .72;
     transition: color .18s ease, opacity .18s ease;
+    min-width: 0;
   }
   .time-stop.active {
     color: var(--title);
@@ -2032,11 +2038,11 @@ const METRICS = {
 
 const SMALL_AREA_DENSITY = {
   geography: "MSOA 2021",
-  years: [2021, 2024],
-  source: "ONS Middle layer Super Output Area population estimates (Accredited official statistics) joined to GLA MSOA 2021 boundaries",
+  years: [],
+  source: "ONS Middle layer Super Output Area population estimates (Accredited official statistics), using the mid-2011 to mid-2022 edition plus the revised mid-2022 to mid-2024 edition, joined to GLA MSOA 2021 boundaries",
   sourceUrlPopulation: "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/middlesuperoutputareamidyearpopulationestimatesnationalstatistics",
   sourceUrlBoundaries: "https://data.london.gov.uk/dataset/statistical-gis-boundary-files-for-london-20od9/",
-  note: "Density is computed from official mid-year population counts and MSOA polygon area",
+  note: "Density is computed from official mid-year population counts and MSOA polygon area; the 2022 to 2024 values use the latest revised ONS small-area series",
 };
 
 const SMALL_AREA_PUBS = {
@@ -2085,6 +2091,22 @@ const STORY_CHAPTERS = [
 
 function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
+}
+
+function discoverMsoaDensityYears(frame) {
+  if (!frame?.features?.length) return [];
+  const years = new Set();
+  for (const feature of frame.features) {
+    const props = feature?.properties || {};
+    for (const key of Object.keys(props)) {
+      const match = key.match(/^density_(\d{4})$/);
+      if (!match) continue;
+      const year = Number(match[1]);
+      const populationValue = props[`population_${year}`];
+      if (Number.isFinite(props[key]) && Number.isFinite(populationValue)) years.add(year);
+    }
+  }
+  return [...years].sort((a, b) => a - b);
 }
 
 let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
@@ -2294,7 +2316,10 @@ async function init() {
 
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
-  if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
+  if (msoaDensityGeoJSON?.features) {
+    msoaGeoJSON = msoaDensityGeoJSON;
+    SMALL_AREA_DENSITY.years = discoverMsoaDensityYears(msoaGeoJSON);
+  }
   if (msoaPubsJson?.by_msoa) msoaPubMeta = msoaPubsJson;
   const stationAccessData = computeStationAccessData(stationsGeoJSON, municipiGeoJSON);
   stationAccessLondonAvg = stationAccessData.londonRate;
@@ -2405,12 +2430,14 @@ async function init() {
   const boroughStats = {};
   const msoaDensityStats = (() => {
     if (!msoaGeoJSON?.features?.length) return {};
+    const years = SMALL_AREA_DENSITY.years;
     const build = (year) => {
       const densityField = `density_${year}`;
       const populationField = `population_${year}`;
       const values = msoaGeoJSON.features
         .map((feature) => feature.properties?.[densityField])
         .filter((value) => Number.isFinite(value));
+      if (!values.length) return null;
       const weighted = msoaGeoJSON.features.reduce((acc, feature) => {
         const density = feature.properties?.[densityField];
         const weight = feature.properties?.[populationField] ?? 0;
@@ -2425,7 +2452,11 @@ async function init() {
         avg: weighted.weight ? weighted.total / weighted.weight : values.reduce((sum, value) => sum + value, 0) / values.length,
       };
     };
-    return { 2021: build(2021), 2024: build(2024) };
+    return Object.fromEntries(
+      years
+        .map((year) => [year, build(year)])
+        .filter(([, stats]) => !!stats)
+    );
   })();
   const msoaPubStats = (() => {
     if (!msoaGeoJSON?.features?.length) return null;
@@ -3980,6 +4011,7 @@ async function init() {
     const visible = years.length > 1;
     if (!visible) {
       yearStopsEl.innerHTML = "";
+      yearStopsEl.classList.remove("compact");
       yearSliderEl.min = 0;
       yearSliderEl.max = 0;
       yearSliderEl.value = 0;
@@ -3996,6 +4028,7 @@ async function init() {
     yearSliderEl.value = String(index);
     yearSliderEl.disabled = false;
     yearSliderEl.style.opacity = 1;
+    yearStopsEl.classList.toggle("compact", years.length > 8);
     yearStopsEl.innerHTML = years.map((year) => `<span class="time-stop${year === resolvedYear ? " active" : ""}">${year}</span>`).join("");
   }
 

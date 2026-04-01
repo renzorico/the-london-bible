@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Expanded MSOA density timeline
+
+- Expanded the MSOA population-density timeline to the full ONS-backed annual series currently available on MSOA 2021 geographies, using mid-2011 to mid-2022 data plus the revised mid-2022 to mid-2024 edition.
+- Kept MSOA pubs density fixed-year, tightened the MSOA year control for the longer timeline, and only exposed annual switching for the density metric that actually has year-by-year support.
+
 ## 2026-04-01 — Branded loading screen
 
 - Added a branded first-load overlay using the project `logo.png` asset, a restrained breathing animation, and a centered `THE LONDON BIBLE` lockup so the atlas opens with a calmer editorial entry state.
