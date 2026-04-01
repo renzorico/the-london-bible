@@ -8,14 +8,14 @@
 <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.css" rel="stylesheet" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/deck.gl@9.0.27/dist.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 
 <style>
   :root {
-    --font-display: "Cormorant Garamond", serif;
+    --font-display: "Manrope", system-ui, sans-serif;
     --font-ui: "Public Sans", system-ui, sans-serif;
 
     --bg: #f4efe8;
@@ -133,20 +133,20 @@
   }
   #title h1 {
     font-family: var(--font-display);
-    font-size: 2.28rem;
-    line-height: .9;
-    font-weight: 700;
-    letter-spacing: .11em;
+    font-size: 2.02rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--title);
+    white-space: nowrap;
   }
   #title p  {
     margin-top: 8px;
     font-family: var(--font-ui);
-    font-size: .66rem;
+    font-size: .78rem;
     font-weight: 600;
-    letter-spacing: .17em;
-    text-transform: uppercase;
+    letter-spacing: .02em;
     color: var(--subtitle);
   }
 
@@ -178,9 +178,19 @@
     align-items: flex-start;
     gap: 6px;
   }
+  .metric-option-row.active-scope {
+    padding: 10px 11px 11px;
+    border: 1px solid color-mix(in srgb, var(--button-active) 26%, var(--panel-border) 74%);
+    background: color-mix(in srgb, var(--button-active) 8%, var(--panel-strong) 92%);
+    border-radius: 11px;
+  }
   .metric-option-row + .metric-option-row {
     padding-top: 8px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 76%, transparent);
+  }
+  .metric-option-row.active-scope + .metric-option-row {
+    padding-top: 0;
+    border-top: none;
   }
   .metric-option-row[hidden] { display: none !important; }
   .metric-option-label {
@@ -190,6 +200,9 @@
     letter-spacing: .2em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--title) 74%, var(--subtitle) 26%);
+  }
+  .metric-option-row.active-scope .metric-option-label {
+    color: color-mix(in srgb, var(--button-active) 68%, var(--title) 32%);
   }
   .metric-subtoggle {
     display: flex;
@@ -355,10 +368,10 @@
     flex: 0 1 auto;
   }
   #btn-home {
-    min-width: 42px;
+    min-width: 88px;
     padding-left: 12px;
     padding-right: 12px;
-    font-size: .82rem;
+    font-size: .68rem;
   }
 
   #search-wrap {
@@ -445,16 +458,18 @@
     backdrop-filter: blur(16px);
   }
   #legend .llbl { font-family: var(--font-ui); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--subtitle); margin-bottom: 12px; }
-  #legend .lbar { width: 196px; height: 12px; border-radius: 999px; margin-bottom: 10px;
-    background: linear-gradient(to right, rgba(253,228,140,.9), #f4a350, #d55e58, #a52674, #560b6b, #0e0430); }
+  #legend .lbar { width: 100%; max-width: 236px; height: 12px; border-radius: 999px; margin-bottom: 10px;
+    background-image: linear-gradient(to right, rgba(253,228,140,.9), #f4a350, #d55e58, #a52674, #560b6b, #0e0430);
+    background-size: 100% 100%;
+    background-repeat: no-repeat; }
   #legend .lends { display: flex; justify-content: space-between; font-size: .81rem; color: var(--legend-text); gap: 12px; }
   #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
-  #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
+  #legend .lmeta { margin-top: 9px; max-width: 320px; font-size: .68rem; line-height: 1.5; color: var(--hint); }
   #analysis-panel {
     position: absolute;
     top: 116px;
     right: 24px;
-    bottom: 88px;
+    bottom: 120px;
     z-index: 10;
     display: none;
     flex-direction: column;
@@ -481,7 +496,7 @@
   }
   #analysis-panel .analysis-title {
     font-family: var(--font-ui);
-    font-size: .64rem;
+    font-size: .68rem;
     font-weight: 800;
     letter-spacing: .18em;
     text-transform: uppercase;
@@ -490,8 +505,8 @@
   #analysis-panel .analysis-subtitle {
     margin-top: 5px;
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.45;
+    font-size: .78rem;
+    line-height: 1.52;
     color: var(--hint);
   }
   #analysis-panel .analysis-close {
@@ -509,22 +524,22 @@
   }
   #analysis-panel .analysis-close:hover { opacity: .76; }
   #analysis-panel .analysis-panel-body {
-    padding: 16px 18px 17px;
+    padding: 18px 20px 18px;
     overflow-y: auto;
     min-height: 0;
     flex: 1 1 auto;
   }
   #analysis-panel .analysis-empty {
     font-family: var(--font-ui);
-    font-size: .72rem;
-    line-height: 1.58;
+    font-size: .79rem;
+    line-height: 1.62;
     color: var(--hint);
   }
   #analysis-panel .s-name {
-    font-family: var(--font-display);
-    font-size: 1.12rem;
-    line-height: 1.02;
-    letter-spacing: .03em;
+    font-family: var(--font-ui);
+    font-size: 1.2rem;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .s-lens {
@@ -539,22 +554,22 @@
   #analysis-panel .s-helper,
   #analysis-panel .s-foot {
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.55;
+    font-size: .78rem;
+    line-height: 1.6;
     color: var(--hint);
   }
   #analysis-panel .s-helper { margin-top: 2px; }
   #analysis-panel .s-story-list {
     display: grid;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 14px;
   }
   #analysis-panel .s-story {
-    padding-top: 9px;
+    padding-top: 11px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
     font-family: var(--font-ui);
-    font-size: .72rem;
-    line-height: 1.56;
+    font-size: .82rem;
+    line-height: 1.62;
     color: var(--title);
   }
   #analysis-panel .s-story:first-child {
@@ -571,10 +586,10 @@
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
   #analysis-panel .sim-name {
-    font-family: var(--font-display);
-    font-size: 1.08rem;
-    line-height: 1.02;
-    letter-spacing: .03em;
+    font-family: var(--font-ui);
+    font-size: 1.18rem;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .sim-lens,
@@ -582,21 +597,21 @@
   #analysis-panel .sim-foot,
   #analysis-panel .sim-reason {
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.55;
+    font-size: .79rem;
+    line-height: 1.62;
     color: var(--hint);
   }
   #analysis-panel .sim-helper { margin-top: 4px; }
   #analysis-panel .sim-list {
     display: grid;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 10px;
+    margin-top: 14px;
   }
   #analysis-panel .sim-item {
     display: grid;
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 10px;
-    padding-top: 9px;
+    padding: 11px 0 0;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
   }
   #analysis-panel .sim-rank {
@@ -615,14 +630,14 @@
   }
   #analysis-panel .sim-item-name {
     font-family: var(--font-ui);
-    font-size: .88rem;
-    font-weight: 700;
+    font-size: .98rem;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .sim-item-meta {
     margin-top: 3px;
     font-family: var(--font-ui);
-    font-size: .6rem;
+    font-size: .64rem;
     font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -668,18 +683,18 @@
     padding: 0;
   }
   #analysis-panel .ch-name {
-    font-family: var(--font-display);
-    font-size: 1.08rem;
-    line-height: 1.02;
-    letter-spacing: .03em;
+    font-family: var(--font-ui);
+    font-size: 1.18rem;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .ch-meta,
   #analysis-panel .ch-description,
   #analysis-panel .ch-foot {
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.55;
+    font-size: .79rem;
+    line-height: 1.62;
     color: var(--hint);
   }
   #analysis-panel .ch-meta {
@@ -693,6 +708,7 @@
   #analysis-panel .ch-description {
     margin-top: 8px;
     color: var(--title);
+    font-size: .85rem;
   }
   #analysis-panel .ch-foot {
     margin-top: 11px;
@@ -711,7 +727,7 @@
   #analysis-panel .corr-label {
     margin-bottom: 6px;
     font-family: var(--font-ui);
-    font-size: .58rem;
+    font-size: .62rem;
     font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -726,13 +742,13 @@
     border-radius: 10px;
     padding: 9px 11px 8px;
     font-family: var(--font-ui);
-    font-size: .69rem;
+    font-size: .78rem;
     line-height: 1.2;
   }
   #analysis-panel .corr-chart-wrap {
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
     border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
-    padding: 12px 0 10px;
+    padding: 14px 0 12px;
   }
   #analysis-panel .corr-svg {
     width: 100%;
@@ -750,7 +766,7 @@
   }
   #analysis-panel .corr-axis-label {
     font-family: var(--font-ui);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: .08em;
     fill: var(--hint);
@@ -781,8 +797,8 @@
   #analysis-panel .corr-detail-kicker,
   #analysis-panel .corr-foot {
     font-family: var(--font-ui);
-    font-size: .62rem;
-    line-height: 1.55;
+    font-size: .72rem;
+    line-height: 1.6;
     color: var(--hint);
   }
   #analysis-panel .corr-detail-kicker {
@@ -793,10 +809,10 @@
   }
   #analysis-panel .corr-detail-name {
     margin-top: 4px;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    line-height: 1.02;
-    letter-spacing: .03em;
+    font-family: var(--font-ui);
+    font-size: 1.05rem;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .corr-detail-values {
@@ -809,8 +825,8 @@
     justify-content: space-between;
     gap: 14px;
     font-family: var(--font-ui);
-    font-size: .71rem;
-    line-height: 1.45;
+    font-size: .79rem;
+    line-height: 1.5;
     color: var(--title);
   }
   #analysis-panel .corr-detail-row span:first-child {
@@ -819,8 +835,8 @@
   #analysis-panel .corr-helper,
   #analysis-panel .corr-foot {
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.55;
+    font-size: .77rem;
+    line-height: 1.6;
     color: var(--hint);
   }
   #analysis-panel .corr-foot {
@@ -829,15 +845,15 @@
 
   #tube-legend {
     position: relative;
-    max-width: 260px;
-    padding: 11px 13px 10px;
+    max-width: 292px;
+    padding: 14px 15px 13px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
     display: none;
-    pointer-events: none;
+    pointer-events: auto;
   }
   #country-toggle {
     display: none;
@@ -856,7 +872,7 @@
   #analysis-panel .c-kicker {
     margin-bottom: 12px;
     font-family: var(--font-ui);
-    font-size: .63rem;
+    font-size: .66rem;
     font-weight: 700;
     letter-spacing: .08em;
     color: var(--legend-accent);
@@ -876,8 +892,8 @@
   #analysis-panel .c-clear:hover { opacity: .76; }
   #analysis-panel .c-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(120px, .72fr) minmax(0, 1.08fr);
-    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
     align-items: start;
   }
   #analysis-panel .c-col {
@@ -906,10 +922,10 @@
   #analysis-panel .c-tag.a { background: #115f63; }
   #analysis-panel .c-tag.b { background: #844a5c; }
   #analysis-panel .c-name {
-    font-family: var(--font-display);
+    font-family: var(--font-ui);
     font-size: 1.12rem;
-    line-height: 1.04;
-    letter-spacing: .03em;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .c-value-label {
@@ -931,52 +947,50 @@
   #analysis-panel .c-support {
     margin-top: 9px;
     font-family: var(--font-ui);
-    font-size: .69rem;
-    line-height: 1.5;
+    font-size: .76rem;
+    line-height: 1.58;
     color: var(--hint);
   }
-  #analysis-panel .c-mid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    min-width: 0;
-    padding: 18px 6px 0;
+  #analysis-panel .c-delta-row {
+    margin-top: 14px;
+    padding: 12px 13px 13px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-strong) 80%, transparent);
   }
   #analysis-panel .c-diff-label,
   #analysis-panel .c-meta {
     font-family: var(--font-ui);
-    font-size: .56rem;
+    font-size: .6rem;
     font-weight: 700;
     letter-spacing: .16em;
     text-transform: uppercase;
     color: var(--subtitle);
   }
   #analysis-panel .c-diff {
+    margin-top: 6px;
     font-family: var(--font-ui);
-    font-size: 1rem;
+    font-size: 1.08rem;
     font-weight: 800;
     color: var(--title);
-    text-align: center;
   }
   #analysis-panel .c-diff.positive { color: #115f63; }
   #analysis-panel .c-diff.negative { color: #844a5c; }
   #analysis-panel .c-diff.neutral { color: var(--title); }
   #analysis-panel .c-diff-note {
-    max-width: 120px;
+    margin-top: 4px;
     font-family: var(--font-ui);
-    font-size: .64rem;
-    line-height: 1.4;
+    font-size: .74rem;
+    line-height: 1.5;
     color: var(--hint);
-    text-align: center;
   }
+  #analysis-panel .c-meta { margin-top: 8px; }
   #analysis-panel .c-state,
   #analysis-panel .c-foot {
     margin-top: 10px;
     font-family: var(--font-ui);
-    font-size: .7rem;
-    line-height: 1.55;
+    font-size: .77rem;
+    line-height: 1.6;
     color: var(--hint);
   }
   #analysis-panel .c-state-grid {
@@ -1006,9 +1020,10 @@
   }
   #analysis-panel .c-state-name {
     margin-top: 6px;
-    font-family: var(--font-display);
-    font-size: .93rem;
-    line-height: 1.02;
+    font-family: var(--font-ui);
+    font-size: .98rem;
+    line-height: 1.08;
+    font-weight: 800;
     color: var(--title);
   }
   #analysis-panel .c-state-name.pending {
@@ -1057,17 +1072,18 @@
   }
   #footer-credit a {
     font-family: var(--font-ui);
-    font-size: .64rem;
-    font-weight: 600;
-    letter-spacing: .04em;
-    color: var(--subtitle);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--title) 88%, var(--subtitle) 12%);
     text-decoration: none;
   }
   #footer-credit a:hover { color: var(--legend-accent); }
   #tube-legend .llbl {
     font-family: var(--font-ui);
-    font-size: .62rem;
-    font-weight: 700;
+    font-size: .68rem;
+    font-weight: 800;
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--subtitle);
@@ -1083,10 +1099,27 @@
     align-items: center;
     gap: 9px;
     min-width: 0;
+    width: 100%;
+    border: none;
     color: var(--legend-text);
     font-family: var(--font-ui);
-    font-size: .7rem;
+    font-size: .78rem;
     line-height: 1.2;
+    padding: 6px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+    text-align: left;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+  }
+  .tube-legend-item:hover,
+  .tube-legend-item.active {
+    background: color-mix(in srgb, var(--panel-strong) 84%, transparent);
+    color: var(--title);
+    transform: translateX(-1px);
+  }
+  .tube-legend-item.active {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--button-active) 30%, transparent);
   }
   .tube-legend-swatch {
     width: 14px;
@@ -1115,19 +1148,19 @@
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     box-shadow: var(--panel-shadow);
     font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 1.62rem;
+    font-weight: 800;
     letter-spacing: .08em;
     color: var(--legend-accent);
   }
-  #loading h2 { margin-top: 18px; font-family: var(--font-display); font-size: 2.05rem; font-weight: 700; letter-spacing: .12em; color: var(--title); text-transform: uppercase; }
+  #loading h2 { margin-top: 18px; font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; letter-spacing: .1em; color: var(--title); text-transform: uppercase; }
   #loading .lstatus  { margin-top: 10px; font-size: .66rem; letter-spacing: .15em; text-transform: uppercase; color: var(--subtitle); font-family: var(--font-ui); }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 540px) {
     #left-stack     { top: 14px; left: 14px; right: 14px; width: calc(100vw - 28px); max-width: calc(100vw - 28px); gap: 9px; }
     #title h1       { font-size: 1.72rem; }
-    #title p        { font-size: .6rem; }
+    #title p        { font-size: .68rem; }
     #layer-toggle .toggle-btn { flex-basis: calc(50% - 7px); }
     #metric-toggle  { max-width: none; }
     #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
@@ -1147,7 +1180,6 @@
     #analysis-panel .analysis-panel-head { padding: 14px 15px 12px; }
     #analysis-panel .analysis-panel-body { padding: 14px 15px 14px; }
     #analysis-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
-    #analysis-panel .c-mid { padding-top: 0; }
     #analysis-panel .corr-selectors { grid-template-columns: 1fr; }
     #footer-bar     { left: 14px; right: 14px; bottom: 16px; grid-template-columns: 1fr; row-gap: 8px; }
     #footer-utility { justify-self: center; text-align: center; white-space: normal; }
@@ -1168,7 +1200,7 @@
 <div id="left-stack">
   <div id="title" class="rail-card">
     <h1>THE LONDON BIBLE</h1>
-    <p>A field guide to the city behind the stats</p>
+    <p>One city, every layer</p>
   </div>
 
   <div class="control-group rail-card" id="layer-group">
@@ -1188,7 +1220,7 @@
     <div id="view-toggle">
       <button id="btn-flat" class="toggle-btn active" onclick="setView('flat')">Flat map</button>
       <button id="btn-3d"   class="toggle-btn" onclick="setView('3d')">Spikes</button>
-      <button id="btn-home" class="toggle-btn" style="margin-left:4px" onclick="resetView()" title="Reset to overview">⌂</button>
+      <button id="btn-home" class="toggle-btn" style="margin-left:4px" onclick="resetView()" title="Reset to overview">↺ Reset</button>
     </div>
   </div>
 
@@ -1598,7 +1630,7 @@ function splitStationLines(lines, modes) {
 }
 
 const METRIC_PALETTES = {
-  density: [[253, 228, 140, 210], [244, 163, 80, 235], [213, 94, 88, 250], [165, 38, 116, 255], [86, 11, 107, 255], [14, 4, 48, 255]],
+  density: PALETTE,
   house_price_proxy_gbp: [[245, 236, 225, 220], [224, 181, 143, 232], [199, 132, 84, 242], [149, 74, 45, 252], [88, 34, 27, 255]],
   median_weekly_earnings_gbp: [[229, 245, 243, 220], [172, 220, 214, 232], [106, 186, 177, 242], [41, 129, 137, 250], [14, 70, 87, 255]],
   children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
@@ -1618,7 +1650,7 @@ const METRICS = {
     legendLabel: "Residents per km²",
     unit: "res/km²",
     year: "2024",
-    source: "Kontur Population clipped to GLA borough boundaries",
+    source: "Kontur Population",
     geography: "Hexes and boroughs",
     scale: "sequential",
     paletteKey: "density",
@@ -1950,6 +1982,7 @@ async function init() {
   let correlationXMetric = "house_price_proxy_gbp";
   let correlationYMetric = "median_weekly_earnings_gbp";
   let correlationHoverName = null;
+  let selectedTubeLineKey = null;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
@@ -1963,6 +1996,7 @@ async function init() {
   const OUTLIER_THRESHOLD = 50000;
   const OUTLIER_COLOR = [0, 0, 0, 0];
   const TARGET_HEIGHT_M = 18000;
+  const SPIKE_RADIUS_M = 110;
   const SIMILARITY_METRICS = [
     { key: "density", label: "density" },
     { key: "house_price_proxy_gbp", label: "house prices" },
@@ -3070,6 +3104,42 @@ async function init() {
     return hexColor(Math.min(density / sectionDensityMax, 1));
   }
 
+  function validSectionDensity(feature) {
+    const density = feature?.properties?.density ?? 0;
+    return Number.isFinite(density) && density > 0 && density <= OUTLIER_THRESHOLD;
+  }
+
+  function featureRepresentativePoint(feature) {
+    const geometry = feature?.geometry;
+    if (!geometry) return null;
+    const ring = geometry.type === "Polygon"
+      ? geometry.coordinates?.[0]
+      : geometry.type === "MultiPolygon"
+        ? geometry.coordinates?.[0]?.[0]
+        : null;
+    if (!ring?.length) return null;
+    const sum = ring.reduce((acc, coord) => {
+      acc.lon += coord[0];
+      acc.lat += coord[1];
+      return acc;
+    }, { lon: 0, lat: 0 });
+    return [sum.lon / ring.length, sum.lat / ring.length];
+  }
+
+  function spikeSectionData() {
+    if (!sectionsGeoJSON?.features?.length) return [];
+    return sectionsGeoJSON.features
+      .filter((feature) => validSectionDensity(feature))
+      .map((feature) => ({
+        feature,
+        properties: feature.properties,
+        geometry: feature.geometry,
+        position: featureRepresentativePoint(feature),
+        density: feature.properties?.density ?? 0,
+      }))
+      .filter((entry) => Array.isArray(entry.position));
+  }
+
   function boroughMetricColor(feature, metricState = getActiveMetricState()) {
     const { metricKey, metric, countrySelection, stats, fillAlpha, theme } = metricState;
     const value = metricValue(feature, metricKey, countrySelection);
@@ -3088,6 +3158,7 @@ async function init() {
 
   function elevationFor(feature, dataset) {
     const density = feature.properties.density ?? 0;
+    if (dataset === "sections" && !validSectionDensity(feature)) return 0;
     return (Math.min(density, sectionDensityMax) / sectionDensityMax) * TARGET_HEIGHT_M;
   }
 
@@ -3115,16 +3186,37 @@ async function init() {
 
   function makeSectionsLayer() {
     if (onlyTubeMode()) return null;
+    if (is3D) {
+      return new deck.ColumnLayer({
+        id: "sections-spikes",
+        data: spikeSectionData(),
+        pickable: true,
+        diskResolution: 4,
+        radiusUnits: "meters",
+        radiusMinPixels: 2,
+        radiusMaxPixels: 16,
+        extruded: true,
+        getPosition: (d) => d.position,
+        getRadius: () => SPIKE_RADIUS_M,
+        getFillColor: (d) => colorFor(d.feature, "sections"),
+        getLineColor: currentTheme === "night" ? [255, 255, 255, 36] : [255, 255, 255, 48],
+        getLineWidth: 1,
+        lineWidthUnits: "pixels",
+        stroked: true,
+        getElevation: (d) => elevationFor(d.feature, "sections"),
+        opacity: currentTheme === "night" ? 0.95 : 0.92,
+      });
+    }
     return new deck.GeoJsonLayer({
       id: "sections",
       data: sectionsGeoJSON,
       filled: true, stroked: false,
-      extruded: is3D, wireframe: false,
+      extruded: false, wireframe: false,
       pickable: true, autoHighlight: true,
       highlightColor: [255, 255, 255, currentTheme === "night" ? 58 : 40],
       getFillColor: (f) => colorFor(f, "sections"),
-      getElevation: (f) => elevationFor(f, "sections"),
-      opacity: is3D ? (currentTheme === "night" ? 0.94 : 0.9) : (currentTheme === "night" ? 0.84 : 0.78),
+      getElevation: 0,
+      opacity: currentTheme === "night" ? 0.84 : 0.78,
     });
   }
 
@@ -3232,10 +3324,17 @@ async function init() {
       data: tubeLinesGeoJSON,
       stroked: true,
       filled: false,
-      pickable: false,
+      pickable: true,
       lineWidthUnits: "pixels",
-      getLineColor: (f) => [...(currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay), 235],
-      getLineWidth: () => (onlyTubeMode() ? THEMES[currentTheme].lineWidthOnly : THEMES[currentTheme].lineWidthMixed) * tubeZoomFactor(),
+      getLineColor: (f) => {
+        const active = selectedTubeLineKey && f.properties?.lineKey === selectedTubeLineKey;
+        const base = currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay;
+        return [...base, active ? 255 : 235];
+      },
+      getLineWidth: (f) => {
+        const base = (onlyTubeMode() ? THEMES[currentTheme].lineWidthOnly : THEMES[currentTheme].lineWidthMixed) * tubeZoomFactor();
+        return selectedTubeLineKey && f.properties?.lineKey === selectedTubeLineKey ? base * 1.3 : base;
+      },
       lineCapRounded: true,
       lineJointRounded: true,
       opacity: 1,
@@ -3326,12 +3425,15 @@ async function init() {
   }
 
   function stationTooltipHtml(station, pinned) {
-    const enriched = onlyTubeMode();
+    const enriched = true;
     const lineItems = splitStationLines(station.properties.lines, station.properties.modes);
     const lineHtml = enriched && lineItems.length
       ? `<span class="tsub">${lineItems.map((line) => line.name).join(" · ")}</span>`
       : `<span class="tsub">${station.properties.modes || "TfL"}</span>`;
-    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Tube</span><br><span class="tarea">${station.properties.stationName}</span><br>${lineHtml}`;
+    const coords = station.geometry?.coordinates;
+    const boroughLabel = Array.isArray(coords) ? boroughAt(coords[0], coords[1]) : null;
+    const boroughHtml = boroughLabel ? `<br><span class="tsub">Borough · ${boroughLabel}</span>` : "";
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">Tube</span><br><span class="tarea">${station.properties.stationName}</span><br>${lineHtml}${boroughHtml}`;
   }
 
   function lineTooltipHtml(line, pinned) {
@@ -3493,6 +3595,21 @@ async function init() {
     });
   }
 
+  function makeSimilarHighlightLayer(features) {
+    if (!features?.length || !isAnalysisMode("similar") || !similarityAvailable()) return null;
+    return new deck.GeoJsonLayer({
+      id: "similar-highlights",
+      data: { type: "FeatureCollection", features },
+      filled: true,
+      stroked: true,
+      pickable: false,
+      getFillColor: currentTheme === "night" ? [154, 128, 88, 18] : [154, 128, 88, 14],
+      getLineColor: currentTheme === "night" ? [232, 212, 170, 215] : [142, 109, 60, 215],
+      lineWidthUnits: "pixels",
+      getLineWidth: 3.5,
+    });
+  }
+
   function getLayers() {
     const layers = [];
     if (currentMainLayer) layers.push(currentMainLayer);
@@ -3508,6 +3625,8 @@ async function init() {
     if (comparisonLayerA) layers.push(comparisonLayerA);
     const comparisonLayerB = makeComparisonSelectionLayer(comparisonFeature(comparisonB), "B");
     if (comparisonLayerB) layers.push(comparisonLayerB);
+    const similarLayer = makeSimilarHighlightLayer(similarHighlightFeatures());
+    if (similarLayer) layers.push(similarLayer);
     const correlationPinnedLayer = makeCorrelationSelectionLayer(correlationPinnedFeature(), "pinned");
     if (correlationPinnedLayer) layers.push(correlationPinnedLayer);
     const correlationHoverLayer = makeCorrelationSelectionLayer(
@@ -3539,6 +3658,12 @@ async function init() {
       });
     }
     return lines.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function similarHighlightFeatures() {
+    const feature = similarityFeature();
+    if (!feature) return [];
+    return similarityResultsForFeature(feature).map((entry) => entry.feature).filter(Boolean);
   }
 
   function updateMetricButtons() {
@@ -3637,12 +3762,16 @@ async function init() {
     metricOptionsEl.style.display = showMetricOptions ? "flex" : "none";
     pubsRowEl.hidden = !pubsMode;
     pubsToggleEl.style.display = pubsMode ? "flex" : "none";
+    pubsRowEl.classList.toggle("active-scope", pubsMode);
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
+    geographyRowEl.classList.toggle("active-scope", geographyMode);
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
+    yearRowEl.classList.toggle("active-scope", yearMode);
     countryRowEl.hidden = !originMode;
     countryToggleEl.style.display = originMode ? "flex" : "none";
+    countryRowEl.classList.toggle("active-scope", originMode);
     analysisGroupEl.style.display = boroughAnalysisMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
     btnCompare.style.display = boroughAnalysisMode ? "" : "none";
@@ -3743,7 +3872,9 @@ async function init() {
       }
       legendAvgEl.textContent = `${metric.summaryLabel} · ${formatMetricValue(metricKey, metricStats.avg)}`;
     }
-    legendMetaEl.textContent = `${metric.source} · ${metric.year} · ${metric.geography}${metric.note ? ` · ${metric.note}` : ""}`;
+    const metaParts = [metric.source, metric.year, metric.geography];
+    if (metric.note && metricKey !== "density") metaParts.push(metric.note);
+    legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
   function renderTubeLegend() {
@@ -3756,8 +3887,34 @@ async function init() {
     const items = activeTubeLegendLines();
     tubeLegendItemsEl.innerHTML = items.map((item) => {
       const swatch = `rgb(${item.color[0]}, ${item.color[1]}, ${item.color[2]})`;
-      return `<div class="tube-legend-item"><span class="tube-legend-swatch" style="background:${swatch}"></span><span class="tube-legend-name">${item.name}</span></div>`;
+      const active = selectedTubeLineKey === item.key ? " active" : "";
+      return `<button class="tube-legend-item${active}" type="button" data-line-key="${item.key}"><span class="tube-legend-swatch" style="background:${swatch}"></span><span class="tube-legend-name">${item.name}</span></button>`;
     }).join("");
+    tubeLegendItemsEl.querySelectorAll("[data-line-key]").forEach((button) => {
+      button.onclick = () => {
+        selectedTubeLineKey = selectedTubeLineKey === button.dataset.lineKey ? null : button.dataset.lineKey;
+        deckgl.setProps({ layers: getLayers() });
+        renderTubeLegend();
+      };
+    });
+    if (currentDataset === "municipi" && showStations) {
+      const analysisWidth = getComputedStyle(analysisPanelEl).display !== "none"
+        ? analysisPanelEl.getBoundingClientRect().width
+        : 0;
+      tubeLegendEl.style.position = "absolute";
+      tubeLegendEl.style.top = "50%";
+      tubeLegendEl.style.right = `${24 + analysisWidth + (analysisWidth ? 16 : 0)}px`;
+      tubeLegendEl.style.left = "auto";
+      tubeLegendEl.style.bottom = "auto";
+      tubeLegendEl.style.transform = "translateY(-50%)";
+    } else {
+      tubeLegendEl.style.position = "relative";
+      tubeLegendEl.style.top = "";
+      tubeLegendEl.style.right = "";
+      tubeLegendEl.style.left = "";
+      tubeLegendEl.style.bottom = "";
+      tubeLegendEl.style.transform = "";
+    }
   }
 
   function buildComparisonPanelContent() {
@@ -3808,12 +3965,6 @@ async function init() {
           <div class="c-val">${formatMetricValueFor(metricKey, valueA, comparisonCountrySelection())}</div>
           ${supportA ? `<div class="c-support">${supportA}</div>` : ""}
         </div>
-        <div class="c-mid">
-          <div class="c-diff-label">Difference</div>
-          <div class="c-diff ${comparisonDifferenceTone(diff)}">${comparisonDifferenceLabel(metricKey, diff)}</div>
-          <div class="c-diff-note">${comparisonDifferenceNote(diff)}</div>
-          <div class="c-meta">B − A · ${metric.legendLabel}</div>
-        </div>
         <div class="c-col b">
           <span class="c-tag b">B</span>
           <div class="c-name">${featureB.properties?.[NAME_FIELD] ?? "Borough B"}</div>
@@ -3821,6 +3972,12 @@ async function init() {
           <div class="c-val">${formatMetricValueFor(metricKey, valueB, comparisonCountrySelection())}</div>
           ${supportB ? `<div class="c-support">${supportB}</div>` : ""}
         </div>
+      </div>
+      <div class="c-delta-row">
+        <div class="c-diff-label">Difference</div>
+        <div class="c-diff ${comparisonDifferenceTone(diff)}">${comparisonDifferenceLabel(metricKey, diff)}</div>
+        <div class="c-diff-note">${comparisonDifferenceNote(diff)}</div>
+        <div class="c-meta">B − A · ${metric.legendLabel}</div>
       </div>
       <div class="c-foot">${metric.source} · ${metric.year}</div>
     `;
@@ -3881,13 +4038,13 @@ async function init() {
             <div class="sim-rank">#${result.rank}</div>
             <div class="sim-item-body">
               <div class="sim-item-name">${result.feature.properties?.[NAME_FIELD] ?? "Borough"}</div>
-              <div class="sim-item-meta">Profile distance · ${result.distance.toFixed(2)}</div>
+              <div class="sim-item-meta">Nearest match · ${result.distance.toFixed(2)}</div>
               <div class="sim-reason">${result.explanation}</div>
             </div>
           </div>
         `).join("")}
       </div>
-      <div class="sim-foot">Equal-weight similarity using normalized borough metrics; excludes the selected borough itself.</div>
+      <div class="sim-foot">The three closest matches are also highlighted on the map. Similarity uses equal-weight normalized borough metrics and excludes the selected borough itself.</div>
     `;
   }
 
@@ -3906,8 +4063,8 @@ async function init() {
     }
 
     const width = 560;
-    const height = 238;
-    const margin = { top: 10, right: 18, bottom: 34, left: 46 };
+    const height = 286;
+    const margin = { top: 12, right: 18, bottom: 42, left: 54 };
     const plotWidth = width - margin.left - margin.right;
     const plotHeight = height - margin.top - margin.bottom;
     const xs = points.map((point) => point.x);
@@ -3971,6 +4128,7 @@ async function init() {
       </div>
       <div class="corr-chart-wrap">
         <svg class="corr-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Scatterplot of ${xMetric.label} against ${yMetric.label}">
+          <rect x="${margin.left}" y="${margin.top}" width="${plotWidth}" height="${plotHeight}" rx="10" fill="${currentTheme === "night" ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.52)"}" />
           <line class="corr-gridline" x1="${margin.left}" y1="${yMid}" x2="${width - margin.right}" y2="${yMid}" />
           <line class="corr-gridline" x1="${xMid}" y1="${margin.top}" x2="${xMid}" y2="${height - margin.bottom}" />
           <line class="corr-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" />
@@ -3981,7 +4139,7 @@ async function init() {
         </svg>
       </div>
       ${detailHtml}
-      <div class="corr-foot">Each point is a borough. Hover links the map and scatter; pinned boroughs stay highlighted in both views.</div>
+      <div class="corr-foot">Each point is a borough. Hover links the map and scatter, and pinned boroughs stay highlighted in both views.</div>
     `;
   }
 
@@ -3998,7 +4156,7 @@ async function init() {
     if (!chapter) {
       return `
         ${picker}
-        <div class="analysis-empty">Choose a chapter to jump into a curated borough view and reading prompt.</div>
+        <div class="analysis-empty">Choose a city-wide chapter to jump into a preset London view and reading prompt. Stories do not require selecting a borough first.</div>
       `;
     }
 
@@ -4008,13 +4166,13 @@ async function init() {
     return `
       ${picker}
       <div class="story-head">
-        <div class="analysis-empty">Preset chapters set the initial borough lens and camera, then leave normal exploration intact.</div>
+        <div class="analysis-empty">Stories frame city-wide London patterns. They set a starting lens and camera, then leave normal exploration intact.</div>
         <button class="ch-clear" onclick="clearChapter()">Clear</button>
       </div>
       <div class="ch-name">${chapter.title}</div>
       <div class="ch-meta">${metricConfig.label} · ${geographyLabel}${yearLabel}</div>
       <div class="ch-description">${chapter.description}</div>
-      <div class="ch-foot">Preset chapters set the initial borough lens and camera, then leave normal exploration intact.</div>
+      <div class="ch-foot">This chapter is a whole-city preset, not a borough-specific reading. You can still pan, zoom, and inspect any borough normally.</div>
     `;
   }
 
@@ -4029,7 +4187,7 @@ async function init() {
       case "correlation":
         return { title: "Correlation view", subtitle: "Choose any two borough metrics and inspect the relationship as a linked scatter." };
       case "story":
-        return { title: "Stories", subtitle: "Preset analytical chapters that set a borough lens and a short reading prompt." };
+        return { title: "Stories", subtitle: "City-wide preset chapters that frame major London patterns without requiring a borough selection." };
       default:
         return { title: "Analysis", subtitle: "Choose an analysis tool to explore this borough in more detail." };
     }
@@ -4217,9 +4375,13 @@ async function init() {
         return;
       }
       if (object?.layer?.id === "tube-lines") {
+        const lineKey = object.properties?.lineKey || null;
+        selectedTubeLineKey = selectedTubeLineKey === lineKey ? null : lineKey;
         tooltipEl.innerHTML = lineTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
+        deckgl.setProps({ layers: getLayers() });
+        renderTubeLegend();
         renderAnalysisPanel();
         return;
       }
@@ -4307,6 +4469,7 @@ async function init() {
   }
 
   setMode = function(mode) {
+    selectedTubeLineKey = null;
     if (mode === "sections") {
       currentDataset = "sections";
       ACTIVE_FEATURES = sectionsGeoJSON.features;
@@ -4472,6 +4635,7 @@ async function init() {
   toggleStations = function() {
     if (currentDataset !== "municipi") return;
     showStations = !showStations;
+    if (!showStations) selectedTubeLineKey = null;
     refreshMapState();
   };
 
@@ -4480,6 +4644,7 @@ async function init() {
   };
 
   resetView = function() {
+    selectedTubeLineKey = null;
     highlightedFeature = null;
     pinData = [];
     tooltipPinned = false;

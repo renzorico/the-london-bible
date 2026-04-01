@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Atlas UI refinement pass
+
+- Refined the atlas typography with a sharper one-line `THE LONDON BIBLE` wordmark, the subtitle `One city, every layer`, a stronger footer credit, and more readable analysis-panel text.
+- Fixed only-tube hover to stay station-specific, enlarged and linked the Tube legend to line selection, cleaned up spikes rendering and outlier handling, improved compare / story / similarity / correlation readability, and aligned legend gradients more closely with the visible map palette.
+
 ## 2026-04-01 — Atlas UI cleanup & control rail redesign
 
 - Rebuilt the atlas controls into a single left-hand rail with clearer brand, views, metrics, analysis, and nested-option hierarchy so the interface feels calmer and more editorial.
