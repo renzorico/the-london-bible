@@ -143,7 +143,7 @@
   }
   #overlay-toggle {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     margin-top: 8px;
     width: 100%;
@@ -266,28 +266,40 @@
   .school-quality-btn[data-school-rating="Inadequate"] .school-signal i:nth-child(-n+1),
   .school-quality-btn[data-school-rating="Requires improvement"] .school-signal i:nth-child(-n+2),
   .school-quality-btn[data-school-rating="Good"] .school-signal i:nth-child(-n+3),
-  .school-quality-btn[data-school-rating="Outstanding"] .school-signal i:nth-child(-n+4) {
+  .school-quality-btn[data-school-rating="Outstanding"] .school-signal i:nth-child(-n+4),
+  .school-quality-btn[data-hospital-rating="Inadequate"] .school-signal i:nth-child(-n+1),
+  .school-quality-btn[data-hospital-rating="Requires improvement"] .school-signal i:nth-child(-n+2),
+  .school-quality-btn[data-hospital-rating="Good"] .school-signal i:nth-child(-n+3),
+  .school-quality-btn[data-hospital-rating="Outstanding"] .school-signal i:nth-child(-n+4) {
     background: currentColor;
   }
-  .school-quality-btn[data-school-rating="Ungraded"] .school-signal {
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal,
+  .school-quality-btn[data-hospital-rating="Not rated"] .school-signal {
     height: 13px;
     justify-content: center;
   }
-  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i {
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i,
+  .school-quality-btn[data-hospital-rating="Not rated"] .school-signal i {
     width: 4px;
     height: 4px;
     border-radius: 50%;
     background: currentColor;
     opacity: .7;
   }
-  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i:not(:first-child) {
+  .school-quality-btn[data-school-rating="Ungraded"] .school-signal i:not(:first-child),
+  .school-quality-btn[data-hospital-rating="Not rated"] .school-signal i:not(:first-child) {
     opacity: .22;
   }
-  .school-quality-btn[data-school-rating="Outstanding"] { color: #2b845a; }
-  .school-quality-btn[data-school-rating="Good"] { color: #45a584; }
-  .school-quality-btn[data-school-rating="Requires improvement"] { color: #d19640; }
-  .school-quality-btn[data-school-rating="Inadequate"] { color: #bf4949; }
-  .school-quality-btn[data-school-rating="Ungraded"] { color: #7a8792; }
+  .school-quality-btn[data-school-rating="Outstanding"],
+  .school-quality-btn[data-hospital-rating="Outstanding"] { color: #2b845a; }
+  .school-quality-btn[data-school-rating="Good"],
+  .school-quality-btn[data-hospital-rating="Good"] { color: #45a584; }
+  .school-quality-btn[data-school-rating="Requires improvement"],
+  .school-quality-btn[data-hospital-rating="Requires improvement"] { color: #d19640; }
+  .school-quality-btn[data-school-rating="Inadequate"],
+  .school-quality-btn[data-hospital-rating="Inadequate"] { color: #bf4949; }
+  .school-quality-btn[data-school-rating="Ungraded"],
+  .school-quality-btn[data-hospital-rating="Not rated"] { color: #7a8792; }
   .school-quality-btn.active {
     color: var(--button-active-text);
   }
@@ -1697,7 +1709,6 @@
       <button id="btn-tube-map" class="toggle-btn" title="Only-tube" aria-label="Only-tube" onclick="setMode('tube')">ONLY-TUBE</button>
     </div>
     <div id="overlay-toggle">
-      <button id="btn-contours" class="toggle-btn secondary-btn" title="Contours" aria-label="Contours" onclick="toggleContours()">Contours</button>
       <button id="btn-bikes" class="toggle-btn secondary-btn" title="Bikes" aria-label="Bikes" onclick="toggleBikes()">Bikes</button>
       <button id="btn-pois" class="toggle-btn secondary-btn" title="POIs" aria-label="POIs" onclick="togglePois()">POIs</button>
       <button id="btn-schools" class="toggle-btn secondary-btn" title="Schools" aria-label="Schools" onclick="toggleSchools()">Schools</button>
@@ -5591,7 +5602,7 @@ async function init() {
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
-    btnContours.classList.toggle("active", contoursVisible());
+    if (btnContours) btnContours.classList.toggle("active", contoursVisible());
     btnBikes.classList.toggle("active", bikesVisible());
     btnPois.classList.toggle("active", poisVisible());
     btnSchools.classList.toggle("active", schoolsVisible());

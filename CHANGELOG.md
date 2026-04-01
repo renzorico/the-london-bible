@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Overlay control cleanup
+
+- Unified the Hospitals rating controls with the Schools signal-scale filter style and removed Contours from the visible overlay row so the main civic overlays now stay focused on Bikes, POIs, Schools, and Hospitals.
+
 ## 2026-04-01 — Hospitals overlay
 
 - Added a new Hospitals overlay built from the official CQC care directory and current CQC hospital location pages, with compact rating filters, hospital-specific hover/click cards, and borough-level hospital summaries alongside the existing civic overlays.
