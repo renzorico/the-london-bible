@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Mobile V2 branch pass
+
+- Built an isolated mobile-first V2 shell on `feat/mobile-v2`, redesigning the phone layout around a touch-first top bar, bottom dock, drawer-style controls, and compact mobile info cards while leaving the published desktop app safe on main.
+
 ## 2026-04-01 — v1 release cleanup
 
 - Finalized The London Bible for a stable v1 release on GitHub Pages, confirmed the root index entry and Pages support files, and tidied the repo by removing untracked cache cruft before merging the completed work onto main.

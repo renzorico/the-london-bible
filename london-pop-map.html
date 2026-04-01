@@ -1676,6 +1676,312 @@
     #footer-utility { justify-self: center; text-align: center; white-space: normal; }
     #footer-credit  { order: -1; }
   }
+  #mobile-brand-bar,
+  #mobile-scrim,
+  #mobile-dock {
+    display: none;
+  }
+
+  @media (max-width: 820px) {
+    body.mobile-shell {
+      overscroll-behavior: none;
+    }
+    #mobile-brand-bar {
+      display: flex;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 24;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border-radius: 18px;
+      box-shadow: var(--panel-shadow);
+      backdrop-filter: blur(16px);
+    }
+    .mobile-brand-copy {
+      min-width: 0;
+    }
+    .mobile-brand-kicker {
+      font-family: var(--font-ui);
+      font-size: .54rem;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--subtitle);
+    }
+    .mobile-brand-context {
+      margin-top: 4px;
+      font-family: var(--font-ui);
+      font-size: .82rem;
+      font-weight: 700;
+      line-height: 1.28;
+      color: var(--title);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #mobile-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 18;
+      background: rgba(23, 33, 43, 0.18);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    #mobile-scrim.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #mobile-dock {
+      display: grid;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 24;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border-radius: 20px;
+      box-shadow: var(--panel-shadow);
+      backdrop-filter: blur(18px);
+    }
+    .mobile-dock-btn {
+      min-width: 0;
+      min-height: 54px;
+      padding: 8px 4px 7px;
+      border-radius: 14px;
+      flex-direction: column;
+      gap: 6px;
+      letter-spacing: .12em;
+      font-size: .53rem;
+      box-shadow: none;
+    }
+    .mobile-dock-btn .dock-mark {
+      width: 22px;
+      height: 4px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--title) 22%, transparent);
+      transition: background .15s ease, transform .15s ease;
+    }
+    .mobile-dock-btn.active .dock-mark {
+      background: currentColor;
+      transform: scaleX(1.08);
+    }
+    body.mobile-shell #title {
+      display: none;
+    }
+    body.mobile-shell #left-stack {
+      top: auto;
+      left: 12px;
+      right: 12px;
+      bottom: 84px;
+      width: auto;
+      max-width: none;
+      gap: 10px;
+      z-index: 22;
+      max-height: min(56vh, 480px);
+      overflow-y: auto;
+      transform: translateY(calc(100% + 24px));
+      opacity: 0;
+      transition: transform .24s ease, opacity .24s ease;
+      pointer-events: none;
+    }
+    body.mobile-shell #left-stack .control-group {
+      display: none;
+    }
+    body.mobile-shell[data-mobile-panel="layers"] #left-stack,
+    body.mobile-shell[data-mobile-panel="metrics"] #left-stack,
+    body.mobile-shell[data-mobile-panel="analysis"] #left-stack {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    body.mobile-shell[data-mobile-panel="layers"] #layer-group,
+    body.mobile-shell[data-mobile-panel="layers"] #view-group,
+    body.mobile-shell[data-mobile-panel="metrics"] #metric-group,
+    body.mobile-shell[data-mobile-panel="analysis"] #analysis-group {
+      display: flex;
+      pointer-events: auto;
+    }
+    body.mobile-shell .rail-card {
+      padding: 12px 13px 13px;
+      border-radius: 18px;
+    }
+    body.mobile-shell .rail-card-head {
+      margin-bottom: 8px;
+    }
+    body.mobile-shell #top-right-controls {
+      top: 78px;
+      left: 12px;
+      right: 12px;
+      gap: 10px;
+      justify-content: stretch;
+      z-index: 23;
+    }
+    body.mobile-shell #search-wrap,
+    body.mobile-shell #search-input {
+      width: 100%;
+      min-width: 0;
+    }
+    body.mobile-shell #layer-toggle {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    body.mobile-shell #overlay-toggle {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+    body.mobile-shell #view-toggle,
+    body.mobile-shell #analysis-group .metric-subtoggle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    body.mobile-shell #view-toggle .toggle-btn,
+    body.mobile-shell #analysis-group .toggle-btn {
+      flex: 1 1 calc(50% - 4px);
+      min-height: 40px;
+    }
+    body.mobile-shell #view-toggle #btn-home {
+      flex-basis: 100%;
+      margin-left: 0 !important;
+    }
+    body.mobile-shell #poi-toggle {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    body.mobile-shell #school-controls,
+    body.mobile-shell #hospital-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    body.mobile-shell #school-toggle {
+      width: 100%;
+      gap: 6px;
+    }
+    body.mobile-shell #school-toggle .toggle-btn {
+      flex: 1 1 0;
+    }
+    body.mobile-shell #school-rating-toggle,
+    body.mobile-shell #hospital-rating-toggle {
+      width: 100%;
+      gap: 6px;
+    }
+    body.mobile-shell #metric-group {
+      gap: 8px;
+    }
+    body.mobile-shell #metric-toggle {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    body.mobile-shell #metric-options {
+      margin-top: 10px;
+      gap: 10px;
+    }
+    body.mobile-shell #country-toggle {
+      gap: 5px;
+    }
+    body.mobile-shell #bottom-left-stack {
+      left: 12px;
+      right: 12px;
+      bottom: 84px;
+      width: auto;
+      max-width: none;
+      z-index: 22;
+      max-height: min(44vh, 340px);
+      overflow-y: auto;
+      transform: translateY(calc(100% + 24px));
+      opacity: 0;
+      transition: transform .24s ease, opacity .24s ease;
+      pointer-events: none;
+    }
+    body.mobile-shell[data-mobile-panel="legend"] #bottom-left-stack {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    body.mobile-shell #legend,
+    body.mobile-shell #tube-legend {
+      width: 100%;
+      max-width: none;
+      pointer-events: auto;
+    }
+    body.mobile-shell #analysis-panel {
+      left: 12px;
+      right: 12px;
+      top: 126px;
+      bottom: 84px;
+      width: auto;
+      max-width: none;
+      z-index: 23;
+      border-radius: 20px;
+    }
+    body.mobile-shell #analysis-panel .analysis-panel-head {
+      padding: 14px 14px 12px;
+    }
+    body.mobile-shell #analysis-panel .analysis-panel-body {
+      padding: 14px 14px 16px;
+    }
+    body.mobile-shell #analysis-panel .c-grid,
+    body.mobile-shell #analysis-panel .corr-selectors {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    body.mobile-shell #tooltip.pinned,
+    body.mobile-shell #tooltip.summary-card {
+      position: fixed !important;
+      left: 12px !important;
+      right: 12px !important;
+      top: auto !important;
+      bottom: 86px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      padding: 12px 14px 13px;
+      border-radius: 18px;
+      z-index: 25;
+    }
+    body.mobile-shell #tooltip .tclose {
+      font-size: .82rem;
+      padding: 3px;
+    }
+    body.mobile-shell #footer-bar {
+      display: none;
+    }
+  }
+
+  @media (max-width: 430px) {
+    body.mobile-shell #mobile-brand-bar {
+      padding: 11px 12px;
+    }
+    body.mobile-shell .mobile-brand-context {
+      font-size: .78rem;
+    }
+    body.mobile-shell #top-right-controls {
+      top: 74px;
+    }
+    body.mobile-shell #analysis-panel {
+      top: 122px;
+    }
+    body.mobile-shell #metric-toggle {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    body.mobile-shell #overlay-toggle {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1691,6 +1997,20 @@
 </div>
 
 <div id="map"></div>
+
+<div id="mobile-brand-bar">
+  <div class="mobile-brand-copy">
+    <div class="mobile-brand-kicker">The London Bible</div>
+    <div id="mobile-brand-context" class="mobile-brand-context">One city, every layer.</div>
+  </div>
+</div>
+<div id="mobile-scrim" hidden></div>
+<div id="mobile-dock" role="toolbar" aria-label="Mobile controls">
+  <button class="toggle-btn mobile-dock-btn" data-mobile-panel="layers" type="button" onclick="toggleMobilePanel('layers')"><span class="dock-mark" aria-hidden="true"></span><span>Layers</span></button>
+  <button class="toggle-btn mobile-dock-btn" data-mobile-panel="metrics" type="button" onclick="toggleMobilePanel('metrics')"><span class="dock-mark" aria-hidden="true"></span><span>Metrics</span></button>
+  <button class="toggle-btn mobile-dock-btn" data-mobile-panel="analysis" type="button" onclick="toggleMobilePanel('analysis')"><span class="dock-mark" aria-hidden="true"></span><span>Insights</span></button>
+  <button class="toggle-btn mobile-dock-btn" data-mobile-panel="legend" type="button" onclick="toggleMobilePanel('legend')"><span class="dock-mark" aria-hidden="true"></span><span>Legend</span></button>
+</div>
 
 <div id="left-stack">
   <div id="title" class="rail-card">
@@ -2480,7 +2800,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
 }
 
 let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase, toggleSchoolRating, toggleHospitals, toggleHospitalRating;
-let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
+let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode, toggleMobilePanel, closeMobilePanel;
 
 async function init() {
   const bodyEl = document.body;
@@ -2531,6 +2851,9 @@ async function init() {
   const yearSliderEl = document.getElementById("year-slider");
   const yearStopsEl = document.getElementById("year-stops");
   const topRightControlsEl = document.getElementById("top-right-controls");
+  const mobileBrandContextEl = document.getElementById("mobile-brand-context");
+  const mobileScrimEl = document.getElementById("mobile-scrim");
+  const mobileDockEl = document.getElementById("mobile-dock");
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
   const btnSpotlight = document.getElementById("btn-spotlight");
@@ -2563,6 +2886,9 @@ async function init() {
   const hospitalRatingButtons = Object.fromEntries(
     [...hospitalRatingToggleEl.querySelectorAll("[data-hospital-rating]")].map((button) => [button.dataset.hospitalRating, button])
   );
+  const mobileDockButtons = mobileDockEl
+    ? Object.fromEntries([...mobileDockEl.querySelectorAll("[data-mobile-panel]")].map((button) => [button.dataset.mobilePanel, button]))
+    : {};
 
   let tooltipPinned = false;
   let pinnedCoord = null;
@@ -2623,6 +2949,7 @@ async function init() {
   let atlasReadyForReveal = false;
   let loadingDismissTimer = null;
   let loadingRevealStarted = false;
+  let mobilePanelMode = null;
 
   function reducedMotionPreferred() {
     return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -2695,6 +3022,85 @@ async function init() {
     atlasReadyForReveal = true;
     maybeDismissLoadingOverlay();
   }
+
+  function isMobileLayout() {
+    return window.matchMedia("(max-width: 820px)").matches;
+  }
+
+  function prefersTouchUi() {
+    return isMobileLayout() || window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  }
+
+  function mobileAnalysisLabel(mode) {
+    if (mode === "compare") return "Compare";
+    if (mode === "why-here") return "Why here?";
+    if (mode === "similar") return "Similar areas";
+    if (mode === "correlation") return "Correlation";
+    if (mode === "story") return "Stories";
+    return "Analysis";
+  }
+
+  function mobileContextLabel() {
+    if (analysisMode) return mobileAnalysisLabel(analysisMode);
+    if (currentDataset === "tube") return "Only-tube view";
+    if (currentDataset === "sections") return is3D ? "Spike terrain" : "Hexes overview";
+    if (currentDataset === "municipi") {
+      const metric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
+      const geography = activeGeography === "msoa" ? "MSOA" : "Borough";
+      return `${metric.label} · ${geography}`;
+    }
+    return "London atlas";
+  }
+
+  function syncMobileUi() {
+    const mobile = isMobileLayout();
+    if (!mobile) mobilePanelMode = null;
+    bodyEl.classList.toggle("mobile-shell", mobile);
+    bodyEl.classList.toggle("mobile-panel-open", mobile && (!!mobilePanelMode || !!analysisMode));
+    bodyEl.dataset.mobilePanel = mobile ? (mobilePanelMode || "") : "";
+
+    if (mobileBrandContextEl) mobileBrandContextEl.textContent = mobileContextLabel();
+
+    const scrimActive = mobile && (!!mobilePanelMode || !!analysisMode);
+    if (mobileScrimEl) {
+      mobileScrimEl.hidden = !scrimActive;
+      mobileScrimEl.classList.toggle("visible", scrimActive);
+    }
+
+    for (const [mode, button] of Object.entries(mobileDockButtons)) {
+      if (!button) continue;
+      button.classList.toggle("active", mobile && (mobilePanelMode === mode || (mode === "analysis" && !!analysisMode)));
+    }
+  }
+
+  toggleMobilePanel = function(mode) {
+    if (!isMobileLayout()) return;
+    mobilePanelMode = mobilePanelMode === mode ? null : mode;
+    syncMobileUi();
+  };
+
+  closeMobilePanel = function() {
+    if (!mobilePanelMode) return;
+    mobilePanelMode = null;
+    syncMobileUi();
+  };
+
+  mobileScrimEl?.addEventListener("click", () => {
+    if (mobilePanelMode) {
+      mobilePanelMode = null;
+      syncMobileUi();
+      return;
+    }
+    if (analysisMode) {
+      clearAnalysisMode();
+      return;
+    }
+    if (tooltipPinned) clearPinnedTooltip();
+  });
+
+  window.addEventListener("resize", () => {
+    syncMobileUi();
+  });
   const OUTLIER_THRESHOLD = 50000;
   const MIN_HEX_SPIKE_AREA_KM2 = 0.18;
   const SPIKE_RENDER_QUANTILE = 0.997;
@@ -5717,6 +6123,7 @@ async function init() {
       clearPinnedTooltip();
     }
 
+    if (analysisMode && isMobileLayout()) mobilePanelMode = null;
     if (analysisMode !== "correlation") correlationHoverName = null;
     if (analysisMode !== "story") activeChapterId = null;
     return true;
@@ -6168,6 +6575,7 @@ async function init() {
     updateContourLayers();
     updateBikeLayers();
     refreshHighlightedFeature();
+    syncMobileUi();
     renderPinnedTooltip();
   }
 
@@ -6221,6 +6629,10 @@ async function init() {
 
     onHover: ({ object, coordinate, x, y }) => {
       object = resolveInteractionObject(x, y, object);
+      if (prefersTouchUi()) {
+        if (!tooltipPinned) tooltipEl.style.display = "none";
+        return;
+      }
       if (isAnalysisMode("correlation") && correlationAvailable() && !poiFocusMode()) {
         const hoveredName = currentDataset === "municipi" && object?.properties?.[NAME_FIELD]
           ? object.properties[NAME_FIELD]
@@ -6293,6 +6705,10 @@ async function init() {
 
     onClick: ({ object, coordinate, x, y }) => {
       object = resolveInteractionObject(x, y, object);
+      if (isMobileLayout() && mobilePanelMode) {
+        mobilePanelMode = null;
+        syncMobileUi();
+      }
       if (!coordinate) return;
       if (onlyTubeMode() && !object) {
         selectedTubeLineKey = null;
@@ -6305,8 +6721,20 @@ async function init() {
       if (onlyTubeMode() && object?.layer?.id === "tube-lines") {
         const lineKey = object.properties?.lineKey || null;
         setSelectedTubeLine(lineKey);
-        tooltipEl.innerHTML = lineTooltipHtml(object, false);
-        tooltipEl.style.display = "block";
+        if (prefersTouchUi()) {
+          tooltipPinned = true;
+          pinnedCoord = coordinate;
+          pinnedPoiFeature = null;
+          pinnedSchoolFeature = null;
+          pinnedHospitalFeature = null;
+          tooltipEl.classList.add("pinned");
+          tooltipEl.classList.remove("summary-card");
+          tooltipEl.innerHTML = lineTooltipHtml(object, true);
+          tooltipEl.style.display = "block";
+        } else {
+          tooltipEl.innerHTML = lineTooltipHtml(object, false);
+          tooltipEl.style.display = "block";
+        }
         positionTooltip(x, y);
         return;
       }
