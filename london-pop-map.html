@@ -172,6 +172,15 @@
     min-height: 35px;
     text-align: center;
   }
+  #overlay-toggle {
+    display: flex;
+    margin-top: 8px;
+    width: 100%;
+  }
+  #overlay-toggle .toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
   #metric-toggle {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1410,6 +1419,9 @@
       <button id="btn-tube" class="toggle-btn" title="Tube" aria-label="Tube" onclick="toggleStations()">TUBE</button>
       <button id="btn-tube-map" class="toggle-btn" title="Only-tube" aria-label="Only-tube" onclick="setMode('tube')">ONLY-TUBE</button>
     </div>
+    <div id="overlay-toggle">
+      <button id="btn-contours" class="toggle-btn secondary-btn" title="Contours" aria-label="Contours" onclick="toggleContours()">Contours</button>
+    </div>
   </div>
 
   <div class="control-group rail-card" id="view-group">
@@ -1536,6 +1548,14 @@ const DAY_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 const NIGHT_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const TFL_STATIONS_URL = "https://services1.arcgis.com/YswvgzOodUvqkoCN/arcgis/rest/services/TfL_stations/FeatureServer/1/query?where=1%3D1&outFields=NAME,LINES,MODES,NIGHT_TUBE&outSR=4326&f=geojson";
 const TUBE_LINES_URL = "https://raw.githubusercontent.com/vega/vega-datasets/main/data/londonTubeLines.json";
+const CONTOUR_DATA_URL = "data/london_contours.geojson";
+const CONTOUR_SOURCE_ID = "london-contours";
+const CONTOUR_LAYER_IDS = [
+  "contours-halo-minor",
+  "contours-halo-major",
+  "contours-line-minor",
+  "contours-line-major",
+];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -1554,6 +1574,11 @@ function hexColor(t, gamma = COLOUR_GAMMA) {
   return lerp(PALETTE[lo], PALETTE[hi], s - lo);
 }
 function mixRgb(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function mixRgbHex(a, b, t) {
+  const parse = (hex) => hex.match(/[a-f0-9]{2}/gi).map((part) => parseInt(part, 16));
+  const mixed = mixRgb(parse(a), parse(b), t);
+  return `rgb(${mixed[0]}, ${mixed[1]}, ${mixed[2]})`;
+}
 
 const ZONES = [
   { name: "City of London", lon: -0.0923, lat: 51.5155, r: 0.020 },
@@ -1579,8 +1604,8 @@ const ZONES = [
 ];
 
 const THEMES = {
-  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4 },
-  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2 },
+  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b" },
+  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff" },
 };
 
 const TUBE_LINE_COLOURS = {
@@ -2055,13 +2080,6 @@ const SMALL_AREA_DENSITY = {
   note: "Density is computed from official mid-year population counts and MSOA polygon area; the 2022 to 2024 values use the latest revised ONS small-area series",
 };
 
-const SMALL_AREA_GENDER = {
-  geography: "MSOA 2021",
-  years: [],
-  source: "ONS Middle layer Super Output Area population estimates by sex (Accredited official statistics), using the mid-2011 to mid-2022 edition plus the revised mid-2022 to mid-2024 edition, joined to GLA MSOA 2021 boundaries",
-  note: "Gender balance is derived from official male and female MSOA mid-year totals; positive values indicate a higher male share",
-};
-
 const SMALL_AREA_PUBS = {
   geography: "MSOA 2021",
   source: "OpenStreetMap amenity=pub snapshot via Overpass API",
@@ -2126,7 +2144,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2155,6 +2173,7 @@ async function init() {
   const analysisGroupEl = document.getElementById("analysis-group");
   const pubsRowEl = document.getElementById("pubs-row");
   const pubsToggleEl = document.getElementById("pubs-toggle");
+  const overlayToggleEl = document.getElementById("overlay-toggle");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
     msoa: document.getElementById("pubs-msoa"),
@@ -2176,6 +2195,7 @@ async function init() {
   const btnCorrelation = document.getElementById("btn-correlation");
   const btnChapters = document.getElementById("btn-chapters");
   const btnTubeMap = document.getElementById("btn-tube-map");
+  const btnContours = document.getElementById("btn-contours");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
@@ -2202,9 +2222,11 @@ async function init() {
   let correlationYMetric = "median_weekly_earnings_gbp";
   let correlationHoverName = null;
   let selectedTubeLineKey = null;
+  let showContours = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
+  let contoursGeoJSON = null;
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2288,7 +2310,6 @@ async function init() {
   function getAvailableYearsForState(metricKey = boroughMetric, geography = activeGeography) {
     if (currentDataset !== "municipi") return [];
     if (metricKey === "density" && geography === "msoa") return [...SMALL_AREA_DENSITY.years];
-    if (metricKey === "gender_balance_pp" && geography === "msoa") return [...SMALL_AREA_GENDER.years];
     return [];
   }
 
@@ -2323,11 +2344,12 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, contoursData, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_pubs.json").then((r) => r.json()).catch(() => null),
+    fetch(CONTOUR_DATA_URL).then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2335,10 +2357,10 @@ async function init() {
 
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
+  if (contoursData?.features) contoursGeoJSON = contoursData;
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
     SMALL_AREA_DENSITY.years = discoverMsoaSeriesYears(msoaGeoJSON, "density", "population");
-    SMALL_AREA_GENDER.years = discoverMsoaSeriesYears(msoaGeoJSON, "gender_balance_pp", "population");
   }
   if (msoaPubsJson?.by_msoa) msoaPubMeta = msoaPubsJson;
   const stationAccessData = computeStationAccessData(stationsGeoJSON, municipiGeoJSON);
@@ -2478,37 +2500,6 @@ async function init() {
         .filter(([, stats]) => !!stats)
     );
   })();
-  const msoaGenderStats = (() => {
-    if (!msoaGeoJSON?.features?.length) return {};
-    const years = SMALL_AREA_GENDER.years;
-    const build = (year) => {
-      const valueField = `gender_balance_pp_${year}`;
-      const populationField = `population_${year}`;
-      const values = msoaGeoJSON.features
-        .map((feature) => feature.properties?.[valueField])
-        .filter((value) => Number.isFinite(value));
-      if (!values.length) return null;
-      const populationWeighted = msoaGeoJSON.features.reduce((acc, feature) => {
-        const value = feature.properties?.[valueField];
-        const weight = feature.properties?.[populationField] ?? 0;
-        if (!Number.isFinite(value) || !weight) return acc;
-        acc.total += value * weight;
-        acc.weight += weight;
-        return acc;
-      }, { total: 0, weight: 0 });
-      return {
-        min: Math.min(...values),
-        max: Math.max(...values),
-        avg: populationWeighted.weight ? populationWeighted.total / populationWeighted.weight : values.reduce((sum, value) => sum + value, 0) / values.length,
-        maxAbs: Math.max(...values.map((value) => Math.abs(value))),
-      };
-    };
-    return Object.fromEntries(
-      years
-        .map((year) => [year, build(year)])
-        .filter(([, stats]) => !!stats)
-    );
-  })();
   const msoaPubStats = (() => {
     if (!msoaGeoJSON?.features?.length) return null;
     const values = msoaGeoJSON.features
@@ -2575,15 +2566,6 @@ async function init() {
         note: SMALL_AREA_DENSITY.note,
       };
     }
-    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
-      return {
-        ...METRICS.gender_balance_pp,
-        year: String(activeYear),
-        source: SMALL_AREA_GENDER.source,
-        geography: SMALL_AREA_GENDER.geography,
-        note: SMALL_AREA_GENDER.note,
-      };
-    }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return {
         ...METRICS.pubs_per_km2_msoa,
@@ -2626,9 +2608,6 @@ async function init() {
   function getMetricStats(metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
-    }
-    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
-      return msoaGenderStats[activeYear];
     }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaPubStats;
@@ -2699,9 +2678,6 @@ async function init() {
   function metricValue(feature, metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return feature?.properties?.[activeDensityField()] ?? null;
-    }
-    if (metricKey === "gender_balance_pp" && currentDataset === "municipi" && activeGeography === "msoa") {
-      return feature?.properties?.[`gender_balance_pp_${activeYear}`] ?? null;
     }
     if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
       return feature?.properties?.pubs_per_km2_msoa ?? null;
@@ -3409,7 +3385,7 @@ async function init() {
   }
 
   function metricSupportsMsoa(metricKey = boroughMetric) {
-    return metricKey === "density" || metricKey === "gender_balance_pp";
+    return metricKey === "density";
   }
 
   function activeMetricFamilyKey() {
@@ -3494,6 +3470,99 @@ async function init() {
 
   function tubeLegendVisible() {
     return currentDataset === "tube" || (currentDataset === "municipi" && showStations);
+  }
+
+  function contoursVisible() {
+    return showContours && !!contoursGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
+  }
+
+  function firstLabelLayerId(map) {
+    const layers = map.getStyle?.().layers || [];
+    return layers.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"])?.id || null;
+  }
+
+  function ensureContourLayers() {
+    const map = getBaseMap();
+    if (!map?.isStyleLoaded?.() || !contoursGeoJSON?.features?.length) return;
+
+    if (!map.getSource(CONTOUR_SOURCE_ID)) {
+      map.addSource(CONTOUR_SOURCE_ID, {
+        type: "geojson",
+        data: contoursGeoJSON,
+        tolerance: 0.4,
+      });
+    }
+
+    const beforeId = firstLabelLayerId(map);
+    const addIfMissing = (id, config) => {
+      if (map.getLayer(id)) return;
+      map.addLayer({ id, source: CONTOUR_SOURCE_ID, ...config }, beforeId);
+    };
+
+    addIfMissing(CONTOUR_LAYER_IDS[0], {
+      type: "line",
+      filter: ["==", ["get", "major"], false],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(CONTOUR_LAYER_IDS[1], {
+      type: "line",
+      filter: ["==", ["get", "major"], true],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(CONTOUR_LAYER_IDS[2], {
+      type: "line",
+      filter: ["==", ["get", "major"], false],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+    addIfMissing(CONTOUR_LAYER_IDS[3], {
+      type: "line",
+      filter: ["==", ["get", "major"], true],
+      layout: { "line-cap": "round", "line-join": "round", visibility: "none" },
+    });
+  }
+
+  function applyContourStyles(map = getBaseMap()) {
+    if (!map?.isStyleLoaded?.()) return;
+    ensureContourLayers();
+    const theme = THEMES[currentTheme];
+    const visible = contoursVisible() ? "visible" : "none";
+    const setVisibility = (id) => {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible);
+    };
+    CONTOUR_LAYER_IDS.forEach(setVisibility);
+    if (!contoursVisible()) return;
+
+    const minorColor = ["interpolate", ["linear"], ["get", "elev"], -20, theme.contourMinorLow, 120, mixRgbHex(theme.contourMinorLow, theme.contourMinorHigh, 0.55), 270, theme.contourMinorHigh];
+    const majorColor = ["interpolate", ["linear"], ["get", "elev"], -20, theme.contourMajorLow, 120, mixRgbHex(theme.contourMajorLow, theme.contourMajorHigh, 0.55), 270, theme.contourMajorHigh];
+
+    map.setPaintProperty(CONTOUR_LAYER_IDS[0], "line-color", theme.contourHaloMinor);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[0], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 1.4, 10.5, 2.2, 13.5, 4.2]);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[0], "line-opacity", currentTheme === "night" ? 0.9 : 0.84);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[0], "line-blur", currentTheme === "night" ? 2.2 : 1.6);
+
+    map.setPaintProperty(CONTOUR_LAYER_IDS[1], "line-color", theme.contourHaloMajor);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[1], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 2.2, 10.5, 3.6, 13.5, 6.4]);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[1], "line-opacity", currentTheme === "night" ? 0.96 : 0.88);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[1], "line-blur", currentTheme === "night" ? 2.8 : 2.0);
+
+    map.setPaintProperty(CONTOUR_LAYER_IDS[2], "line-color", minorColor);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[2], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 0.7, 10.5, 1.0, 13.5, 1.65]);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[2], "line-opacity", currentTheme === "night" ? 0.82 : 0.7);
+
+    map.setPaintProperty(CONTOUR_LAYER_IDS[3], "line-color", majorColor);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[3], "line-width", ["interpolate", ["linear"], ["zoom"], 8, 1.0, 10.5, 1.5, 13.5, 2.4]);
+    map.setPaintProperty(CONTOUR_LAYER_IDS[3], "line-opacity", currentTheme === "night" ? 0.94 : 0.82);
+  }
+
+  function updateContourLayers() {
+    const map = getBaseMap();
+    if (!map) return;
+    const apply = () => applyContourStyles(map);
+    if (map.isStyleLoaded?.()) {
+      apply();
+    } else {
+      map.once?.("styledata", apply);
+    }
   }
 
   function boroughFillAlpha() {
@@ -3832,10 +3901,9 @@ async function init() {
         support.push(`Borough · ${analysisParentName(feature)}`);
       }
     } else if (metricKey === "gender_balance_pp") {
-      const male = activeGeography === "msoa" ? feature.properties?.[`male_share_pct_${activeYear}`] : feature.properties?.male_share_pct;
-      const female = activeGeography === "msoa" ? feature.properties?.[`female_share_pct_${activeYear}`] : feature.properties?.female_share_pct;
+      const male = feature.properties?.male_share_pct;
+      const female = feature.properties?.female_share_pct;
       if (Number.isFinite(male) && Number.isFinite(female)) support.push(`Men ${male.toFixed(1)}% · Women ${female.toFixed(1)}%`);
-      if (activeGeography === "msoa") support.push(`Borough · ${analysisParentName(feature)}`);
     } else if (metricKey === "country_of_birth_pct") {
       if (selectedCountryBirth === "ALL") {
         const notUk = feature.properties?.not_born_uk_share_pct;
@@ -4118,6 +4186,7 @@ async function init() {
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
+    btnContours.classList.toggle("active", contoursVisible());
     btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
@@ -4132,7 +4201,6 @@ async function init() {
     const boroughsMode = currentDataset === "municipi";
     const boroughAnalysisMode = boroughsMode && activeGeography === "borough";
     const densityMode = boroughsMode && boroughMetric === "density";
-    const genderMode = boroughsMode && boroughMetric === "gender_balance_pp";
     const pubsMode = boroughsMode && pubsMetricActive();
     const originMode = boroughsMode && boroughMetric === "country_of_birth_pct";
     const geographyMode = boroughsMode && metricSupportsMsoa(boroughMetric);
@@ -4142,6 +4210,7 @@ async function init() {
     viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
     viewToggleEl.style.display = sectionsMode ? "flex" : "none";
+    overlayToggleEl.style.display = sectionsMode ? "none" : "flex";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -4152,7 +4221,7 @@ async function init() {
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
     geographyRowEl.classList.toggle("active-scope", geographyMode);
-    if (geographyRowLabelEl) geographyRowLabelEl.textContent = densityMode ? "Density scope" : genderMode ? "Gender scope" : "Geography";
+    if (geographyRowLabelEl) geographyRowLabelEl.textContent = densityMode ? "Density scope" : "Geography";
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     yearRowEl.classList.toggle("active-scope", yearMode);
@@ -4261,6 +4330,7 @@ async function init() {
     }
     const metaParts = [metric.source, metric.year, metric.geography];
     if (metric.note && metricKey !== "density") metaParts.push(metric.note);
+    if (contoursVisible()) metaParts.push("Contours · elevation in meters above sea level");
     legendMetaEl.textContent = metaParts.filter(Boolean).join(" · ");
   }
 
@@ -4659,6 +4729,7 @@ async function init() {
     updateCountrySelector();
     updateChapterSelector();
     updateLegend();
+    updateContourLayers();
     refreshHighlightedFeature();
     renderPinnedTooltip();
   }
@@ -4904,6 +4975,7 @@ async function init() {
 
     if (map.isStyleLoaded?.()) tuneStyle();
     map.once?.("styledata", tuneStyle);
+    updateContourLayers();
   }
 
   function applyTheme(theme) {
@@ -5090,6 +5162,13 @@ async function init() {
     showStations = !showStations;
     if (!showStations) selectedTubeLineKey = null;
     refreshMapState();
+  };
+
+  toggleContours = function() {
+    showContours = !showContours;
+    updateContourLayers();
+    updateModeButtons();
+    updateLegend();
   };
 
   toggleTheme = function() {

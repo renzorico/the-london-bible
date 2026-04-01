@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Contours layer and MSOA gender rollback
+
+- Reverted the experimental MSOA gender-balance path so gender balance is borough-only again, leaving MSOA density as the only annual small-area timeline and MSOA pubs density as a fixed-year snapshot.
+- Added a new London contours overlay generated from open Terrarium elevation tiles, with a dedicated Contours toggle and day/night line styling that etches the city’s terrain onto borough, MSOA, and tube views without turning contours into a metric.
+
 ## 2026-04-01 — MSOA controls cleanup and metric audit
 
 - Simplified the expanded MSOA density time control by labeling only milestone years plus the active year, and tightened transient hover cards so they stay compact instead of stretching across the map.
