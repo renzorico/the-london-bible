@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Unified analysis mode shell
+
+- Refactored Compare, Why here?, Similar areas, Correlation, and Stories into one mutually exclusive borough analysis-mode system with a shared right-side panel shell.
+- Replaced the separate ad-hoc analysis cards with one consistent header, close affordance, scrollable body, and borough-only visibility rules without removing any existing analysis capability.
+
 ## 2026-04-01 — MSOA pub density metric
 
 - Added an MSOA-only pubs-per-km² metric using the same OpenStreetMap amenity=pub snapshot, spatially joined to London MSOA 2021 polygons.

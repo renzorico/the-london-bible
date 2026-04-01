@@ -434,51 +434,84 @@
   #legend .lends { display: flex; justify-content: space-between; font-size: .81rem; color: var(--legend-text); gap: 12px; }
   #legend .lavg  { margin-top: 12px; font-size: .8rem; letter-spacing: .04em; color: var(--legend-text); }
   #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
-  #spotlight-panel {
+  #analysis-panel {
     position: absolute;
-    top: 50%;
+    top: 112px;
     right: 24px;
-    transform: translateY(-46%);
+    bottom: 92px;
     z-index: 10;
     display: none;
-    width: min(344px, calc(100vw - 48px));
-    padding: 15px 16px 14px;
+    flex-direction: column;
+    width: clamp(380px, 33vw, 620px);
+    max-width: calc(100vw - 48px);
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 14px;
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
+    overflow: hidden;
   }
-  #spotlight-panel .s-head {
+  #analysis-panel .analysis-panel-head {
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+    flex: 0 0 auto;
   }
-  #spotlight-panel .s-title {
+  #analysis-panel .analysis-head-copy {
+    min-width: 0;
+  }
+  #analysis-panel .analysis-title {
     font-family: var(--font-ui);
-    font-size: .62rem;
+    font-size: .64rem;
     font-weight: 800;
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #spotlight-panel .s-kicker {
+  #analysis-panel .analysis-subtitle {
+    margin-top: 5px;
     font-family: var(--font-ui);
-    font-size: .59rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    color: var(--legend-accent);
+    font-size: .69rem;
+    line-height: 1.45;
+    color: var(--hint);
   }
-  #spotlight-panel .s-name {
+  #analysis-panel .analysis-close {
+    border: none;
+    background: transparent;
+    color: var(--legend-accent);
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 1px 0 0;
+    flex: 0 0 auto;
+  }
+  #analysis-panel .analysis-close:hover { opacity: .76; }
+  #analysis-panel .analysis-panel-body {
+    padding: 16px 18px 17px;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+  #analysis-panel .analysis-empty {
+    font-family: var(--font-ui);
+    font-size: .72rem;
+    line-height: 1.58;
+    color: var(--hint);
+  }
+  #analysis-panel .s-name {
     font-family: var(--font-display);
     font-size: 1.12rem;
     line-height: 1.02;
     letter-spacing: .03em;
     color: var(--title);
   }
-  #spotlight-panel .s-lens {
+  #analysis-panel .s-lens {
     margin-top: 4px;
     font-family: var(--font-ui);
     font-size: .61rem;
@@ -487,20 +520,20 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #spotlight-panel .s-helper,
-  #spotlight-panel .s-foot {
+  #analysis-panel .s-helper,
+  #analysis-panel .s-foot {
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #spotlight-panel .s-helper { margin-top: 2px; }
-  #spotlight-panel .s-story-list {
+  #analysis-panel .s-helper { margin-top: 2px; }
+  #analysis-panel .s-story-list {
     display: grid;
     gap: 8px;
     margin-top: 12px;
   }
-  #spotlight-panel .s-story {
+  #analysis-panel .s-story {
     padding-top: 9px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
     font-family: var(--font-ui);
@@ -508,86 +541,49 @@
     line-height: 1.56;
     color: var(--title);
   }
-  #spotlight-panel .s-story:first-child {
+  #analysis-panel .s-story:first-child {
     padding-top: 0;
     border-top: none;
   }
-  #spotlight-panel .s-story strong {
+  #analysis-panel .s-story strong {
     color: var(--legend-accent);
     font-weight: 800;
   }
-  #spotlight-panel .s-foot {
+  #analysis-panel .s-foot {
     margin-top: 12px;
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
-  #similar-panel {
-    position: absolute;
-    top: 50%;
-    right: 24px;
-    transform: translateY(-46%);
-    z-index: 10;
-    display: none;
-    width: min(368px, calc(100vw - 48px));
-    padding: 15px 16px 14px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
-  }
-  #similar-panel .sim-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  #similar-panel .sim-title {
-    font-family: var(--font-ui);
-    font-size: .62rem;
-    font-weight: 800;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-  }
-  #similar-panel .sim-kicker {
-    font-family: var(--font-ui);
-    font-size: .59rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    color: var(--legend-accent);
-  }
-  #similar-panel .sim-name {
+  #analysis-panel .sim-name {
     font-family: var(--font-display);
     font-size: 1.08rem;
     line-height: 1.02;
     letter-spacing: .03em;
     color: var(--title);
   }
-  #similar-panel .sim-lens,
-  #similar-panel .sim-helper,
-  #similar-panel .sim-foot,
-  #similar-panel .sim-reason {
+  #analysis-panel .sim-lens,
+  #analysis-panel .sim-helper,
+  #analysis-panel .sim-foot,
+  #analysis-panel .sim-reason {
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #similar-panel .sim-helper { margin-top: 4px; }
-  #similar-panel .sim-list {
+  #analysis-panel .sim-helper { margin-top: 4px; }
+  #analysis-panel .sim-list {
     display: grid;
     gap: 8px;
     margin-top: 12px;
   }
-  #similar-panel .sim-item {
+  #analysis-panel .sim-item {
     display: grid;
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 10px;
     padding-top: 9px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
   }
-  #similar-panel .sim-rank {
+  #analysis-panel .sim-rank {
     width: 30px;
     height: 30px;
     border-radius: 999px;
@@ -601,13 +597,13 @@
     color: #fff;
     background: var(--button-active);
   }
-  #similar-panel .sim-item-name {
+  #analysis-panel .sim-item-name {
     font-family: var(--font-ui);
     font-size: .88rem;
     font-weight: 700;
     color: var(--title);
   }
-  #similar-panel .sim-item-meta {
+  #analysis-panel .sim-item-meta {
     margin-top: 3px;
     font-family: var(--font-ui);
     font-size: .6rem;
@@ -616,64 +612,34 @@
     text-transform: uppercase;
     color: var(--legend-accent);
   }
-  #similar-panel .sim-reason {
+  #analysis-panel .sim-reason {
     margin-top: 4px;
   }
-  #similar-panel .sim-foot {
+  #analysis-panel .sim-foot {
     margin-top: 12px;
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
-  #chapter-toggle {
-    position: relative;
-    z-index: 10;
-    display: none;
+  #analysis-panel .story-picker {
+    display: flex;
     flex-wrap: wrap;
     gap: 7px;
-    max-width: 360px;
-    padding: 12px 13px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
+    margin-bottom: 12px;
   }
-  #chapter-toggle .chapter-btn {
+  #analysis-panel .story-picker .chapter-btn {
     padding: 7px 10px 6px;
     font-size: .62rem;
     letter-spacing: .1em;
     text-transform: none;
   }
-  #chapter-panel {
-    position: absolute;
-    top: 110px;
-    right: 24px;
-    z-index: 10;
-    display: none;
-    width: min(340px, calc(100vw - 48px));
-    padding: 15px 16px 14px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
-  }
-  #chapter-panel .ch-head {
+  #analysis-panel .story-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     margin-bottom: 8px;
   }
-  #chapter-panel .ch-title {
-    font-family: var(--font-ui);
-    font-size: .62rem;
-    font-weight: 800;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-  }
-  #chapter-panel .ch-clear {
+  #analysis-panel .ch-clear {
     border: none;
     background: transparent;
     color: var(--legend-accent);
@@ -685,22 +651,22 @@
     cursor: pointer;
     padding: 0;
   }
-  #chapter-panel .ch-name {
+  #analysis-panel .ch-name {
     font-family: var(--font-display);
     font-size: 1.08rem;
     line-height: 1.02;
     letter-spacing: .03em;
     color: var(--title);
   }
-  #chapter-panel .ch-meta,
-  #chapter-panel .ch-description,
-  #chapter-panel .ch-foot {
+  #analysis-panel .ch-meta,
+  #analysis-panel .ch-description,
+  #analysis-panel .ch-foot {
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #chapter-panel .ch-meta {
+  #analysis-panel .ch-meta {
     margin-top: 5px;
     font-size: .6rem;
     font-weight: 700;
@@ -708,63 +674,25 @@
     text-transform: uppercase;
     color: var(--legend-accent);
   }
-  #chapter-panel .ch-description {
+  #analysis-panel .ch-description {
     margin-top: 8px;
     color: var(--title);
   }
-  #chapter-panel .ch-foot {
+  #analysis-panel .ch-foot {
     margin-top: 11px;
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
-  #correlation-panel {
-    position: absolute;
-    top: 50%;
-    right: 24px;
-    transform: translateY(-46%);
-    z-index: 10;
-    display: none;
-    width: clamp(420px, 34vw, 620px);
-    max-width: calc(100vw - 48px);
-    padding: 15px 16px 14px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
-  }
-  #correlation-panel .corr-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  #correlation-panel .corr-title {
-    font-family: var(--font-ui);
-    font-size: .62rem;
-    font-weight: 800;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-  }
-  #correlation-panel .corr-kicker {
-    font-family: var(--font-ui);
-    font-size: .59rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    color: var(--legend-accent);
-  }
-  #correlation-panel .corr-selectors {
+  #analysis-panel .corr-selectors {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     margin-bottom: 12px;
   }
-  #correlation-panel .corr-select-group {
+  #analysis-panel .corr-select-group {
     min-width: 0;
   }
-  #correlation-panel .corr-label {
+  #analysis-panel .corr-label {
     margin-bottom: 6px;
     font-family: var(--font-ui);
     font-size: .58rem;
@@ -773,7 +701,7 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #correlation-panel .corr-select {
+  #analysis-panel .corr-select {
     width: 100%;
     appearance: none;
     border: 1px solid var(--button-border);
@@ -785,69 +713,69 @@
     font-size: .69rem;
     line-height: 1.2;
   }
-  #correlation-panel .corr-chart-wrap {
+  #analysis-panel .corr-chart-wrap {
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
     border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 86%, transparent);
     padding: 12px 0 10px;
   }
-  #correlation-panel .corr-svg {
+  #analysis-panel .corr-svg {
     width: 100%;
     height: auto;
     display: block;
   }
-  #correlation-panel .corr-axis,
-  #correlation-panel .corr-gridline {
+  #analysis-panel .corr-axis,
+  #analysis-panel .corr-gridline {
     stroke: color-mix(in srgb, var(--panel-border) 80%, transparent);
     stroke-width: 1;
   }
-  #correlation-panel .corr-gridline {
+  #analysis-panel .corr-gridline {
     stroke-dasharray: 3 4;
     opacity: .6;
   }
-  #correlation-panel .corr-axis-label {
+  #analysis-panel .corr-axis-label {
     font-family: var(--font-ui);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: .08em;
     fill: var(--hint);
   }
-  #correlation-panel .corr-point {
+  #analysis-panel .corr-point {
     fill: rgba(121, 136, 150, .8);
     stroke: rgba(255,255,255,.78);
     stroke-width: 1.1;
     cursor: pointer;
     transition: fill .14s ease, r .14s ease, stroke-width .14s ease;
   }
-  #correlation-panel .corr-point.hovered {
+  #analysis-panel .corr-point.hovered {
     fill: #115f63;
     stroke-width: 1.6;
   }
-  #correlation-panel .corr-point.pinned {
+  #analysis-panel .corr-point.pinned {
     fill: #844a5c;
     stroke-width: 2;
   }
-  #correlation-panel .corr-point.hovered.pinned {
+  #analysis-panel .corr-point.hovered.pinned {
     fill: #5f4669;
   }
-  #correlation-panel .corr-detail {
+  #analysis-panel .corr-detail {
     margin-top: 11px;
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
-  #correlation-panel .corr-detail-kicker,
-  #correlation-panel .corr-foot {
+  #analysis-panel .corr-detail-kicker,
+  #analysis-panel .corr-foot {
     font-family: var(--font-ui);
     font-size: .62rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #correlation-panel .corr-detail-kicker {
+  #analysis-panel .corr-detail-kicker {
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--legend-accent);
   }
-  #correlation-panel .corr-detail-name {
+  #analysis-panel .corr-detail-name {
     margin-top: 4px;
     font-family: var(--font-display);
     font-size: 1rem;
@@ -855,12 +783,12 @@
     letter-spacing: .03em;
     color: var(--title);
   }
-  #correlation-panel .corr-detail-values {
+  #analysis-panel .corr-detail-values {
     margin-top: 7px;
     display: grid;
     gap: 5px;
   }
-  #correlation-panel .corr-detail-row {
+  #analysis-panel .corr-detail-row {
     display: flex;
     justify-content: space-between;
     gap: 14px;
@@ -869,17 +797,17 @@
     line-height: 1.45;
     color: var(--title);
   }
-  #correlation-panel .corr-detail-row span:first-child {
+  #analysis-panel .corr-detail-row span:first-child {
     color: var(--hint);
   }
-  #correlation-panel .corr-helper,
-  #correlation-panel .corr-foot {
+  #analysis-panel .corr-helper,
+  #analysis-panel .corr-foot {
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #correlation-panel .corr-foot {
+  #analysis-panel .corr-foot {
     margin-top: 10px;
   }
 
@@ -919,37 +847,7 @@
     letter-spacing: .1em;
     text-transform: none;
   }
-  #comparison-panel {
-    position: absolute;
-    right: 24px;
-    bottom: 92px;
-    z-index: 10;
-    display: none;
-    width: clamp(420px, 33vw, 640px);
-    max-width: calc(100vw - 48px);
-    padding: 18px 20px 17px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
-  }
-  #comparison-panel .c-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  #comparison-panel .c-title {
-    font-family: var(--font-ui);
-    font-size: .64rem;
-    font-weight: 800;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--subtitle);
-  }
-  #comparison-panel .c-kicker {
+  #analysis-panel .c-kicker {
     margin-bottom: 12px;
     font-family: var(--font-ui);
     font-size: .63rem;
@@ -957,7 +855,7 @@
     letter-spacing: .08em;
     color: var(--legend-accent);
   }
-  #comparison-panel .c-clear {
+  #analysis-panel .c-clear {
     border: none;
     background: transparent;
     color: var(--legend-accent);
@@ -969,25 +867,25 @@
     cursor: pointer;
     padding: 0;
   }
-  #comparison-panel .c-clear:hover { opacity: .76; }
-  #comparison-panel .c-grid {
+  #analysis-panel .c-clear:hover { opacity: .76; }
+  #analysis-panel .c-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.08fr) minmax(120px, .72fr) minmax(0, 1.08fr);
     gap: 18px;
     align-items: start;
   }
-  #comparison-panel .c-col {
+  #analysis-panel .c-col {
     min-width: 0;
   }
-  #comparison-panel .c-col.a,
-  #comparison-panel .c-col.b {
+  #analysis-panel .c-col.a,
+  #analysis-panel .c-col.b {
     padding: 10px 12px 12px;
     border-radius: 12px;
     background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
   }
-  #comparison-panel .c-col.a { border-top: 2px solid rgba(17, 95, 99, .32); }
-  #comparison-panel .c-col.b { border-top: 2px solid rgba(132, 74, 92, .32); }
-  #comparison-panel .c-tag {
+  #analysis-panel .c-col.a { border-top: 2px solid rgba(17, 95, 99, .32); }
+  #analysis-panel .c-col.b { border-top: 2px solid rgba(132, 74, 92, .32); }
+  #analysis-panel .c-tag {
     display: inline-block;
     margin-bottom: 6px;
     padding: 3px 7px 2px;
@@ -999,16 +897,16 @@
     text-transform: uppercase;
     color: #fff;
   }
-  #comparison-panel .c-tag.a { background: #115f63; }
-  #comparison-panel .c-tag.b { background: #844a5c; }
-  #comparison-panel .c-name {
+  #analysis-panel .c-tag.a { background: #115f63; }
+  #analysis-panel .c-tag.b { background: #844a5c; }
+  #analysis-panel .c-name {
     font-family: var(--font-display);
     font-size: 1.12rem;
     line-height: 1.04;
     letter-spacing: .03em;
     color: var(--title);
   }
-  #comparison-panel .c-value-label {
+  #analysis-panel .c-value-label {
     margin-top: 7px;
     font-family: var(--font-ui);
     font-size: .56rem;
@@ -1017,21 +915,21 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #comparison-panel .c-val {
+  #analysis-panel .c-val {
     margin-top: 3px;
     font-family: var(--font-ui);
     font-size: 1.03rem;
     font-weight: 800;
     color: var(--legend-accent);
   }
-  #comparison-panel .c-support {
+  #analysis-panel .c-support {
     margin-top: 9px;
     font-family: var(--font-ui);
     font-size: .69rem;
     line-height: 1.5;
     color: var(--hint);
   }
-  #comparison-panel .c-mid {
+  #analysis-panel .c-mid {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1040,8 +938,8 @@
     min-width: 0;
     padding: 18px 6px 0;
   }
-  #comparison-panel .c-diff-label,
-  #comparison-panel .c-meta {
+  #analysis-panel .c-diff-label,
+  #analysis-panel .c-meta {
     font-family: var(--font-ui);
     font-size: .56rem;
     font-weight: 700;
@@ -1049,17 +947,17 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #comparison-panel .c-diff {
+  #analysis-panel .c-diff {
     font-family: var(--font-ui);
     font-size: 1rem;
     font-weight: 800;
     color: var(--title);
     text-align: center;
   }
-  #comparison-panel .c-diff.positive { color: #115f63; }
-  #comparison-panel .c-diff.negative { color: #844a5c; }
-  #comparison-panel .c-diff.neutral { color: var(--title); }
-  #comparison-panel .c-diff-note {
+  #analysis-panel .c-diff.positive { color: #115f63; }
+  #analysis-panel .c-diff.negative { color: #844a5c; }
+  #analysis-panel .c-diff.neutral { color: var(--title); }
+  #analysis-panel .c-diff-note {
     max-width: 120px;
     font-family: var(--font-ui);
     font-size: .64rem;
@@ -1067,32 +965,32 @@
     color: var(--hint);
     text-align: center;
   }
-  #comparison-panel .c-state,
-  #comparison-panel .c-foot {
+  #analysis-panel .c-state,
+  #analysis-panel .c-foot {
     margin-top: 10px;
     font-family: var(--font-ui);
     font-size: .7rem;
     line-height: 1.55;
     color: var(--hint);
   }
-  #comparison-panel .c-state-grid {
+  #analysis-panel .c-state-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-top: 2px;
   }
-  #comparison-panel .c-state-slot {
+  #analysis-panel .c-state-slot {
     min-width: 0;
     padding: 10px 11px 11px;
     border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
     border-radius: 12px;
     background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
   }
-  #comparison-panel .c-state-slot.pending {
+  #analysis-panel .c-state-slot.pending {
     border-style: dashed;
     background: color-mix(in srgb, var(--panel) 86%, transparent);
   }
-  #comparison-panel .c-state-label {
+  #analysis-panel .c-state-label {
     font-family: var(--font-ui);
     font-size: .54rem;
     font-weight: 800;
@@ -1100,17 +998,17 @@
     text-transform: uppercase;
     color: var(--subtitle);
   }
-  #comparison-panel .c-state-name {
+  #analysis-panel .c-state-name {
     margin-top: 6px;
     font-family: var(--font-display);
     font-size: .93rem;
     line-height: 1.02;
     color: var(--title);
   }
-  #comparison-panel .c-state-name.pending {
+  #analysis-panel .c-state-name.pending {
     color: var(--hint);
   }
-  #comparison-panel .c-state-help {
+  #analysis-panel .c-state-help {
     margin-top: 11px;
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 85%, transparent);
@@ -1119,7 +1017,7 @@
     line-height: 1.56;
     color: var(--hint);
   }
-  #comparison-panel .c-foot { margin-top: 12px; }
+  #analysis-panel .c-foot { margin-top: 12px; }
   #credit {
     position: absolute;
     right: 24px;
@@ -1216,16 +1114,13 @@
     #legend { width: 100%; max-width: 320px; }
     #hint           { display: none; }
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
-    #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
-    #similar-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
-    #chapter-panel { right: 14px; left: 14px; top: 118px; width: auto; max-width: none; }
-    #correlation-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
-    #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
-    #comparison-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
-    #comparison-panel .c-mid { padding-top: 0; }
-    #correlation-panel .corr-selectors { grid-template-columns: 1fr; }
+    #analysis-panel { left: 14px; right: 14px; top: 116px; bottom: 118px; width: auto; max-width: none; }
+    #analysis-panel .analysis-panel-head { padding: 14px 15px 12px; }
+    #analysis-panel .analysis-panel-body { padding: 14px 15px 14px; }
+    #analysis-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
+    #analysis-panel .c-mid { padding-top: 0; }
+    #analysis-panel .corr-selectors { grid-template-columns: 1fr; }
     #credit         { right: 14px; bottom: 82px; }
-    #chapter-toggle { max-width: none; }
   }
 </style>
 </head>
@@ -1283,7 +1178,7 @@
 
   <div id="metric-options">
     <div class="metric-option-row tools-row" id="compare-row">
-      <div class="metric-option-label">Tools</div>
+      <div class="metric-option-label">Analysis</div>
       <div class="metric-subtoggle">
         <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
         <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
@@ -1311,14 +1206,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <div id="chapter-toggle">
-    <button class="toggle-btn metric-btn chapter-btn" data-chapter="inner-outer" onclick="applyChapter('inner-outer')">Inner vs outer</button>
-    <button class="toggle-btn metric-btn chapter-btn" data-chapter="east-west-divide" onclick="applyChapter('east-west-divide')">East-west divide</button>
-    <button class="toggle-btn metric-btn chapter-btn" data-chapter="family-suburbs" onclick="applyChapter('family-suburbs')">Family suburbs</button>
-    <button class="toggle-btn metric-btn chapter-btn" data-chapter="high-rent-core" onclick="applyChapter('high-rent-core')">High-rent core</button>
-    <button class="toggle-btn metric-btn chapter-btn" data-chapter="international-london" onclick="applyChapter('international-london')">International London</button>
   </div>
 
   <div id="country-toggle">
@@ -1353,49 +1240,20 @@
   </div>
 </div>
 
-<div id="spotlight-panel">
-  <div class="s-head">
-    <div class="s-title">Why here?</div>
-    <div class="s-kicker">Borough spotlight</div>
+<div id="analysis-panel">
+  <div class="analysis-panel-head">
+    <div class="analysis-head-copy">
+      <div id="analysis-panel-title" class="analysis-title">Analysis</div>
+      <div id="analysis-panel-subtitle" class="analysis-subtitle"></div>
+    </div>
+    <button id="analysis-panel-close" class="analysis-close" onclick="clearAnalysisMode()">Close</button>
   </div>
-  <div id="spotlight-content"></div>
-</div>
-
-<div id="similar-panel">
-  <div class="sim-head">
-    <div class="sim-title">Similar areas</div>
-    <div class="sim-kicker">Borough profile match</div>
-  </div>
-  <div id="similar-content"></div>
-</div>
-
-<div id="correlation-panel">
-  <div class="corr-head">
-    <div class="corr-title">Correlation view</div>
-    <div class="corr-kicker">Linked scatter</div>
-  </div>
-  <div id="correlation-content"></div>
-</div>
-
-<div id="chapter-panel">
-  <div class="ch-head">
-    <div class="ch-title">Story chapter</div>
-    <button id="chapter-clear" class="ch-clear" onclick="clearChapter()">Clear</button>
-  </div>
-  <div id="chapter-content"></div>
+  <div id="analysis-panel-content" class="analysis-panel-body"></div>
 </div>
 
 <div id="tube-legend">
   <div class="llbl">Tube lines</div>
   <div id="tube-legend-items"></div>
-</div>
-
-<div id="comparison-panel">
-  <div class="c-head">
-    <div class="c-title">Borough comparison</div>
-    <button id="comparison-clear" class="c-clear" onclick="clearComparison()">Clear</button>
-  </div>
-  <div id="comparison-content"></div>
 </div>
 
 <div id="hint">
@@ -1981,7 +1839,7 @@ function paletteGradient(stops) {
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
-let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter;
+let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
   const bodyEl = document.body;
@@ -1992,17 +1850,10 @@ async function init() {
   const legendEl = document.getElementById("legend");
   const tubeLegendEl = document.getElementById("tube-legend");
   const tubeLegendItemsEl = document.getElementById("tube-legend-items");
-  const comparisonPanelEl = document.getElementById("comparison-panel");
-  const comparisonContentEl = document.getElementById("comparison-content");
-  const spotlightPanelEl = document.getElementById("spotlight-panel");
-  const spotlightContentEl = document.getElementById("spotlight-content");
-  const similarPanelEl = document.getElementById("similar-panel");
-  const similarContentEl = document.getElementById("similar-content");
-  const correlationPanelEl = document.getElementById("correlation-panel");
-  const correlationContentEl = document.getElementById("correlation-content");
-  const chapterPanelEl = document.getElementById("chapter-panel");
-  const chapterContentEl = document.getElementById("chapter-content");
-  const chapterToggleEl = document.getElementById("chapter-toggle");
+  const analysisPanelEl = document.getElementById("analysis-panel");
+  const analysisPanelTitleEl = document.getElementById("analysis-panel-title");
+  const analysisPanelSubtitleEl = document.getElementById("analysis-panel-subtitle");
+  const analysisPanelContentEl = document.getElementById("analysis-panel-content");
   const countryToggleEl = document.getElementById("country-toggle");
   const viewGroupEl = document.getElementById("view-group");
   const viewLabelEl = document.getElementById("view-label");
@@ -2031,9 +1882,6 @@ async function init() {
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
   );
-  const chapterButtons = Object.fromEntries(
-    [...chapterToggleEl.querySelectorAll("[data-chapter]")].map((button) => [button.dataset.chapter, button])
-  );
   const geographyButtons = {
     borough: document.getElementById("geo-borough"),
     msoa: document.getElementById("geo-msoa"),
@@ -2049,16 +1897,12 @@ async function init() {
   let activeGeography = "borough";
   let activeYear = 2024;
   let selectedCountryBirth = "ALL";
-  let comparisonEnabled = false;
+  let analysisMode = null;
   let comparisonA = null;
   let comparisonB = null;
-  let spotlightEnabled = false;
-  let similarEnabled = false;
-  let correlationEnabled = false;
   let correlationXMetric = "house_price_proxy_gbp";
   let correlationYMetric = "median_weekly_earnings_gbp";
   let correlationHoverName = null;
-  let chapterPickerOpen = false;
   let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
@@ -2129,9 +1973,7 @@ async function init() {
       pinnedCoord = null;
       tooltipEl.classList.remove("pinned");
       tooltipEl.style.display = "none";
-      renderSpotlightPanel();
-      renderSimilarPanel();
-      renderCorrelationPanel();
+      renderAnalysisPanel();
     }
   });
 
@@ -2464,24 +2306,35 @@ async function init() {
     return feature?.properties?.[metricKey];
   }
 
+  function analysisModeAvailable(mode) {
+    if (!mode) return true;
+    const boroughOnly = currentDataset === "municipi" && activeGeography === "borough";
+    if (["compare", "why-here", "similar", "correlation", "story"].includes(mode)) return boroughOnly;
+    return false;
+  }
+
   function comparisonAvailable() {
-    return currentDataset === "municipi" && activeGeography === "borough";
+    return analysisModeAvailable("compare");
   }
 
   function spotlightAvailable() {
-    return currentDataset === "municipi" && activeGeography === "borough";
+    return analysisModeAvailable("why-here");
   }
 
   function similarityAvailable() {
-    return currentDataset === "municipi" && activeGeography === "borough";
+    return analysisModeAvailable("similar");
   }
 
   function correlationAvailable() {
-    return currentDataset === "municipi" && activeGeography === "borough";
+    return analysisModeAvailable("correlation");
   }
 
   function chapterAvailable() {
-    return currentDataset === "municipi" && activeGeography === "borough";
+    return analysisModeAvailable("story");
+  }
+
+  function isAnalysisMode(mode) {
+    return analysisMode === mode;
   }
 
   function activeChapter() {
@@ -2558,17 +2411,17 @@ async function init() {
     if (correlationHoverName === next) return;
     correlationHoverName = next;
     deckgl.setProps({ layers: getLayers() });
-    renderCorrelationPanel();
+    renderAnalysisPanel();
   }
 
   function spotlightFeature() {
-    if (!spotlightEnabled || !spotlightAvailable() || comparisonEnabled || !tooltipPinned || !pinnedCoord) return null;
+    if (!isAnalysisMode("why-here") || !spotlightAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
 
   function similarityFeature() {
-    if (!similarEnabled || !similarityAvailable() || comparisonEnabled || spotlightEnabled || !tooltipPinned || !pinnedCoord) return null;
+    if (!isAnalysisMode("similar") || !similarityAvailable() || !tooltipPinned || !pinnedCoord) return null;
     const feature = featureAt(...pinnedCoord);
     return feature?.properties?.[NAME_FIELD] ? feature : null;
   }
@@ -3511,7 +3364,7 @@ async function init() {
   }
 
   function makeComparisonSelectionLayer(feature, side) {
-    if (!feature || !comparisonAvailable()) return null;
+    if (!feature || !isAnalysisMode("compare") || !comparisonAvailable()) return null;
     const styles = side === "A"
       ? {
           fill: currentTheme === "night" ? [17, 95, 99, 44] : [17, 95, 99, 30],
@@ -3535,7 +3388,7 @@ async function init() {
   }
 
   function makeCorrelationSelectionLayer(feature, mode = "hover") {
-    if (!feature || !correlationEnabled || !correlationAvailable()) return null;
+    if (!feature || !isAnalysisMode("correlation") || !correlationAvailable()) return null;
     const styles = mode === "pinned"
       ? {
           fill: currentTheme === "night" ? [132, 74, 92, 44] : [132, 74, 92, 28],
@@ -3661,11 +3514,11 @@ async function init() {
     document.getElementById("btn-municipi").classList.toggle("active", currentDataset === "municipi");
     btnTubeMap.classList.toggle("active", currentDataset === "tube");
     btnTube.classList.toggle("active", currentDataset === "municipi" && showStations);
-    btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
-    btnSpotlight.classList.toggle("active", currentDataset === "municipi" && spotlightEnabled && !comparisonEnabled);
-    btnSimilar.classList.toggle("active", currentDataset === "municipi" && similarEnabled && !comparisonEnabled && !spotlightEnabled);
-    btnCorrelation.classList.toggle("active", currentDataset === "municipi" && correlationEnabled && !comparisonEnabled && !spotlightEnabled && !similarEnabled);
-    btnChapters.classList.toggle("active", currentDataset === "municipi" && (chapterPickerOpen || !!activeChapterId));
+    btnCompare.classList.toggle("active", currentDataset === "municipi" && analysisMode === "compare");
+    btnSpotlight.classList.toggle("active", currentDataset === "municipi" && analysisMode === "why-here");
+    btnSimilar.classList.toggle("active", currentDataset === "municipi" && analysisMode === "similar");
+    btnCorrelation.classList.toggle("active", currentDataset === "municipi" && analysisMode === "correlation");
+    btnChapters.classList.toggle("active", currentDataset === "municipi" && analysisMode === "story");
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
   }
@@ -3673,11 +3526,11 @@ async function init() {
   function updateControlVisibility() {
     const sectionsMode = currentDataset === "sections";
     const boroughsMode = currentDataset === "municipi";
-    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && !comparisonEnabled;
+    const boroughAnalysisMode = boroughsMode && activeGeography === "borough";
+    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && analysisMode !== "compare";
     const geographyMode = boroughsMode && boroughMetric === "density";
     const yearMode = geographyMode && getAvailableYearsForState().length > 1;
-    const compareMode = boroughsMode && comparisonAvailable();
-    const showMetricOptions = compareMode || geographyMode;
+    const showMetricOptions = boroughAnalysisMode || geographyMode;
 
     viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
@@ -3686,42 +3539,29 @@ async function init() {
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
     metricOptionsEl.style.display = showMetricOptions ? "flex" : "none";
-    compareRowEl.hidden = !compareMode;
+    compareRowEl.hidden = !boroughAnalysisMode;
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
-    btnCompare.style.display = compareMode ? "" : "none";
+    btnCompare.style.display = boroughAnalysisMode ? "" : "none";
     btnCompare.disabled = !comparisonAvailable();
     btnCompare.title = comparisonAvailable() ? "Compare two boroughs" : "Comparison is available in borough geography only";
-    btnSpotlight.style.display = compareMode ? "" : "none";
-    btnSpotlight.disabled = !spotlightAvailable() || comparisonEnabled;
-    btnSpotlight.title = comparisonEnabled
-      ? "Disable comparison to use the borough spotlight"
-      : (spotlightAvailable() ? "Explain how the selected borough stands out" : "Spotlight is available in borough geography only");
-    btnSimilar.style.display = compareMode ? "" : "none";
-    btnSimilar.disabled = !similarityAvailable() || comparisonEnabled || spotlightEnabled;
-    btnSimilar.title = comparisonEnabled
-      ? "Disable comparison to find similar areas"
-      : (spotlightEnabled
-        ? "Disable the borough spotlight to find similar areas"
-        : (similarityAvailable() ? "Find boroughs with a similar profile" : "Similarity is available in borough geography only"));
-    btnCorrelation.style.display = compareMode ? "" : "none";
-    btnCorrelation.disabled = !correlationAvailable() || comparisonEnabled || spotlightEnabled || similarEnabled;
-    btnCorrelation.title = comparisonEnabled
-      ? "Disable comparison to use the correlation view"
-      : (spotlightEnabled
-        ? "Disable the borough spotlight to use the correlation view"
-        : (similarEnabled
-          ? "Disable similar areas to use the correlation view"
-          : (correlationAvailable() ? "Compare two borough metrics in a linked scatterplot" : "Correlation is available in borough geography only")));
-    btnChapters.style.display = compareMode ? "" : "none";
+    btnSpotlight.style.display = boroughAnalysisMode ? "" : "none";
+    btnSpotlight.disabled = !spotlightAvailable();
+    btnSpotlight.title = spotlightAvailable() ? "Explain how the selected borough stands out" : "Spotlight is available in borough geography only";
+    btnSimilar.style.display = boroughAnalysisMode ? "" : "none";
+    btnSimilar.disabled = !similarityAvailable();
+    btnSimilar.title = similarityAvailable() ? "Find boroughs with a similar profile" : "Similarity is available in borough geography only";
+    btnCorrelation.style.display = boroughAnalysisMode ? "" : "none";
+    btnCorrelation.disabled = !correlationAvailable();
+    btnCorrelation.title = correlationAvailable() ? "Compare two borough metrics in a linked scatterplot" : "Correlation is available in borough geography only";
+    btnChapters.style.display = boroughAnalysisMode ? "" : "none";
     btnChapters.disabled = !chapterAvailable();
     btnChapters.title = chapterAvailable()
       ? "Open the borough story chapters"
       : "Story chapters are available in borough geography only";
-    chapterToggleEl.style.display = compareMode && chapterPickerOpen ? "flex" : "none";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
@@ -3732,11 +3572,47 @@ async function init() {
     }
   }
 
-  function updateChapterSelector() {
-    for (const [chapterId, button] of Object.entries(chapterButtons)) {
-      if (!button) continue;
-      button.classList.toggle("active", activeChapterId === chapterId);
+  function updateChapterSelector() {}
+
+  function clearComparisonSelectionState() {
+    comparisonA = null;
+    comparisonB = null;
+  }
+
+  function clearAnalysisModeState(mode) {
+    if (mode === "compare") clearComparisonSelectionState();
+    if (mode === "correlation") correlationHoverName = null;
+    if (mode === "story") activeChapterId = null;
+  }
+
+  function normalizeAnalysisModeForState() {
+    if (!analysisMode) return;
+    if (analysisModeAvailable(analysisMode)) return;
+    clearAnalysisModeState(analysisMode);
+    analysisMode = null;
+  }
+
+  function setAnalysisMode(mode) {
+    const nextMode = mode === analysisMode ? null : mode;
+    const currentMode = analysisMode;
+
+    if (nextMode && !analysisModeAvailable(nextMode)) {
+      analysisMode = null;
+      clearAnalysisModeState(currentMode);
+      return false;
     }
+
+    if (currentMode && currentMode !== nextMode) clearAnalysisModeState(currentMode);
+    analysisMode = nextMode;
+
+    if (analysisMode === "compare") {
+      if (boroughMetric === "country_of_birth_pct") selectedCountryBirth = "ALL";
+      clearPinnedTooltip();
+    }
+
+    if (analysisMode !== "correlation") correlationHoverName = null;
+    if (analysisMode !== "story") activeChapterId = null;
+    return true;
   }
 
   function renderLegend() {
@@ -3785,14 +3661,7 @@ async function init() {
     }).join("");
   }
 
-  function renderComparisonPanel() {
-    const visible = comparisonEnabled && comparisonAvailable();
-    comparisonPanelEl.style.display = visible ? "block" : "none";
-    if (!visible) {
-      comparisonContentEl.innerHTML = "";
-      return;
-    }
-
+  function buildComparisonPanelContent() {
     const featureA = comparisonFeature(comparisonA);
     const featureB = comparisonFeature(comparisonB);
     const metricKey = boroughMetric;
@@ -3803,8 +3672,12 @@ async function init() {
     const metricKicker = `<div class="c-kicker">${metric.label}</div>`;
 
     if (!featureA || !featureB) {
-      comparisonContentEl.innerHTML = `
+      return `
         ${metricKicker}
+        <div class="story-head">
+          <div class="analysis-empty">Select two boroughs to compare the current active metric side by side.</div>
+          <button class="c-clear" onclick="clearComparison()">Clear</button>
+        </div>
         <div class="c-state-grid">
           <div class="c-state-slot ${featureA ? "" : "pending"}">
             <div class="c-state-label">Borough A</div>
@@ -3818,13 +3691,16 @@ async function init() {
         <div class="c-state-help">${comparisonInstructionText()}</div>
         <div class="c-foot">${metric.source} · ${metric.year}</div>
       `;
-      return;
     }
 
     const supportA = comparisonSupportLine(featureA);
     const supportB = comparisonSupportLine(featureB);
-    comparisonContentEl.innerHTML = `
+    return `
       ${metricKicker}
+      <div class="story-head">
+        <div class="analysis-empty">Click another borough to replace B, or click a selected borough to clear it.</div>
+        <button class="c-clear" onclick="clearComparison()">Clear</button>
+      </div>
       <div class="c-grid">
         <div class="c-col a">
           <span class="c-tag a">A</span>
@@ -3851,34 +3727,25 @@ async function init() {
     `;
   }
 
-  function renderSpotlightPanel() {
+  function buildSpotlightPanelContent() {
     const feature = spotlightFeature();
-    const visible = spotlightEnabled && spotlightAvailable() && !comparisonEnabled;
-    spotlightPanelEl.style.display = visible ? "block" : "none";
-    if (!visible) {
-      spotlightContentEl.innerHTML = "";
-      return;
-    }
-
     if (!feature) {
-      spotlightContentEl.innerHTML = `
+      return `
         <div class="s-helper">Select a borough to see how it differs from London borough averages.</div>
-        <div class="s-foot">Uses current borough metrics only. Compare mode hides the spotlight.</div>
+        <div class="s-foot">Uses current borough metrics only.</div>
       `;
-      return;
     }
 
     const currentMetric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
     const stories = buildSpotlightNarrative(feature);
     if (!stories.length) {
-      spotlightContentEl.innerHTML = `
+      return `
         <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
         <div class="s-lens">Current lens · ${currentMetric.label}</div>
         <div class="s-helper">No reliable borough-level spotlight summary is available from the current metric set.</div>
       `;
-      return;
     }
-    spotlightContentEl.innerHTML = `
+    return `
       <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
       <div class="s-lens">Current lens · ${currentMetric.label}</div>
       <div class="s-story-list">
@@ -3888,34 +3755,25 @@ async function init() {
     `;
   }
 
-  function renderSimilarPanel() {
-    const visible = similarEnabled && similarityAvailable() && !comparisonEnabled && !spotlightEnabled;
-    similarPanelEl.style.display = visible ? "block" : "none";
-    if (!visible) {
-      similarContentEl.innerHTML = "";
-      return;
-    }
-
+  function buildSimilarPanelContent() {
     const feature = similarityFeature();
     if (!feature) {
-      similarContentEl.innerHTML = `
+      return `
         <div class="sim-helper">Select a borough to find the closest matches across the current borough profile.</div>
-        <div class="sim-foot">Uses normalized borough metrics with equal weighting. Compare and spotlight are hidden while similarity search is active.</div>
+        <div class="sim-foot">Uses normalized borough metrics with equal weighting.</div>
       `;
-      return;
     }
 
     const results = similarityResultsForFeature(feature);
     if (!results.length) {
-      similarContentEl.innerHTML = `
+      return `
         <div class="sim-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
         <div class="sim-lens">Similarity uses the full borough profile, not just the current lens.</div>
         <div class="sim-helper">No reliable similarity matches are available from the current borough metric set.</div>
       `;
-      return;
     }
 
-    similarContentEl.innerHTML = `
+    return `
       <div class="sim-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
       <div class="sim-lens">Top matches across density, housing, earnings, children, international mix, greenspace, age, and station coverage.</div>
       <div class="sim-list">
@@ -3934,14 +3792,7 @@ async function init() {
     `;
   }
 
-  function renderCorrelationPanel() {
-    const visible = correlationEnabled && correlationAvailable() && !comparisonEnabled && !spotlightEnabled && !similarEnabled;
-    correlationPanelEl.style.display = visible ? "block" : "none";
-    if (!visible) {
-      correlationContentEl.innerHTML = "";
-      return;
-    }
-
+  function buildCorrelationPanelContent() {
     const points = correlationScatterData();
     const focusFeature = correlationFocusFeature();
     const focusName = focusFeature?.properties?.[NAME_FIELD] || null;
@@ -3949,11 +3800,10 @@ async function init() {
     const yMetric = correlationMetricConfig(correlationYMetric);
 
     if (!points.length) {
-      correlationContentEl.innerHTML = `
+      return `
         <div class="corr-helper">No reliable borough values are available for the selected metric pair.</div>
         <div class="corr-foot">Choose a different pair of borough metrics to continue.</div>
       `;
-      return;
     }
 
     const width = 560;
@@ -3985,18 +3835,17 @@ async function init() {
       return `<circle class="${classes.join(" ")}" data-borough="${point.name}" cx="${xScale(point.x).toFixed(2)}" cy="${yScale(point.y).toFixed(2)}" r="${pinned ? 5.6 : hovered ? 5.1 : 3.9}" />`;
     }).join("");
 
-    const detailFeature = focusFeature;
     const detailKicker = correlationPinnedFeature()
       ? "Selected borough"
       : (correlationHoverName ? "Hovered borough" : "Pinned borough");
-    const detailHtml = detailFeature
+    const detailHtml = focusFeature
       ? `
         <div class="corr-detail">
           <div class="corr-detail-kicker">${detailKicker}</div>
-          <div class="corr-detail-name">${detailFeature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
+          <div class="corr-detail-name">${focusFeature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
           <div class="corr-detail-values">
-            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationXMetric)}</span><span>${formatMetricValueFor(correlationXMetric, correlationMetricValue(detailFeature, correlationXMetric), correlationXMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
-            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationYMetric)}</span><span>${formatMetricValueFor(correlationYMetric, correlationMetricValue(detailFeature, correlationYMetric), correlationYMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
+            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationXMetric)}</span><span>${formatMetricValueFor(correlationXMetric, correlationMetricValue(focusFeature, correlationXMetric), correlationXMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
+            <div class="corr-detail-row"><span>${correlationAxisLabel(correlationYMetric)}</span><span>${formatMetricValueFor(correlationYMetric, correlationMetricValue(focusFeature, correlationYMetric), correlationYMetric === "country_of_birth_pct" ? "ALL" : selectedCountryBirth)}</span></div>
           </div>
         </div>
       `
@@ -4006,7 +3855,7 @@ async function init() {
         </div>
       `;
 
-    correlationContentEl.innerHTML = `
+    return `
       <div class="corr-selectors">
         <div class="corr-select-group">
           <div class="corr-label">X metric</div>
@@ -4035,35 +3884,92 @@ async function init() {
       ${detailHtml}
       <div class="corr-foot">Each point is a borough. Hover links the map and scatter; pinned boroughs stay highlighted in both views.</div>
     `;
-
-    const xSelect = correlationContentEl.querySelector("#corr-x-select");
-    const ySelect = correlationContentEl.querySelector("#corr-y-select");
-    if (xSelect) xSelect.onchange = (event) => setCorrelationAxis("x", event.target.value);
-    if (ySelect) ySelect.onchange = (event) => setCorrelationAxis("y", event.target.value);
-    correlationContentEl.querySelectorAll(".corr-point").forEach((pointEl) => {
-      pointEl.addEventListener("mouseenter", () => setCorrelationHover(pointEl.dataset.borough));
-      pointEl.addEventListener("mouseleave", () => setCorrelationHover(null));
-    });
   }
 
-  function renderChapterPanel() {
+  function buildStoryPanelContent() {
     const chapter = activeChapter();
-    const visible = !!chapter;
-    chapterPanelEl.style.display = visible ? "block" : "none";
-    if (!visible) {
-      chapterContentEl.innerHTML = "";
-      return;
+    const picker = `
+      <div class="story-picker">
+        ${STORY_CHAPTERS.map((story) => `
+          <button class="toggle-btn metric-btn chapter-btn${activeChapterId === story.id ? " active" : ""}" onclick="applyChapter('${story.id}')">${story.title}</button>
+        `).join("")}
+      </div>
+    `;
+
+    if (!chapter) {
+      return `
+        ${picker}
+        <div class="analysis-empty">Choose a chapter to jump into a curated borough view and reading prompt.</div>
+      `;
     }
 
     const metricConfig = getMetricConfigFor(chapter.state.metric, chapter.state.countrySelection ?? selectedCountryBirth);
     const geographyLabel = chapter.state.geography === "msoa" ? "MSOA" : "Borough";
     const yearLabel = chapter.state.year ? ` · ${chapter.state.year}` : "";
-    chapterContentEl.innerHTML = `
+    return `
+      ${picker}
+      <div class="story-head">
+        <div class="analysis-empty">Preset chapters set the initial borough lens and camera, then leave normal exploration intact.</div>
+        <button class="ch-clear" onclick="clearChapter()">Clear</button>
+      </div>
       <div class="ch-name">${chapter.title}</div>
       <div class="ch-meta">${metricConfig.label} · ${geographyLabel}${yearLabel}</div>
       <div class="ch-description">${chapter.description}</div>
       <div class="ch-foot">Preset chapters set the initial borough lens and camera, then leave normal exploration intact.</div>
     `;
+  }
+
+  function analysisPanelMeta() {
+    switch (analysisMode) {
+      case "compare":
+        return { title: "Compare boroughs", subtitle: "Side-by-side view of the current active borough metric." };
+      case "why-here":
+        return { title: "Why here?", subtitle: "Narrative profile built from the borough metric set." };
+      case "similar":
+        return { title: "Similar areas", subtitle: "Nearest borough matches across the wider profile, not just the current lens." };
+      case "correlation":
+        return { title: "Correlation view", subtitle: "Choose any two borough metrics and inspect the relationship as a linked scatter." };
+      case "story":
+        return { title: "Stories", subtitle: "Preset analytical chapters that set a borough lens and a short reading prompt." };
+      default:
+        return { title: "Analysis", subtitle: "Choose an analysis tool to explore this borough in more detail." };
+    }
+  }
+
+  function mountCorrelationInteractions() {
+    const xSelect = analysisPanelContentEl.querySelector("#corr-x-select");
+    const ySelect = analysisPanelContentEl.querySelector("#corr-y-select");
+    if (xSelect) xSelect.onchange = (event) => setCorrelationAxis("x", event.target.value);
+    if (ySelect) ySelect.onchange = (event) => setCorrelationAxis("y", event.target.value);
+    analysisPanelContentEl.querySelectorAll(".corr-point").forEach((pointEl) => {
+      pointEl.addEventListener("mouseenter", () => setCorrelationHover(pointEl.dataset.borough));
+      pointEl.addEventListener("mouseleave", () => setCorrelationHover(null));
+    });
+  }
+
+  function renderAnalysisPanel() {
+    normalizeAnalysisModeForState();
+    const visible = !!analysisMode;
+    analysisPanelEl.style.display = visible ? "flex" : "none";
+    if (!visible) {
+      analysisPanelContentEl.innerHTML = "";
+      return;
+    }
+
+    const meta = analysisPanelMeta();
+    analysisPanelTitleEl.textContent = meta.title;
+    analysisPanelSubtitleEl.textContent = meta.subtitle;
+    analysisPanelSubtitleEl.style.display = meta.subtitle ? "" : "none";
+
+    let html = `<div class="analysis-empty">Choose an analysis tool to explore this borough in more detail.</div>`;
+    if (analysisMode === "compare") html = buildComparisonPanelContent();
+    if (analysisMode === "why-here") html = buildSpotlightPanelContent();
+    if (analysisMode === "similar") html = buildSimilarPanelContent();
+    if (analysisMode === "correlation") html = buildCorrelationPanelContent();
+    if (analysisMode === "story") html = buildStoryPanelContent();
+    analysisPanelContentEl.innerHTML = html;
+
+    if (analysisMode === "correlation") mountCorrelationInteractions();
   }
 
   function updateStopHoverBehavior() {
@@ -4077,14 +3983,11 @@ async function init() {
   function updateLegend() {
     renderLegend();
     renderTubeLegend();
-    renderComparisonPanel();
-    renderSpotlightPanel();
-    renderSimilarPanel();
-    renderCorrelationPanel();
-    renderChapterPanel();
+    renderAnalysisPanel();
   }
 
   function refreshMapState(nextViewState = null) {
+    normalizeAnalysisModeForState();
     if (currentDataset === "municipi") {
       ACTIVE_FEATURES = activeAnalysisFeatures();
     } else if (currentDataset === "sections") {
@@ -4118,9 +4021,7 @@ async function init() {
     pinnedCoord = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
-    renderSpotlightPanel();
-    renderSimilarPanel();
-    renderCorrelationPanel();
+    renderAnalysisPanel();
   }
 
   function handleComparisonSelection(feature) {
@@ -4154,14 +4055,14 @@ async function init() {
     },
 
     onHover: ({ object, coordinate, x, y }) => {
-      if (correlationEnabled && correlationAvailable()) {
+      if (isAnalysisMode("correlation") && correlationAvailable()) {
         const hoveredName = currentDataset === "municipi" && object?.properties?.[NAME_FIELD]
           ? object.properties[NAME_FIELD]
           : null;
         if (correlationHoverName !== hoveredName) {
           correlationHoverName = hoveredName;
           deckgl.setProps({ layers: getLayers() });
-          renderCorrelationPanel();
+          renderAnalysisPanel();
         }
       }
       if (tooltipPinned) return;
@@ -4199,7 +4100,7 @@ async function init() {
     onClick: ({ object, coordinate, x, y }) => {
       if (!coordinate) return;
 
-      if (currentDataset === "municipi" && comparisonEnabled && comparisonAvailable() && object?.properties?.[NAME_FIELD]) {
+      if (currentDataset === "municipi" && isAnalysisMode("compare") && comparisonAvailable() && object?.properties?.[NAME_FIELD]) {
         handleComparisonSelection(object);
         return;
       }
@@ -4212,18 +4113,14 @@ async function init() {
         tooltipEl.innerHTML = stationTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
-        renderSpotlightPanel();
-        renderSimilarPanel();
-        renderCorrelationPanel();
+        renderAnalysisPanel();
         return;
       }
       if (object?.layer?.id === "tube-lines") {
         tooltipEl.innerHTML = lineTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
-        renderSpotlightPanel();
-        renderSimilarPanel();
-        renderCorrelationPanel();
+        renderAnalysisPanel();
         return;
       }
 
@@ -4231,9 +4128,7 @@ async function init() {
         tooltipEl.innerHTML = boroughMetricTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
-        renderSpotlightPanel();
-        renderSimilarPanel();
-        renderCorrelationPanel();
+        renderAnalysisPanel();
         return;
       }
 
@@ -4243,9 +4138,7 @@ async function init() {
       tooltipEl.innerHTML = densityTooltipHtml(zone, pop, dens, true);
       tooltipEl.style.display = "block";
       positionTooltip(x, y);
-      renderSpotlightPanel();
-      renderSimilarPanel();
-      renderCorrelationPanel();
+      renderAnalysisPanel();
     },
   });
 
@@ -4332,7 +4225,7 @@ async function init() {
     if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
     if (metricKey === "pubs_per_km2_msoa") activeGeography = "msoa";
     else if (metricKey !== "density") activeGeography = "borough";
-    if (metricKey === "country_of_birth_pct" && comparisonEnabled) selectedCountryBirth = "ALL";
+    if (metricKey === "country_of_birth_pct" && analysisMode === "compare") selectedCountryBirth = "ALL";
     applyActiveMetric(metricKey);
   };
 
@@ -4373,89 +4266,28 @@ async function init() {
 
   toggleComparison = function() {
     if (currentDataset !== "municipi") return;
-    if (!comparisonAvailable()) {
-      comparisonEnabled = false;
-      comparisonA = null;
-      comparisonB = null;
-      refreshMapState();
-      return;
-    }
-    comparisonEnabled = !comparisonEnabled;
-    if (!comparisonEnabled) {
-      comparisonA = null;
-      comparisonB = null;
-    } else if (boroughMetric === "country_of_birth_pct") {
-      selectedCountryBirth = "ALL";
-      spotlightEnabled = false;
-      similarEnabled = false;
-      correlationEnabled = false;
-      chapterPickerOpen = false;
-    } else {
-      spotlightEnabled = false;
-      similarEnabled = false;
-      correlationEnabled = false;
-      chapterPickerOpen = false;
-    }
-    clearPinnedTooltip();
+    setAnalysisMode("compare");
     refreshMapState();
   };
 
   clearComparison = function() {
-    comparisonEnabled = false;
-    comparisonA = null;
-    comparisonB = null;
+    if (analysisMode === "compare") analysisMode = null;
+    clearComparisonSelectionState();
     refreshMapState();
   };
 
   toggleSpotlight = function() {
-    if (!spotlightAvailable() || comparisonEnabled) {
-      spotlightEnabled = false;
-      refreshMapState();
-      return;
-    }
-    spotlightEnabled = !spotlightEnabled;
-    if (spotlightEnabled) {
-      similarEnabled = false;
-      correlationEnabled = false;
-      chapterPickerOpen = false;
-    }
+    setAnalysisMode("why-here");
     refreshMapState();
   };
 
   toggleSimilar = function() {
-    if (!similarityAvailable() || comparisonEnabled || spotlightEnabled) {
-      similarEnabled = false;
-      refreshMapState();
-      return;
-    }
-    similarEnabled = !similarEnabled;
-    if (similarEnabled) {
-      spotlightEnabled = false;
-      comparisonEnabled = false;
-      comparisonA = null;
-      comparisonB = null;
-      correlationEnabled = false;
-      chapterPickerOpen = false;
-    }
+    setAnalysisMode("similar");
     refreshMapState();
   };
 
   toggleCorrelation = function() {
-    if (!correlationAvailable() || comparisonEnabled || spotlightEnabled || similarEnabled) {
-      correlationEnabled = false;
-      refreshMapState();
-      return;
-    }
-    correlationEnabled = !correlationEnabled;
-    if (correlationEnabled) {
-      comparisonEnabled = false;
-      comparisonA = null;
-      comparisonB = null;
-      spotlightEnabled = false;
-      similarEnabled = false;
-      chapterPickerOpen = false;
-      correlationHoverName = null;
-    }
+    setAnalysisMode("correlation");
     refreshMapState();
   };
 
@@ -4463,16 +4295,11 @@ async function init() {
     if (!CORRELATION_METRICS.includes(metricKey)) return;
     if (axis === "x") correlationXMetric = metricKey;
     if (axis === "y") correlationYMetric = metricKey;
-    renderCorrelationPanel();
+    renderAnalysisPanel();
   };
 
   toggleChapterPicker = function() {
-    if (!chapterAvailable()) {
-      chapterPickerOpen = false;
-      refreshMapState();
-      return;
-    }
-    chapterPickerOpen = !chapterPickerOpen;
+    setAnalysisMode("story");
     refreshMapState();
   };
 
@@ -4489,14 +4316,9 @@ async function init() {
 
     showStations = false;
     is3D = false;
-    comparisonEnabled = false;
-    comparisonA = null;
-    comparisonB = null;
-    spotlightEnabled = false;
-    similarEnabled = false;
-    correlationEnabled = false;
+    clearComparisonSelectionState();
     correlationHoverName = null;
-    chapterPickerOpen = false;
+    analysisMode = "story";
     activeChapterId = chapter.id;
     highlightedFeature = null;
     pinData = [];
@@ -4506,7 +4328,15 @@ async function init() {
   };
 
   clearChapter = function() {
+    if (analysisMode === "story") analysisMode = null;
     activeChapterId = null;
+    refreshMapState();
+  };
+
+  clearAnalysisMode = function() {
+    if (!analysisMode) return;
+    clearAnalysisModeState(analysisMode);
+    analysisMode = null;
     refreshMapState();
   };
 
