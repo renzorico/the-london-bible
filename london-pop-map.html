@@ -1117,6 +1117,9 @@
     color: var(--title);
     transform: translateX(-1px);
   }
+  .tube-legend-item.inactive {
+    opacity: .58;
+  }
   .tube-legend-item.active {
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--button-active) 30%, transparent);
   }
@@ -3312,12 +3315,12 @@ async function init() {
         if (!onlyTubeMode() || !selectedTubeLineKey) return THEMES[currentTheme].lineCase;
         const active = f.properties?.lineKey === selectedTubeLineKey;
         const base = THEMES[currentTheme].lineCase;
-        return [base[0], base[1], base[2], active ? base[3] : Math.round(base[3] * 0.42)];
+        return [base[0], base[1], base[2], active ? base[3] : Math.round(base[3] * 0.22)];
       },
       getLineWidth: (f) => {
         const base = (onlyTubeMode() ? THEMES[currentTheme].lineCaseWidthOnly : THEMES[currentTheme].lineCaseWidthMixed) * tubeZoomFactor();
         if (!onlyTubeMode() || !selectedTubeLineKey) return base;
-        return f.properties?.lineKey === selectedTubeLineKey ? base : base * 0.84;
+        return f.properties?.lineKey === selectedTubeLineKey ? base * 1.08 : base * 0.68;
       },
       lineCapRounded: true,
       lineJointRounded: true,
@@ -3338,12 +3341,12 @@ async function init() {
         const active = selectedTubeLineKey && f.properties?.lineKey === selectedTubeLineKey;
         const base = currentTheme === "night" ? f.properties.markerNight : f.properties.markerDay;
         if (!onlyTubeMode() || !selectedTubeLineKey) return [...base, 235];
-        return [...base, active ? 255 : 96];
+        return [...base, active ? 255 : 54];
       },
       getLineWidth: (f) => {
         const base = (onlyTubeMode() ? THEMES[currentTheme].lineWidthOnly : THEMES[currentTheme].lineWidthMixed) * tubeZoomFactor();
         if (!onlyTubeMode() || !selectedTubeLineKey) return base;
-        return f.properties?.lineKey === selectedTubeLineKey ? base : base * 0.82;
+        return f.properties?.lineKey === selectedTubeLineKey ? base * 1.12 : base * 0.7;
       },
       lineCapRounded: true,
       lineJointRounded: true,
@@ -3432,6 +3435,20 @@ async function init() {
     pinnedCoord = null;
     tooltipEl.classList.remove("pinned");
     tooltipEl.style.display = "none";
+  }
+
+  function clearTubeInteractionState() {
+    tooltipPinned = false;
+    pinnedCoord = null;
+    tooltipEl.classList.remove("pinned");
+    tooltipEl.style.display = "none";
+  }
+
+  function setSelectedTubeLine(lineKey, { preserveTooltip = false } = {}) {
+    selectedTubeLineKey = selectedTubeLineKey === lineKey ? null : lineKey;
+    if (!preserveTooltip) clearTubeInteractionState();
+    deckgl.setProps({ layers: getLayers() });
+    renderTubeLegend();
   }
 
   function stationTooltipHtml(station, pinned) {
@@ -3897,14 +3914,13 @@ async function init() {
     const items = activeTubeLegendLines();
     tubeLegendItemsEl.innerHTML = items.map((item) => {
       const swatch = `rgb(${item.color[0]}, ${item.color[1]}, ${item.color[2]})`;
-      const active = selectedTubeLineKey === item.key ? " active" : "";
-      return `<button class="tube-legend-item${active}" type="button" data-line-key="${item.key}"><span class="tube-legend-swatch" style="background:${swatch}"></span><span class="tube-legend-name">${item.name}</span></button>`;
+      const active = selectedTubeLineKey === item.key;
+      const inactive = selectedTubeLineKey && !active ? " inactive" : "";
+      return `<button class="tube-legend-item${active ? " active" : ""}${inactive}" type="button" data-line-key="${item.key}"><span class="tube-legend-swatch" style="background:${swatch}"></span><span class="tube-legend-name">${item.name}</span></button>`;
     }).join("");
     tubeLegendItemsEl.querySelectorAll("[data-line-key]").forEach((button) => {
       button.onclick = () => {
-        selectedTubeLineKey = selectedTubeLineKey === button.dataset.lineKey ? null : button.dataset.lineKey;
-        deckgl.setProps({ layers: getLayers() });
-        renderTubeLegend();
+        setSelectedTubeLine(button.dataset.lineKey);
       };
     });
     if (currentDataset === "municipi" && showStations) {
@@ -4350,6 +4366,11 @@ async function init() {
         return;
       }
 
+      if (onlyTubeMode()) {
+        tooltipEl.style.display = "none";
+        return;
+      }
+
       if (currentDataset === "municipi") {
         tooltipEl.innerHTML = boroughMetricTooltipHtml(object, false);
         tooltipEl.style.display = "block";
@@ -4368,10 +4389,10 @@ async function init() {
     onClick: ({ object, coordinate, x, y }) => {
       if (!coordinate) return;
       if (onlyTubeMode() && !object) {
-        tooltipPinned = false;
-        pinnedCoord = null;
-        tooltipEl.classList.remove("pinned");
-        tooltipEl.style.display = "none";
+        selectedTubeLineKey = null;
+        clearTubeInteractionState();
+        deckgl.setProps({ layers: getLayers() });
+        renderTubeLegend();
         return;
       }
 
@@ -4393,13 +4414,16 @@ async function init() {
       }
       if (object?.layer?.id === "tube-lines") {
         const lineKey = object.properties?.lineKey || null;
-        selectedTubeLineKey = selectedTubeLineKey === lineKey ? null : lineKey;
+        setSelectedTubeLine(lineKey, { preserveTooltip: true });
         tooltipEl.innerHTML = lineTooltipHtml(object, true);
         tooltipEl.style.display = "block";
         positionTooltip(x, y);
-        deckgl.setProps({ layers: getLayers() });
-        renderTubeLegend();
         renderAnalysisPanel();
+        return;
+      }
+
+      if (onlyTubeMode()) {
+        clearTubeInteractionState();
         return;
       }
 
@@ -4462,7 +4486,7 @@ async function init() {
             map.setPaintProperty(layer.id, "text-halo-color", currentTheme === "night" ? "#0d1319" : "#f7f7f6");
             map.setPaintProperty(layer.id, "text-halo-width", currentTheme === "night" ? 0.35 : 0.55);
             if (id.includes("transit") || id.includes("rail") || id.includes("station")) {
-              map.setLayoutProperty(layer.id, "text-radial-offset", 0.2);
+              map.setLayoutProperty(layer.id, "text-radial-offset", 0.12);
             }
           }
         } catch (err) {}

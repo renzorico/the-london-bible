@@ -2,7 +2,7 @@
 
 ## 2026-04-01 — Tube interaction and branding polish
 
-- Fixed only-tube interaction so station and line hover/click stay tube-centric, while selected Tube lines now sync cleanly with the legend and visually de-emphasize other lines.
+- Fixed the actual only-tube interaction path so station and line hover/click stay tube-centric, empty-space click clears tube selection cleanly, and selected Tube lines now sync with the legend while non-selected lines visibly fade back.
 - Tightened the title/subtitle lockup, softened the footer credit styling, and nudged Tube label spacing closer to their lines without changing the wider atlas structure.
 
 ## 2026-04-01 — Atlas UI refinement pass
