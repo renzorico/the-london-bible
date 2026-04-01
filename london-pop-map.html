@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>London · Demographic Analysis Map</title>
+<title>The London Bible</title>
 
 <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.css" rel="stylesheet" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.5.2/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/deck.gl@9.0.27/dist.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 
 <style>
   :root {
-    --font-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+    --font-display: "Cormorant Garamond", serif;
     --font-ui: "Public Sans", system-ui, sans-serif;
 
     --bg: #f4efe8;
@@ -60,8 +60,8 @@
     --button-bg: rgba(15, 22, 30, 0.82);
     --button-border: rgba(150, 170, 190, 0.16);
     --button-hover: rgba(24, 33, 44, 0.96);
-    --button-active: #7b61ff;
-    --button-active-border: #7b61ff;
+    --button-active: #4f8589;
+    --button-active-border: #4f8589;
     --button-active-text: #ffffff;
     --tooltip-bg: rgba(17, 24, 32, 0.96);
     --tooltip-border: rgba(163, 184, 204, 0.14);
@@ -72,10 +72,10 @@
     --hint: #788796;
     --attrib-bg: rgba(16, 22, 30, 0.84);
     --attrib-text: #93a1af;
-    --search-focus: rgba(123, 97, 255, 0.45);
+    --search-focus: rgba(79, 133, 137, 0.45);
     --thames: 90, 164, 255, 230;
-    --highlight-fill: 123, 97, 255, 70;
-    --highlight-line: 169, 146, 255, 255;
+    --highlight-fill: 79, 133, 137, 70;
+    --highlight-line: 147, 212, 205, 255;
     --pin-fill: 255, 199, 107, 255;
   }
 
@@ -92,76 +92,85 @@
 
   #left-stack {
     position: absolute;
-    top: 22px;
+    top: 20px;
     left: 24px;
     z-index: 12;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 11px;
-    max-width: min(520px, calc(100vw - 48px));
+    gap: 12px;
+    width: min(388px, calc(100vw - 48px));
+    max-width: min(388px, calc(100vw - 48px));
   }
   .control-group {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    align-items: stretch;
+    gap: 10px;
     width: 100%;
   }
-  #title {
+  .rail-card {
     position: relative;
-    pointer-events: none;
-    padding: 14px 16px 12px;
+    z-index: 10;
+    width: 100%;
+    padding: 14px 15px 14px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
-    border-radius: 14px;
+    border-radius: 16px;
+  }
+  .rail-card-head {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #title {
+    pointer-events: none;
+    padding: 16px 17px 14px;
   }
   #title h1 {
     font-family: var(--font-display);
-    font-size: 2.15rem;
-    line-height: .94;
+    font-size: 2.28rem;
+    line-height: .9;
     font-weight: 700;
-    letter-spacing: .16em;
+    letter-spacing: .11em;
     text-transform: uppercase;
     color: var(--title);
   }
   #title p  {
-    margin-top: 7px;
+    margin-top: 8px;
     font-family: var(--font-ui);
-    font-size: .68rem;
+    font-size: .66rem;
     font-weight: 600;
-    letter-spacing: .22em;
+    letter-spacing: .17em;
     text-transform: uppercase;
     color: var(--subtitle);
   }
 
   #layer-toggle, #view-toggle, #metric-toggle {
-    position: relative;
-    z-index: 10;
     display: flex;
-    gap: 4px;
+    gap: 6px;
     flex-wrap: wrap;
+    width: 100%;
   }
+  #layer-toggle { gap: 7px; }
   #metric-toggle {
-    max-width: 500px;
+    max-width: none;
     gap: 6px;
   }
   #metric-options {
-    position: relative;
-    z-index: 10;
     display: none;
     flex-direction: column;
-    gap: 10px;
-    min-width: 258px;
-    max-width: 338px;
+    gap: 9px;
+    width: 100%;
+    margin-top: 2px;
     padding: 11px 12px 12px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 95%, transparent), color-mix(in srgb, var(--panel) 92%, transparent));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
+    background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
+    border-radius: 12px;
   }
   .metric-option-row {
     display: flex;
@@ -169,9 +178,9 @@
     align-items: flex-start;
     gap: 6px;
   }
-  .metric-option-row.tools-row {
-    padding-bottom: 2px;
-    border-bottom: 1px solid color-mix(in srgb, var(--panel-border) 85%, transparent);
+  .metric-option-row + .metric-option-row {
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 76%, transparent);
   }
   .metric-option-row[hidden] { display: none !important; }
   .metric-option-label {
@@ -186,7 +195,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    width: 100%;
   }
+  .metric-subtoggle.tight { gap: 5px; }
   .time-control {
     display: flex;
     flex-direction: column;
@@ -276,7 +287,7 @@
   }
   #top-right-controls {
     position: absolute;
-    top: 24px;
+    top: 20px;
     right: 24px;
     z-index: 20;
     display: flex;
@@ -293,15 +304,12 @@
     flex: 0 0 auto;
   }
   .control-title {
-    position: relative;
-    z-index: 10;
     font-family: var(--font-ui);
-    font-size: .58rem;
+    font-size: .56rem;
     font-weight: 800;
-    letter-spacing: .22em;
+    letter-spacing: .2em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--title) 68%, var(--subtitle) 32%);
-    pointer-events: none;
   }
   .toggle-btn {
     padding: 7px 12px 6px;
@@ -324,7 +332,7 @@
   .toggle-btn.metric-btn {
     padding-left: 10px;
     padding-right: 10px;
-    letter-spacing: .14em;
+    letter-spacing: .12em;
   }
   .toggle-btn.secondary-btn {
     padding: 6px 10px 5px;
@@ -335,8 +343,16 @@
     box-shadow: 0 10px 24px rgba(79, 49, 38, 0.05);
   }
   .toggle-btn.tool-btn {
-    min-width: 112px;
+    min-width: 0;
+    flex: 1 1 calc(50% - 6px);
     justify-content: center;
+  }
+  #layer-toggle .toggle-btn {
+    flex: 1 1 calc(50% - 7px);
+    justify-content: center;
+  }
+  #metric-toggle .toggle-btn.metric-btn {
+    flex: 0 1 auto;
   }
   #btn-home {
     min-width: 42px;
@@ -436,9 +452,9 @@
   #legend .lmeta { margin-top: 11px; max-width: 320px; font-size: .72rem; line-height: 1.58; color: var(--hint); }
   #analysis-panel {
     position: absolute;
-    top: 112px;
+    top: 116px;
     right: 24px;
-    bottom: 92px;
+    bottom: 88px;
     z-index: 10;
     display: none;
     flex-direction: column;
@@ -812,9 +828,7 @@
   }
 
   #tube-legend {
-    position: absolute; top: 50%; right: 24px;
-    transform: translateY(-50%);
-    z-index: 10;
+    position: relative;
     max-width: 260px;
     padding: 11px 13px 10px;
     border: 1px solid var(--panel-border);
@@ -823,24 +837,16 @@
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
     display: none;
+    pointer-events: none;
   }
   #country-toggle {
-    position: relative;
-    z-index: 10;
     display: none;
     flex-direction: column;
     align-items: flex-start;
     gap: 7px;
-    max-width: 230px;
-    padding: 12px 13px;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-    border-radius: 14px;
-    box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(16px);
+    width: 100%;
   }
   .country-btn {
-    width: 100%;
     justify-content: flex-start;
     padding: 7px 10px 6px;
     font-size: .64rem;
@@ -1018,28 +1024,46 @@
     color: var(--hint);
   }
   #analysis-panel .c-foot { margin-top: 12px; }
-  #credit {
+  #footer-bar {
     position: absolute;
+    left: 24px;
     right: 24px;
     bottom: 26px;
     z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 14px;
+    pointer-events: none;
+  }
+  #footer-utility {
+    justify-self: end;
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--hint);
+    white-space: nowrap;
+  }
+  #footer-credit {
+    justify-self: center;
     padding: 7px 11px 6px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, var(--panel-strong), var(--panel));
     border-radius: 999px;
     box-shadow: var(--panel-shadow);
     backdrop-filter: blur(16px);
+    pointer-events: auto;
   }
-  #credit a {
+  #footer-credit a {
     font-family: var(--font-ui);
     font-size: .64rem;
     font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+    letter-spacing: .04em;
     color: var(--subtitle);
     text-decoration: none;
   }
-  #credit a:hover { color: var(--legend-accent); }
+  #footer-credit a:hover { color: var(--legend-accent); }
   #tube-legend .llbl {
     font-family: var(--font-ui);
     font-size: .62rem;
@@ -1076,29 +1100,35 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  #hint {
-    position: absolute; bottom: 26px; right: 24px;
-    z-index: 10; pointer-events: none; text-align: right;
-    font-size: .63rem; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--hint); line-height: 2;
-    font-family: var(--font-ui);
-  }
-
   #loading {
     position: absolute; inset: 0; background: var(--bg);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     z-index: 100; transition: opacity .5s ease;
   }
-  #loading h2 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; letter-spacing: .18em; color: var(--title); margin-bottom: 20px; text-transform: uppercase; }
-  #loading .lspinner { width: 32px; height: 32px; border: 2px solid rgba(140,50,40,.12); border-top-color: var(--button-active); border-radius: 50%; animation: spin .85s linear infinite; }
-  #loading .lstatus  { margin-top: 14px; font-size: .68rem; letter-spacing: .17em; text-transform: uppercase; color: var(--subtitle); font-family: var(--font-ui); }
+  #loading .lmark {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 90%, transparent);
+    display: grid;
+    place-items: center;
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    box-shadow: var(--panel-shadow);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--legend-accent);
+  }
+  #loading h2 { margin-top: 18px; font-family: var(--font-display); font-size: 2.05rem; font-weight: 700; letter-spacing: .12em; color: var(--title); text-transform: uppercase; }
+  #loading .lstatus  { margin-top: 10px; font-size: .66rem; letter-spacing: .15em; text-transform: uppercase; color: var(--subtitle); font-family: var(--font-ui); }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 540px) {
-    #left-stack     { top: 14px; left: 14px; right: 14px; max-width: calc(100vw - 28px); gap: 9px; }
-    #title h1       { font-size: 1.52rem; }
+    #left-stack     { top: 14px; left: 14px; right: 14px; width: calc(100vw - 28px); max-width: calc(100vw - 28px); gap: 9px; }
+    #title h1       { font-size: 1.72rem; }
     #title p        { font-size: .6rem; }
+    #layer-toggle .toggle-btn { flex-basis: calc(50% - 7px); }
     #metric-toggle  { max-width: none; }
     #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
     #country-toggle { max-width: 100%; }
@@ -1112,35 +1142,39 @@
 
     #bottom-left-stack { left: 14px; right: 14px; bottom: 16px; max-width: calc(100vw - 28px); }
     #legend { width: 100%; max-width: 320px; }
-    #hint           { display: none; }
-    #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
+    #tube-legend    { max-width: 220px; }
     #analysis-panel { left: 14px; right: 14px; top: 116px; bottom: 118px; width: auto; max-width: none; }
     #analysis-panel .analysis-panel-head { padding: 14px 15px 12px; }
     #analysis-panel .analysis-panel-body { padding: 14px 15px 14px; }
     #analysis-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
     #analysis-panel .c-mid { padding-top: 0; }
     #analysis-panel .corr-selectors { grid-template-columns: 1fr; }
-    #credit         { right: 14px; bottom: 82px; }
+    #footer-bar     { left: 14px; right: 14px; bottom: 16px; grid-template-columns: 1fr; row-gap: 8px; }
+    #footer-utility { justify-self: center; text-align: center; white-space: normal; }
+    #footer-credit  { order: -1; }
   }
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <h2>London</h2>
-  <div class="lspinner"></div>
+  <div class="lmark" aria-hidden="true">TLB</div>
+  <h2>THE LONDON BIBLE</h2>
   <div class="lstatus" id="load-status">Loading…</div>
 </div>
 
 <div id="map"></div>
 
 <div id="left-stack">
-  <div id="title">
-    <h1>London</h1>
-    <p>Demographic Analysis Atlas · Borough Metrics</p>
+  <div id="title" class="rail-card">
+    <h1>THE LONDON BIBLE</h1>
+    <p>A field guide to the city behind the stats</p>
   </div>
 
-  <div class="control-group" id="layer-group">
+  <div class="control-group rail-card" id="layer-group">
+    <div class="rail-card-head">
+      <div class="control-title">Views</div>
+    </div>
     <div id="layer-toggle">
       <button id="btn-sections" class="toggle-btn active" onclick="setMode('sections')">Hexes</button>
       <button id="btn-municipi" class="toggle-btn" onclick="setMode('municipi')">Boroughs</button>
@@ -1149,8 +1183,8 @@
     </div>
   </div>
 
-  <div class="control-group" id="view-group">
-    <div id="view-label" class="control-title">View</div>
+  <div class="control-group rail-card" id="view-group">
+    <div id="view-label" class="control-title">Hexes style</div>
     <div id="view-toggle">
       <button id="btn-flat" class="toggle-btn active" onclick="setView('flat')">Flat map</button>
       <button id="btn-3d"   class="toggle-btn" onclick="setView('3d')">Spikes</button>
@@ -1158,8 +1192,8 @@
     </div>
   </div>
 
-  <div class="control-group" id="metric-group">
-    <div id="metric-label" class="control-title">Metric</div>
+  <div class="control-group rail-card" id="metric-group">
+    <div id="metric-label" class="control-title">Metrics</div>
     <div id="metric-toggle">
       <button id="metric-density" class="toggle-btn metric-btn active" onclick="setMetric('density')">Density</button>
       <button id="metric-house_price_proxy_gbp" class="toggle-btn metric-btn" onclick="setMetric('house_price_proxy_gbp')">House prices</button>
@@ -1167,55 +1201,63 @@
       <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
       <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
-      <button id="metric-station_access_per_10k" class="toggle-btn metric-btn" onclick="setMetric('station_access_per_10k')">Stations / 10k</button>
-      <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2')">Pubs / km²</button>
-      <button id="metric-pubs_per_km2_msoa" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2_msoa')">Pubs / km² (MSOA)</button>
-      <button id="metric-buildings_per_km2" class="toggle-btn metric-btn" onclick="setMetric('buildings_per_km2')">Buildings / km²</button>
-      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
-      <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
+      <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetricFamily('pubs')">Pubs density</button>
+      <button id="metric-buildings_per_km2" class="toggle-btn metric-btn" onclick="setMetric('buildings_per_km2')">Buildings density</button>
+      <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace</button>
+      <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Origin</button>
+    </div>
+
+    <div id="metric-options">
+      <div class="metric-option-row" id="pubs-row">
+        <div class="metric-option-label">Pubs density scope</div>
+        <div id="pubs-toggle" class="metric-subtoggle tight">
+          <button id="pubs-borough" class="toggle-btn secondary-btn active" onclick="setPubsScope('borough')">Borough</button>
+          <button id="pubs-msoa" class="toggle-btn secondary-btn" onclick="setPubsScope('msoa')">MSOA</button>
+        </div>
+      </div>
+      <div class="metric-option-row" id="geography-row">
+        <div class="metric-option-label">Density scope</div>
+        <div id="geography-toggle" class="metric-subtoggle tight">
+          <button id="geo-borough" class="toggle-btn secondary-btn active" onclick="setGeography('borough')">Borough</button>
+          <button id="geo-msoa" class="toggle-btn secondary-btn" onclick="setGeography('msoa')">MSOA</button>
+        </div>
+      </div>
+      <div class="metric-option-row" id="year-row">
+        <div class="metric-option-label">Time</div>
+        <div id="year-toggle" class="time-control">
+          <div class="time-head">
+            <div id="year-badge" class="time-badge">2024</div>
+          </div>
+          <div class="time-slider-wrap">
+            <input id="year-slider" class="time-slider" type="range" min="0" max="0" step="1" value="0" oninput="setYearFromIndex(this.value)" />
+            <div id="year-stops" class="time-stops"></div>
+          </div>
+        </div>
+      </div>
+      <div class="metric-option-row" id="country-row">
+        <div class="metric-option-label">Origin focus</div>
+        <div id="country-toggle" class="metric-subtoggle">
+          <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">Overview</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
+          <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="metric-options">
-    <div class="metric-option-row tools-row" id="compare-row">
-      <div class="metric-option-label">Analysis</div>
-      <div class="metric-subtoggle">
-        <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
-        <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
-        <button id="btn-similar" class="toggle-btn secondary-btn tool-btn" onclick="toggleSimilar()">Similar areas</button>
-        <button id="btn-correlation" class="toggle-btn secondary-btn tool-btn" onclick="toggleCorrelation()">Correlation</button>
-        <button id="btn-chapters" class="toggle-btn secondary-btn tool-btn" onclick="toggleChapterPicker()">Stories</button>
-      </div>
+  <div class="control-group rail-card" id="analysis-group">
+    <div class="control-title">Analysis</div>
+    <div class="metric-subtoggle">
+      <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
+      <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
+      <button id="btn-similar" class="toggle-btn secondary-btn tool-btn" onclick="toggleSimilar()">Similar areas</button>
+      <button id="btn-correlation" class="toggle-btn secondary-btn tool-btn" onclick="toggleCorrelation()">Correlation</button>
+      <button id="btn-chapters" class="toggle-btn secondary-btn tool-btn" onclick="toggleChapterPicker()">Stories</button>
     </div>
-    <div class="metric-option-row" id="geography-row">
-      <div class="metric-option-label">Geography</div>
-      <div id="geography-toggle" class="metric-subtoggle">
-        <button id="geo-borough" class="toggle-btn secondary-btn active" onclick="setGeography('borough')">Borough</button>
-        <button id="geo-msoa" class="toggle-btn secondary-btn" onclick="setGeography('msoa')">MSOA</button>
-      </div>
-    </div>
-    <div class="metric-option-row" id="year-row">
-      <div class="metric-option-label">Time</div>
-      <div id="year-toggle" class="time-control">
-        <div class="time-head">
-          <div id="year-badge" class="time-badge">2024</div>
-        </div>
-        <div class="time-slider-wrap">
-          <input id="year-slider" class="time-slider" type="range" min="0" max="0" step="1" value="0" oninput="setYearFromIndex(this.value)" />
-          <div id="year-stops" class="time-stops"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="country-toggle">
-    <button class="toggle-btn metric-btn country-btn" data-country="ALL" onclick="setCountryMetric('ALL')">All</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="India" onclick="setCountryMetric('India')">India</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="Poland" onclick="setCountryMetric('Poland')">Poland</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="Romania" onclick="setCountryMetric('Romania')">Romania</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="Nigeria" onclick="setCountryMetric('Nigeria')">Nigeria</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="Pakistan" onclick="setCountryMetric('Pakistan')">Pakistan</button>
-    <button class="toggle-btn metric-btn country-btn" data-country="Bangladesh" onclick="setCountryMetric('Bangladesh')">Bangladesh</button>
   </div>
 </div>
 <div id="top-right-controls">
@@ -1238,6 +1280,10 @@
     <div class="lavg" id="legend-avg">London avg · 0 res/km²</div>
     <div class="lmeta" id="legend-meta"></div>
   </div>
+  <div id="tube-legend">
+    <div class="llbl">Tube lines</div>
+    <div id="tube-legend-items"></div>
+  </div>
 </div>
 
 <div id="analysis-panel">
@@ -1251,18 +1297,11 @@
   <div id="analysis-panel-content" class="analysis-panel-body"></div>
 </div>
 
-<div id="tube-legend">
-  <div class="llbl">Tube lines</div>
-  <div id="tube-legend-items"></div>
+<div id="footer-bar">
+  <div></div>
+  <div id="footer-credit"><a href="https://www.linkedin.com/in/renzorico" target="_blank" rel="noopener noreferrer">Created by Renzo Rico</a></div>
+  <div id="footer-utility">Drag · scroll to zoom · Click to pin · Search any London address</div>
 </div>
-
-<div id="hint">
-  Drag · scroll to zoom<br>
-  Flat map · Spikes to switch<br>
-  Click for address
-</div>
-
-<div id="credit"><a href="https://www.linkedin.com/in/renzorico" target="_blank" rel="noopener noreferrer">by renzorico</a></div>
 
 <script>
 const POP_FIELD = "population";
@@ -1675,8 +1714,8 @@ const METRICS = {
   },
   station_access_per_10k: {
     key: "station_access_per_10k",
-    label: "Stations per 10,000 residents",
-    button: "Stations / 10k",
+    label: "Station access",
+    button: "Station access",
     legendLabel: "Mapped TfL / rail stations per 10,000 residents",
     unit: "stations / 10k residents",
     year: "Live snapshot",
@@ -1688,13 +1727,13 @@ const METRICS = {
     formatter: (v) => `${v.toFixed(2)} / 10k residents`,
     diffFormatter: (v) => `${v.toFixed(2)} / 10k`,
     summaryLabel: "London rate",
-    tooltipTag: "Stations / 10k",
+    tooltipTag: "Station access",
     note: "Station-based proxy derived from TfL station locations only; excludes buses, service frequency, and full PTAL",
   },
   pubs_per_km2: {
     key: "pubs_per_km2",
-    label: "Pub density",
-    button: "Pubs / km²",
+    label: "Pubs density",
+    button: "Pubs density",
     legendLabel: "Mapped pubs per km²",
     unit: "pubs/km²",
     year: "Snapshot 2026-04-01",
@@ -1711,8 +1750,8 @@ const METRICS = {
   },
   pubs_per_km2_msoa: {
     key: "pubs_per_km2_msoa",
-    label: "Pubs / km² (MSOA)",
-    button: "Pubs / km² (MSOA)",
+    label: "Pubs density",
+    button: "Pubs density",
     legendLabel: "Pubs per km² (MSOA level)",
     unit: "pubs/km²",
     year: "Snapshot 2026-04-01",
@@ -1729,8 +1768,8 @@ const METRICS = {
   },
   buildings_per_km2: {
     key: "buildings_per_km2",
-    label: "Mapped buildings per km²",
-    button: "Buildings / km²",
+    label: "Buildings density",
+    button: "Buildings density",
     legendLabel: "Mapped building footprints per km²",
     unit: "buildings/km²",
     year: "Snapshot 2026-04-01",
@@ -1747,8 +1786,8 @@ const METRICS = {
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
-    label: "Greenspace share (2005)",
-    button: "Greenspace 2005",
+    label: "Greenspace",
+    button: "Greenspace",
     legendLabel: "Share of borough area in the GLUD 2005 Greenspace class",
     unit: "%",
     year: "2005",
@@ -1765,9 +1804,9 @@ const METRICS = {
   },
   country_of_birth_pct: {
     key: "country_of_birth_pct",
-    label: "Country of birth",
-    button: "Country of birth",
-    legendLabel: "Country of birth",
+    label: "Origin",
+    button: "Origin",
+    legendLabel: "Origin",
     unit: "%",
     year: "2021",
     source: "GLA Country of Birth 2021 tool derived from Census 2021 borough tables",
@@ -1777,7 +1816,7 @@ const METRICS = {
     views: ["municipi"],
     formatter: (v) => `${v.toFixed(1)}%`,
     summaryLabel: "London avg",
-    tooltipTag: "Country of birth",
+    tooltipTag: "Origin",
   },
 };
 
@@ -1838,11 +1877,12 @@ function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
-let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
   const bodyEl = document.body;
+  const leftStackEl = document.getElementById("left-stack");
   const statusEl = document.getElementById("load-status");
   const tooltipEl = document.getElementById("tooltip");
   const legendAvgEl = document.getElementById("legend-avg");
@@ -1862,11 +1902,18 @@ async function init() {
   const metricLabelEl = document.getElementById("metric-label");
   const metricToggleEl = document.getElementById("metric-toggle");
   const metricOptionsEl = document.getElementById("metric-options");
-  const compareRowEl = document.getElementById("compare-row");
+  const analysisGroupEl = document.getElementById("analysis-group");
+  const pubsRowEl = document.getElementById("pubs-row");
+  const pubsToggleEl = document.getElementById("pubs-toggle");
+  const pubsButtons = {
+    borough: document.getElementById("pubs-borough"),
+    msoa: document.getElementById("pubs-msoa"),
+  };
   const geographyToggleEl = document.getElementById("geography-toggle");
   const geographyRowEl = document.getElementById("geography-row");
   const yearRowEl = document.getElementById("year-row");
   const yearToggleEl = document.getElementById("year-toggle");
+  const countryRowEl = document.getElementById("country-row");
   const yearSliderEl = document.getElementById("year-slider");
   const yearBadgeEl = document.getElementById("year-badge");
   const yearStopsEl = document.getElementById("year-stops");
@@ -2134,7 +2181,7 @@ async function init() {
     if (selectedCountryBirth === "ALL") {
       return {
         ...METRICS.country_of_birth_pct,
-        label: "Born outside the UK",
+        label: "Origin · born outside the UK",
         legendLabel: "Residents born outside the UK",
         source: `${METRICS.country_of_birth_pct.source} · overview`,
         note: "Tooltip shows both UK-born and not-UK-born shares",
@@ -2142,7 +2189,7 @@ async function init() {
     }
     return {
       ...METRICS.country_of_birth_pct,
-      label: `${selectedCountryBirth}-born residents`,
+      label: `Origin · ${selectedCountryBirth}-born residents`,
       legendLabel: `${selectedCountryBirth}-born residents`,
       source: `${METRICS.country_of_birth_pct.source} · ${selectedCountryBirth}`,
     };
@@ -2153,7 +2200,7 @@ async function init() {
       if (countrySelection === "ALL") {
         return {
           ...METRICS.country_of_birth_pct,
-          label: "Born outside the UK",
+          label: "Origin · born outside the UK",
           legendLabel: "Residents born outside the UK",
           source: `${METRICS.country_of_birth_pct.source} · overview`,
           note: "Tooltip shows both UK-born and not-UK-born shares",
@@ -2161,7 +2208,7 @@ async function init() {
       }
       return {
         ...METRICS.country_of_birth_pct,
-        label: `${countrySelection}-born residents`,
+        label: `Origin · ${countrySelection}-born residents`,
         legendLabel: `${countrySelection}-born residents`,
         source: `${METRICS.country_of_birth_pct.source} · ${countrySelection}`,
       };
@@ -2370,12 +2417,12 @@ async function init() {
     if (metricKey === "house_price_proxy_gbp") return "House prices (£)";
     if (metricKey === "median_weekly_earnings_gbp") return "Earnings (£/week)";
     if (metricKey === "children_share_pct") return "Children (%)";
-    if (metricKey === "country_of_birth_pct") return "Born outside UK (%)";
-    if (metricKey === "pubs_per_km2") return "Pubs / km²";
-    if (metricKey === "buildings_per_km2") return "Buildings / km²";
+    if (metricKey === "country_of_birth_pct") return "Origin · born outside UK (%)";
+    if (metricKey === "pubs_per_km2") return "Pubs density (pubs/km²)";
+    if (metricKey === "buildings_per_km2") return "Buildings density (buildings/km²)";
     if (metricKey === "greenspace_share_pct") return "Greenspace share (2005, %)";
     if (metricKey === "median_age_years") return "Median age (years)";
-    if (metricKey === "station_access_per_10k") return "Stations / 10k residents";
+    if (metricKey === "station_access_per_10k") return "Station access (/10k residents)";
     return metric.label;
   }
 
@@ -2991,6 +3038,19 @@ async function init() {
     return currentDataset === "municipi" ? boroughMetric : "density";
   }
 
+  function pubsScope() {
+    return boroughMetric === "pubs_per_km2_msoa" ? "msoa" : "borough";
+  }
+
+  function pubsMetricActive() {
+    return boroughMetric === "pubs_per_km2" || boroughMetric === "pubs_per_km2_msoa";
+  }
+
+  function activeMetricFamilyKey() {
+    if (pubsMetricActive()) return "pubs_per_km2";
+    return boroughMetric;
+  }
+
   function metricAvailableInCurrentView(metricKey) {
     const currentView = currentDataset === "tube" ? "tube" : is3D ? "spikes" : currentDataset;
     if (metricKey === "station_access_per_10k" && !Number.isFinite(stationAccessLondonAvg)) return false;
@@ -3200,8 +3260,28 @@ async function init() {
 
   function positionTooltip(x, y) {
     const pad = 14, tw = tooltipEl.offsetWidth, th = tooltipEl.offsetHeight;
-    tooltipEl.style.left = (x + pad + tw > innerWidth ? x - tw - pad : x + pad) + "px";
-    tooltipEl.style.top = (y + pad + th > innerHeight ? y - th - pad : y + pad) + "px";
+    let left = x + pad + tw > innerWidth ? x - tw - pad : x + pad;
+    let top = y + pad + th > innerHeight ? y - th - pad : y + pad;
+
+    const occupied = [];
+    const analysisRect = getComputedStyle(analysisPanelEl).display !== "none" ? analysisPanelEl.getBoundingClientRect() : null;
+    const railRect = leftStackEl?.getBoundingClientRect?.();
+    if (analysisRect) occupied.push(analysisRect);
+    if (railRect) occupied.push(railRect);
+
+    for (const rect of occupied) {
+      const overlaps = left < rect.right && left + tw > rect.left && top < rect.bottom && top + th > rect.top;
+      if (!overlaps) continue;
+      if (rect.left > innerWidth / 2) {
+        left = Math.max(12, rect.left - tw - pad);
+      } else {
+        left = Math.min(innerWidth - tw - 12, rect.right + pad);
+      }
+      if (top + th > innerHeight - 12) top = Math.max(12, rect.top - th - pad);
+    }
+
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
   }
 
   function refreshHighlightedFeature() {
@@ -3466,11 +3546,25 @@ async function init() {
       if (!button) continue;
       const available = metricAvailableInCurrentView(metricKey);
       button.disabled = !available;
-      button.classList.toggle("active", effectiveMetricKey() === metricKey && available && currentDataset === "municipi");
+      const active = metricKey === "pubs_per_km2"
+        ? pubsMetricActive()
+        : activeMetricFamilyKey() === metricKey;
+      button.classList.toggle("active", active && available && currentDataset === "municipi");
     }
     if (metricButtons.density) {
       metricButtons.density.classList.toggle("active", currentDataset !== "municipi" || boroughMetric === "density");
       metricButtons.density.disabled = false;
+    }
+  }
+
+  function updatePubsScopeButtons() {
+    for (const [scope, button] of Object.entries(pubsButtons)) {
+      if (!button) continue;
+      const enabled = scope === "borough"
+        ? metricAvailableInCurrentView("pubs_per_km2")
+        : metricAvailableInCurrentView("pubs_per_km2_msoa");
+      button.disabled = !enabled;
+      button.classList.toggle("active", pubsMetricActive() && pubsScope() === scope && enabled);
     }
   }
 
@@ -3527,10 +3621,12 @@ async function init() {
     const sectionsMode = currentDataset === "sections";
     const boroughsMode = currentDataset === "municipi";
     const boroughAnalysisMode = boroughsMode && activeGeography === "borough";
-    const countryMode = boroughsMode && boroughMetric === "country_of_birth_pct" && analysisMode !== "compare";
-    const geographyMode = boroughsMode && boroughMetric === "density";
-    const yearMode = geographyMode && getAvailableYearsForState().length > 1;
-    const showMetricOptions = boroughAnalysisMode || geographyMode;
+    const densityMode = boroughsMode && boroughMetric === "density";
+    const pubsMode = boroughsMode && pubsMetricActive();
+    const originMode = boroughsMode && boroughMetric === "country_of_birth_pct";
+    const geographyMode = densityMode;
+    const yearMode = densityMode && getAvailableYearsForState().length > 1;
+    const showMetricOptions = densityMode || pubsMode || originMode;
 
     viewGroupEl.style.display = sectionsMode ? "flex" : "none";
     viewLabelEl.style.display = sectionsMode ? "block" : "none";
@@ -3539,11 +3635,15 @@ async function init() {
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
     metricOptionsEl.style.display = showMetricOptions ? "flex" : "none";
-    compareRowEl.hidden = !boroughAnalysisMode;
+    pubsRowEl.hidden = !pubsMode;
+    pubsToggleEl.style.display = pubsMode ? "flex" : "none";
     geographyRowEl.hidden = !geographyMode;
     geographyToggleEl.style.display = geographyMode ? "flex" : "none";
     yearRowEl.hidden = !yearMode;
     yearToggleEl.style.display = yearMode ? "flex" : "none";
+    countryRowEl.hidden = !originMode;
+    countryToggleEl.style.display = originMode ? "flex" : "none";
+    analysisGroupEl.style.display = boroughAnalysisMode ? "flex" : "none";
     btnTube.style.display = boroughsMode ? "" : "none";
     btnCompare.style.display = boroughAnalysisMode ? "" : "none";
     btnCompare.disabled = !comparisonAvailable();
@@ -3562,7 +3662,6 @@ async function init() {
     btnChapters.title = chapterAvailable()
       ? "Open the borough story chapters"
       : "Story chapters are available in borough geography only";
-    countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
   function updateCountrySelector() {
@@ -4002,6 +4101,7 @@ async function init() {
     updateModeButtons();
     updateControlVisibility();
     updateMetricButtons();
+    updatePubsScopeButtons();
     updateGeographyButtons();
     updateYearControl();
     updateCountrySelector();
@@ -4227,6 +4327,23 @@ async function init() {
     else if (metricKey !== "density") activeGeography = "borough";
     if (metricKey === "country_of_birth_pct" && analysisMode === "compare") selectedCountryBirth = "ALL";
     applyActiveMetric(metricKey);
+  };
+
+  setMetricFamily = function(familyKey) {
+    if (familyKey === "pubs") {
+      setMetric(pubsScope() === "msoa" && metricAvailableInCurrentView("pubs_per_km2_msoa") ? "pubs_per_km2_msoa" : "pubs_per_km2");
+      return;
+    }
+  };
+
+  setPubsScope = function(scope) {
+    if (scope === "msoa") {
+      if (!metricAvailableInCurrentView("pubs_per_km2_msoa")) return;
+      setMetric("pubs_per_km2_msoa");
+      return;
+    }
+    if (!metricAvailableInCurrentView("pubs_per_km2")) return;
+    setMetric("pubs_per_km2");
   };
 
   setCountryMetric = function(country) {

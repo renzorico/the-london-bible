@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Atlas UI cleanup & control rail redesign
+
+- Rebuilt the atlas controls into a single left-hand rail with clearer brand, views, metrics, analysis, and nested-option hierarchy so the interface feels calmer and more editorial.
+- Renamed key metric families to Pubs density, Buildings density, Greenspace, and Origin, nested MSOA pub scope under the pub family, refreshed the loading/branding/footer treatment, and removed the station-access metric from the top-level visible chip row for a cleaner first read.
+
 ## 2026-04-01 — Unified analysis mode shell
 
 - Refactored Compare, Why here?, Similar areas, Correlation, and Stories into one mutually exclusive borough analysis-mode system with a shared right-side panel shell.
