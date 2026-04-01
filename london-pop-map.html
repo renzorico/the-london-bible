@@ -48,37 +48,6 @@
     --pin-fill: 30, 120, 200, 255;
   }
 
-  body[data-theme="night"] {
-    --bg: #0b1217;
-    --panel: rgba(16, 22, 30, 0.82);
-    --panel-strong: rgba(20, 27, 36, 0.92);
-    --panel-border: rgba(163, 184, 204, 0.14);
-    --panel-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
-    --title: #eef2f6;
-    --subtitle: #91a0af;
-    --button-text: #dbe5ef;
-    --button-bg: rgba(15, 22, 30, 0.82);
-    --button-border: rgba(150, 170, 190, 0.16);
-    --button-hover: rgba(24, 33, 44, 0.96);
-    --button-active: #4f8589;
-    --button-active-border: #4f8589;
-    --button-active-text: #ffffff;
-    --tooltip-bg: rgba(17, 24, 32, 0.96);
-    --tooltip-border: rgba(163, 184, 204, 0.14);
-    --tooltip-text: #edf2f7;
-    --tooltip-subtle: #9fb0c0;
-    --legend-text: #a7b7c6;
-    --legend-accent: #f0c572;
-    --hint: #788796;
-    --attrib-bg: rgba(16, 22, 30, 0.84);
-    --attrib-text: #93a1af;
-    --search-focus: rgba(79, 133, 137, 0.45);
-    --thames: 90, 164, 255, 230;
-    --highlight-fill: 79, 133, 137, 70;
-    --highlight-line: 147, 212, 205, 255;
-    --pin-fill: 255, 199, 107, 255;
-  }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); font-family: var(--font-ui); overflow: hidden; color: var(--title); }
   #map { width: 100vw; height: 100vh; }
@@ -205,19 +174,32 @@
     color: var(--subtitle);
     letter-spacing: .04em;
   }
-  #school-toggle {
+  #school-toggle,
+  #school-rating-toggle {
     display: none;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
     width: 100%;
     margin-top: 8px;
   }
-  #school-toggle .toggle-btn {
+  #school-toggle .toggle-btn,
+  #school-rating-toggle .toggle-btn {
     justify-content: center;
     min-height: 34px;
     padding: 6px 8px 5px;
     font-size: .56rem;
     letter-spacing: .11em;
+  }
+  #school-rating-toggle {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  #school-note {
+    display: none;
+    margin-top: 7px;
+    font-size: .58rem;
+    line-height: 1.45;
+    color: var(--subtitle);
+    letter-spacing: .04em;
   }
   #metric-toggle {
     display: grid;
@@ -384,13 +366,6 @@
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 12px;
-  }
-  #theme-toggle {
-    position: relative;
-    top: auto;
-    right: auto;
-    z-index: 20;
-    flex: 0 0 auto;
   }
   .control-title {
     font-family: var(--font-ui);
@@ -1472,7 +1447,6 @@
     #metric-options { min-width: 0; max-width: 100%; gap: 9px; }
     #country-toggle { max-width: 100%; gap: 4px; }
     #top-right-controls { top: 14px; left: 14px; right: 14px; gap: 10px; }
-    #theme-toggle   { top: auto; right: auto; left: auto; }
     .toggle-btn     { padding: 4px 10px; font-size: .65rem; }
     .toggle-btn.secondary-btn { padding: 5px 9px 4px; font-size: .58rem; }
 
@@ -1542,6 +1516,14 @@
       <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Primary" title="Primary schools" aria-label="Primary schools" onclick="toggleSchoolPhase('Primary')">Primary</button>
       <button class="toggle-btn secondary-btn school-filter-btn" data-school-phase="Secondary" title="Secondary and all-through schools" aria-label="Secondary and all-through schools" onclick="toggleSchoolPhase('Secondary')">Secondary</button>
     </div>
+    <div id="school-rating-toggle">
+      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Outstanding" title="Outstanding" aria-label="Outstanding" onclick="toggleSchoolRating('Outstanding')">Outstanding</button>
+      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Good" title="Good" aria-label="Good" onclick="toggleSchoolRating('Good')">Good</button>
+      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Requires improvement" title="Requires improvement" aria-label="Requires improvement" onclick="toggleSchoolRating('Requires improvement')">Requires improvement</button>
+      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Inadequate" title="Inadequate" aria-label="Inadequate" onclick="toggleSchoolRating('Inadequate')">Inadequate</button>
+      <button class="toggle-btn secondary-btn school-rating-btn active" data-school-rating="Ungraded" title="Ungraded" aria-label="Ungraded" onclick="toggleSchoolRating('Ungraded')">Ungraded</button>
+    </div>
+    <div id="school-note" aria-live="polite"></div>
   </div>
 
   <div class="control-group rail-card" id="view-group">
@@ -1619,10 +1601,6 @@
   </div>
 </div>
 <div id="top-right-controls">
-  <div id="theme-toggle">
-    <button id="btn-theme" class="toggle-btn" onclick="toggleTheme()">☾ Night</button>
-  </div>
-
   <div id="search-wrap">
     <input id="search-input" type="text" placeholder="Search an address in London…" autocomplete="off" />
     <button id="search-btn">→</button>
@@ -1665,7 +1643,6 @@
 const POP_FIELD = "population";
 const NAME_FIELD = "name";
 const DAY_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
-const NIGHT_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const TFL_STATIONS_URL = "https://services1.arcgis.com/YswvgzOodUvqkoCN/arcgis/rest/services/TfL_stations/FeatureServer/1/query?where=1%3D1&outFields=NAME,LINES,MODES,NIGHT_TUBE&outSR=4326&f=geojson";
 const TUBE_LINES_URL = "london_tube_lines.json";
 const CONTOUR_DATA_URL = "data/london_contours.geojson";
@@ -1689,6 +1666,7 @@ const POI_DATA_URL = "data/london_pois.geojson";
 const POI_CATEGORIES = ["coffee", "nightlife", "culture", "sport", "landmarks"];
 const SCHOOLS_DATA_URL = "data/london_schools_ofsted.geojson";
 const SCHOOL_PHASES = ["all", "Primary", "Secondary"];
+const SCHOOL_RATINGS = ["Outstanding", "Good", "Requires improvement", "Inadequate", "Ungraded"];
 
 const PALETTE = [
   [244, 240, 236, 210],
@@ -1737,8 +1715,7 @@ const ZONES = [
 ];
 
 const THEMES = {
-  day: { mapStyle: DAY_STYLE, themeLabel: "☾ Night", municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b", bikeHaloMajor: "rgba(64, 208, 177, 0.42)", bikeHaloPrimary: "rgba(63, 190, 164, 0.28)", bikeMajor: "#08a48b", bikePrimary: "#1fbf9f", bikeConnector: "#58c9b2", poiColors: { coffee: [191, 133, 64, 228], nightlife: [125, 52, 88, 228], culture: [70, 104, 170, 232], sport: [67, 143, 115, 228], landmarks: [149, 128, 62, 234] }, poiHalo: { coffee: [230, 188, 132, 74], nightlife: [184, 118, 152, 72], culture: [127, 158, 222, 76], sport: [129, 196, 167, 70], landmarks: [210, 185, 108, 76] } },
-  night: { mapStyle: NIGHT_STYLE, themeLabel: "☀ Day", municipiLine: [214, 222, 232, 188], municipiFillAlpha: 186, municipiTubeFillAlpha: 82, tubeContextFillAlpha: 46, tubeContextLine: [176, 188, 201, 168], thames: [112, 132, 148, 190], highlightFill: [123, 97, 255, 70], highlightLine: [169, 146, 255, 255], pinFill: [255, 199, 107, 255], stationStroke: [16, 22, 30, 240], stationRadiusMeters: 54, stationRadiusMin: 1.2, stationRadiusMax: 6.8, stationOpacity: 0.92, lineCase: [6, 10, 18, 212], lineWidthMixed: 4.0, lineWidthOnly: 5.8, lineCaseWidthMixed: 6.8, lineCaseWidthOnly: 9.2, contourHaloMinor: "rgba(82, 226, 214, 0.16)", contourHaloMajor: "rgba(148, 204, 255, 0.24)", contourMinorLow: "#79ddd4", contourMinorHigh: "#ce9cff", contourMajorLow: "#bbfff7", contourMajorHigh: "#f0b6ff", bikeHaloMajor: "rgba(114, 255, 229, 0.42)", bikeHaloPrimary: "rgba(84, 241, 208, 0.28)", bikeMajor: "#abffec", bikePrimary: "#62f5d8", bikeConnector: "#38d7be", poiColors: { coffee: [244, 190, 104, 236], nightlife: [218, 117, 173, 234], culture: [144, 181, 255, 238], sport: [114, 232, 184, 236], landmarks: [235, 211, 123, 240] }, poiHalo: { coffee: [255, 214, 146, 78], nightlife: [246, 156, 206, 74], culture: [171, 210, 255, 80], sport: [149, 255, 206, 78], landmarks: [255, 227, 146, 82] } },
+  day: { mapStyle: DAY_STYLE, municipiLine: [76, 88, 96, 175], municipiFillAlpha: 176, municipiTubeFillAlpha: 68, tubeContextFillAlpha: 36, tubeContextLine: [88, 102, 116, 150], thames: [124, 142, 154, 180], highlightFill: [30, 120, 200, 70], highlightLine: [30, 120, 200, 255], pinFill: [30, 120, 200, 255], stationStroke: [255, 255, 255, 220], stationRadiusMeters: 46, stationRadiusMin: 1, stationRadiusMax: 6, stationOpacity: 0.82, lineCase: [255, 255, 255, 178], lineWidthMixed: 3.6, lineWidthOnly: 5.2, lineCaseWidthMixed: 6.2, lineCaseWidthOnly: 8.4, contourHaloMinor: "rgba(106, 67, 90, 0.18)", contourHaloMajor: "rgba(96, 38, 80, 0.28)", contourMinorLow: "#7f7383", contourMinorHigh: "#68284c", contourMajorLow: "#615567", contourMajorHigh: "#42142b", bikeHaloMajor: "rgba(64, 208, 177, 0.42)", bikeHaloPrimary: "rgba(63, 190, 164, 0.28)", bikeMajor: "#08a48b", bikePrimary: "#1fbf9f", bikeConnector: "#58c9b2", poiColors: { coffee: [191, 133, 64, 228], nightlife: [125, 52, 88, 228], culture: [70, 104, 170, 232], sport: [67, 143, 115, 228], landmarks: [149, 128, 62, 234] }, poiHalo: { coffee: [230, 188, 132, 74], nightlife: [184, 118, 152, 72], culture: [127, 158, 222, 76], sport: [129, 196, 167, 70], landmarks: [210, 185, 108, 76] } },
 };
 
 const TUBE_LINE_COLOURS = {
@@ -2277,7 +2254,7 @@ function discoverMsoaSeriesYears(frame, valuePrefix, companionPrefix) {
   return [...years].sort((a, b) => a - b);
 }
 
-let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase;
+let setMode, setView, setMetric, setMetricFamily, setPubsScope, setCountryMetric, resetView, toggleStations, toggleComparison, clearComparison, toggleSpotlight, toggleContours, toggleBikes, togglePois, togglePoiCategory, toggleSchools, toggleSchoolPhase, toggleSchoolRating;
 let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleCorrelation, setCorrelationAxis, toggleChapterPicker, applyChapter, clearChapter, clearAnalysisMode;
 
 async function init() {
@@ -2309,7 +2286,9 @@ async function init() {
   const overlayToggleEl = document.getElementById("overlay-toggle");
   const poiToggleEl = document.getElementById("poi-toggle");
   const schoolToggleEl = document.getElementById("school-toggle");
+  const schoolRatingToggleEl = document.getElementById("school-rating-toggle");
   const poiNoteEl = document.getElementById("poi-note");
+  const schoolNoteEl = document.getElementById("school-note");
   const pubsButtons = {
     borough: document.getElementById("pubs-borough"),
     msoa: document.getElementById("pubs-msoa"),
@@ -2323,7 +2302,6 @@ async function init() {
   const yearSliderEl = document.getElementById("year-slider");
   const yearStopsEl = document.getElementById("year-stops");
   const topRightControlsEl = document.getElementById("top-right-controls");
-  const btnTheme = document.getElementById("btn-theme");
   const btnTube = document.getElementById("btn-tube");
   const btnCompare = document.getElementById("btn-compare");
   const btnSpotlight = document.getElementById("btn-spotlight");
@@ -2348,6 +2326,9 @@ async function init() {
   );
   const schoolButtons = Object.fromEntries(
     [...schoolToggleEl.querySelectorAll("[data-school-phase]")].map((button) => [button.dataset.schoolPhase, button])
+  );
+  const schoolRatingButtons = Object.fromEntries(
+    [...schoolRatingToggleEl.querySelectorAll("[data-school-rating]")].map((button) => [button.dataset.schoolRating, button])
   );
 
   let tooltipPinned = false;
@@ -2382,6 +2363,8 @@ async function init() {
   let schoolsGeoJSON = null;
   let poiCategoryCounts = Object.fromEntries(POI_CATEGORIES.map((category) => [category, 0]));
   let schoolPhaseCounts = Object.fromEntries(SCHOOL_PHASES.map((phase) => [phase, 0]));
+  let schoolRatingCounts = Object.fromEntries(SCHOOL_RATINGS.map((rating) => [rating, 0]));
+  let boroughSchoolStats = new Map();
   let msoaGeoJSON = null;
   let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
@@ -2390,6 +2373,7 @@ async function init() {
   let currentMainLayer = null;
   let activePoiCategories = new Set(POI_CATEGORIES);
   let activeSchoolPhase = "all";
+  let activeSchoolRatings = new Set(SCHOOL_RATINGS);
   const HOME_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 };
   const INTRO_VIEW_STATE = { longitude: -0.118, latitude: 51.505, zoom: 8.72, pitch: 0, bearing: 0 };
   let viewState = { ...INTRO_VIEW_STATE };
@@ -2582,13 +2566,19 @@ async function init() {
   if (schoolsData?.features) {
     schoolsGeoJSON = schoolsData;
     const counts = Object.fromEntries(SCHOOL_PHASES.map((phase) => [phase, 0]));
+    const ratingCounts = Object.fromEntries(SCHOOL_RATINGS.map((rating) => [rating, 0]));
     for (const feature of schoolsGeoJSON.features) {
-      const phase = feature.properties?.phase;
+      const props = feature.properties || {};
+      const phase = props.phase;
+      const rating = props.ofsted_rating;
       counts.all += 1;
       if (phase === "Primary") counts.Primary += 1;
       if (phase === "Secondary" || phase === "All-through") counts.Secondary += 1;
+      if (rating in ratingCounts) ratingCounts[rating] += 1;
     }
     schoolPhaseCounts = counts;
+    schoolRatingCounts = ratingCounts;
+    boroughSchoolStats = computeBoroughSchoolStats(schoolsGeoJSON);
   }
   if (msoaDensityGeoJSON?.features) {
     msoaGeoJSON = msoaDensityGeoJSON;
@@ -3720,6 +3710,85 @@ async function init() {
     return showSchools && !!schoolsGeoJSON?.features?.length && (currentDataset === "municipi" || currentDataset === "tube");
   }
 
+  function schoolRatingScore(rating) {
+    if (rating === "Outstanding") return 4;
+    if (rating === "Good") return 3;
+    if (rating === "Requires improvement") return 2;
+    if (rating === "Inadequate") return 1;
+    return null;
+  }
+
+  function computeBoroughSchoolStats(geojson) {
+    const statsByBorough = new Map();
+    if (!geojson?.features?.length) return statsByBorough;
+    for (const feature of geojson.features) {
+      const props = feature.properties || {};
+      const borough = props.borough;
+      if (!borough) continue;
+      if (!statsByBorough.has(borough)) {
+        statsByBorough.set(borough, {
+          total: 0,
+          graded: 0,
+          outstanding: 0,
+          good: 0,
+          requiresImprovement: 0,
+          inadequate: 0,
+          ungraded: 0,
+          goodOrOutstanding: 0,
+          belowGood: 0,
+          scoreTotal: 0,
+          scoreAvg: null,
+          goodOrOutstandingShare: null,
+          belowGoodShare: null,
+          outstandingShare: null,
+          rankGoodOrOutstanding: null,
+          rankScore: null,
+        });
+      }
+      const stat = statsByBorough.get(borough);
+      const rating = props.ofsted_rating || "Ungraded";
+      stat.total += 1;
+      if (rating === "Outstanding") stat.outstanding += 1;
+      else if (rating === "Good") stat.good += 1;
+      else if (rating === "Requires improvement") stat.requiresImprovement += 1;
+      else if (rating === "Inadequate") stat.inadequate += 1;
+      else stat.ungraded += 1;
+
+      const score = schoolRatingScore(rating);
+      if (score !== null) {
+        stat.graded += 1;
+        stat.scoreTotal += score;
+        if (score >= 3) stat.goodOrOutstanding += 1;
+        if (score <= 2) stat.belowGood += 1;
+      }
+    }
+
+    const ranked = [...statsByBorough.entries()].map(([borough, stat]) => {
+      stat.scoreAvg = stat.graded ? stat.scoreTotal / stat.graded : null;
+      stat.goodOrOutstandingShare = stat.graded ? (stat.goodOrOutstanding / stat.graded) * 100 : null;
+      stat.belowGoodShare = stat.graded ? (stat.belowGood / stat.graded) * 100 : null;
+      stat.outstandingShare = stat.total ? (stat.outstanding / stat.total) * 100 : null;
+      return { borough, stat };
+    });
+
+    const rankBy = (key) => ranked
+      .filter((entry) => Number.isFinite(entry.stat[key]))
+      .sort((a, b) => b.stat[key] - a.stat[key])
+      .forEach((entry, index) => { entry.stat[key === "scoreAvg" ? "rankScore" : "rankGoodOrOutstanding"] = index + 1; });
+
+    rankBy("goodOrOutstandingShare");
+    rankBy("scoreAvg");
+
+    return statsByBorough;
+  }
+
+  function schoolInsightsForFeature(feature) {
+    if (!feature || currentDataset !== "municipi" || !schoolsVisible()) return null;
+    const borough = feature.properties?.[NAME_FIELD];
+    if (!borough) return null;
+    return boroughSchoolStats.get(borough) || null;
+  }
+
   function poiButtonActive(category) {
     return activePoiCategories.has(category);
   }
@@ -4132,6 +4201,7 @@ async function init() {
     const zoom = viewState.zoom ?? HOME_VIEW_STATE.zoom;
     return schoolsGeoJSON.features.filter((feature) => {
       const props = feature.properties || {};
+      if (!activeSchoolRatings.has(props.ofsted_rating || "Ungraded")) return false;
       if (activeSchoolPhase === "Primary" && props.phase !== "Primary") return false;
       if (activeSchoolPhase === "Secondary" && props.phase !== "Secondary" && props.phase !== "All-through") return false;
       if (props.phase === "Primary") return zoom >= 10.15;
@@ -4200,7 +4270,7 @@ async function init() {
       getFillColor: () => [255, 255, 255, 1],
       opacity: 1,
       updateTriggers: {
-        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase, Array.from(activeSchoolRatings).join("|")],
       },
     });
   }
@@ -4222,7 +4292,7 @@ async function init() {
       getFillColor: (f) => schoolHaloColorFor(f.properties?.ofsted_rating),
       opacity: 1,
       updateTriggers: {
-        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase, Array.from(activeSchoolRatings).join("|")],
         getFillColor: [currentTheme],
       },
     });
@@ -4248,7 +4318,7 @@ async function init() {
       getLineWidth: () => 1.2,
       opacity: 1,
       updateTriggers: {
-        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase],
+        data: [showSchools, currentDataset, viewState.zoom, activeSchoolPhase, Array.from(activeSchoolRatings).join("|")],
         getFillColor: [currentTheme],
         getLineColor: [currentTheme],
       },
@@ -4540,6 +4610,53 @@ async function init() {
     return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${rating}</span><br><span class="tarea">${props.school_name || "School"}</span>${phase}${inspectionDate}${detail}`;
   }
 
+  function boroughSchoolSummaryHtml(feature) {
+    const stats = schoolInsightsForFeature(feature);
+    if (!stats || !stats.total) return "";
+    const lines = [
+      `${stats.total.toLocaleString()} mainstream schools`,
+      `${stats.outstanding} Outstanding · ${stats.good} Good · ${stats.requiresImprovement} Requires improvement · ${stats.inadequate} Inadequate`,
+    ];
+    if (Number.isFinite(stats.goodOrOutstandingShare)) {
+      lines.push(`${stats.goodOrOutstandingShare.toFixed(1)}% Good or Outstanding`);
+    }
+    if (Number.isFinite(stats.belowGoodShare)) {
+      lines.push(`${stats.belowGoodShare.toFixed(1)}% below Good`);
+    }
+    if (Number.isFinite(stats.scoreAvg)) {
+      lines.push(`Average Ofsted score ${stats.scoreAvg.toFixed(2)} / 4 across graded schools`);
+    }
+    if (Number.isFinite(stats.rankGoodOrOutstanding)) {
+      lines.push(`London rank #${stats.rankGoodOrOutstanding} by Good or Outstanding share`);
+    }
+    if (stats.ungraded > 0) {
+      lines.push(`${stats.ungraded} schools still ungraded or without a current 4-grade outcome`);
+    }
+    return `<br><span class="ttag">Schools</span><br><span class="tsub">${lines.join("<br>")}</span>`;
+  }
+
+  function boroughSchoolInsightPanelHtml(feature) {
+    const stats = schoolInsightsForFeature(feature);
+    if (!stats || !stats.total) return "";
+    const gradedLabel = stats.graded ? `${stats.graded.toLocaleString()} graded schools` : "No current graded schools";
+    const averageLabel = Number.isFinite(stats.scoreAvg) ? `${stats.scoreAvg.toFixed(2)} / 4 average Ofsted score` : "Average score unavailable";
+    const leadingLine = Number.isFinite(stats.rankGoodOrOutstanding)
+      ? `London rank #${stats.rankGoodOrOutstanding} by Good or Outstanding share`
+      : "No London ranking available";
+    return `
+      <div class="s-story">
+        <strong>Schools snapshot.</strong> ${stats.total.toLocaleString()} mainstream schools, with ${stats.outstanding} Outstanding and ${stats.good} Good. ${Number.isFinite(stats.goodOrOutstandingShare) ? `${stats.goodOrOutstandingShare.toFixed(1)}% of graded schools are Good or Outstanding.` : gradedLabel + "."}
+      </div>
+      <div class="s-story">
+        <strong>Quality profile.</strong> ${averageLabel}. ${Number.isFinite(stats.belowGoodShare) ? `${stats.belowGoodShare.toFixed(1)}% of graded schools are below Good.` : gradedLabel + "."}
+      </div>
+      <div class="s-story">
+        <strong>London standing.</strong> ${leadingLine}. ${stats.ungraded ? `${stats.ungraded} schools are currently ungraded or outside the latest four-grade outcome set.` : gradedLabel + "."}
+      </div>
+      <div class="s-helper">Schools summary uses the local Ofsted overlay join. Average score maps Outstanding = 4, Good = 3, Requires improvement = 2, Inadequate = 1 and excludes ungraded schools.</div>
+    `;
+  }
+
   function formatMetricValue(metricKey, value) {
     if (!Number.isFinite(value)) return "No data";
     return getMetricConfig(metricKey).formatter(value);
@@ -4605,7 +4722,8 @@ async function init() {
       support.push("Median sale price proxy");
     }
     const supportHtml = support.length ? `<br><span class="tsub">${support.join("<br>")}</span>` : "";
-    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
+    const schoolHtml = boroughSchoolSummaryHtml(feature);
+    return `${pinned ? '<span class="tclose">✕</span>' : ""}<span class="ttag">${metric.tooltipTag}</span><br><span class="tarea">${name}</span><br><span class="tval">${formatMetricValue(metricKey, value)}</span>${supportHtml}${schoolHtml}<br><span class="tsub">${metric.source} · ${metric.year}</span>`;
   }
 
   function densityTooltipHtml(zone, pop, dens, pinned) {
@@ -4879,6 +4997,26 @@ async function init() {
       button.disabled = (schoolPhaseCounts[phase] || 0) < 1;
       button.classList.toggle("active", activeSchoolPhase === phase);
     }
+    for (const [rating, button] of Object.entries(schoolRatingButtons)) {
+      if (!button) continue;
+      const available = (schoolRatingCounts[rating] || 0) > 0;
+      button.disabled = !available;
+      button.classList.toggle("active", activeSchoolRatings.has(rating));
+    }
+    if (!schoolNoteEl) return;
+    if (!showSchools) {
+      schoolNoteEl.style.display = "none";
+      schoolNoteEl.textContent = "";
+      return;
+    }
+    const visibleCount = visibleSchoolFeatures().length;
+    if (visibleCount > 0) {
+      schoolNoteEl.style.display = "none";
+      schoolNoteEl.textContent = "";
+      return;
+    }
+    schoolNoteEl.style.display = "block";
+    schoolNoteEl.textContent = "Zoom in or widen the Ofsted filters to reveal more schools.";
   }
 
   function updateModeButtons() {
@@ -4916,6 +5054,7 @@ async function init() {
     overlayToggleEl.style.display = sectionsMode ? "none" : "grid";
     poiToggleEl.style.display = !sectionsMode && showPois ? "grid" : "none";
     schoolToggleEl.style.display = !sectionsMode && showSchools ? "grid" : "none";
+    schoolRatingToggleEl.style.display = !sectionsMode && showSchools ? "grid" : "none";
     metricGroupEl.style.display = boroughsMode ? "flex" : "none";
     metricLabelEl.style.display = boroughsMode ? "block" : "none";
     metricToggleEl.style.display = boroughsMode ? "flex" : "none";
@@ -5166,11 +5305,13 @@ async function init() {
 
     const currentMetric = getMetricConfigFor(boroughMetric, selectedCountryBirth);
     const stories = buildSpotlightNarrative(feature);
+    const schoolInsights = boroughSchoolInsightPanelHtml(feature);
     if (!stories.length) {
       return `
         <div class="s-name">${feature.properties?.[NAME_FIELD] ?? "Selected borough"}</div>
         <div class="s-lens">Current lens · ${currentMetric.label}</div>
         <div class="s-helper">No reliable borough-level spotlight summary is available from the current metric set.</div>
+        ${schoolInsights}
       `;
     }
     return `
@@ -5179,7 +5320,8 @@ async function init() {
       <div class="s-story-list">
         ${stories.map((story) => `<div class="s-story">${story}</div>`).join("")}
       </div>
-      <div class="s-foot">Built from the current borough metrics only, using London-wide averages and simple ranking buckets.</div>
+      ${schoolInsights}
+      <div class="s-foot">Built from the current borough metrics using London-wide averages and simple ranking buckets.${schoolsVisible() ? " Schools insight uses the joined Ofsted overlay dataset." : ""}</div>
     `;
   }
 
@@ -5478,7 +5620,7 @@ async function init() {
 
   const deckgl = new deck.DeckGL({
     container: "map",
-    mapStyle: THEMES[currentTheme].mapStyle,
+    mapStyle: THEMES.day.mapStyle,
     initialViewState: viewState,
     controller: { scrollZoom: { smooth: true, speed: 0.02 }, inertia: 0, doubleClickZoom: false },
     pickingRadius: 6,
@@ -5725,25 +5867,25 @@ async function init() {
         try {
           const id = layer.id.toLowerCase();
           if (layer.type === "background") {
-            map.setPaintProperty(layer.id, "background-color", currentTheme === "night" ? "#0b1217" : "#f3f4f5");
+            map.setPaintProperty(layer.id, "background-color", "#f3f4f5");
           }
           if (layer.type === "fill") {
             if (id.includes("water")) {
-              map.setPaintProperty(layer.id, "fill-color", currentTheme === "night" ? "#19232c" : "#dce3e7");
-              map.setPaintProperty(layer.id, "fill-opacity", currentTheme === "night" ? 0.78 : 0.62);
+              map.setPaintProperty(layer.id, "fill-color", "#dce3e7");
+              map.setPaintProperty(layer.id, "fill-opacity", 0.62);
             } else if (id.includes("landuse") || id.includes("landcover") || id.includes("park") || id.includes("building")) {
-              map.setPaintProperty(layer.id, "fill-color", currentTheme === "night" ? "#121920" : "#f5f5f4");
-              map.setPaintProperty(layer.id, "fill-opacity", currentTheme === "night" ? 0.28 : 0.35);
+              map.setPaintProperty(layer.id, "fill-color", "#f5f5f4");
+              map.setPaintProperty(layer.id, "fill-opacity", 0.35);
             }
           }
           if (layer.type === "line" && (id.includes("road") || id.includes("street") || id.includes("highway"))) {
-            map.setPaintProperty(layer.id, "line-color", currentTheme === "night" ? "#2b3540" : "#d5dade");
-            map.setPaintProperty(layer.id, "line-opacity", currentTheme === "night" ? 0.34 : 0.42);
+            map.setPaintProperty(layer.id, "line-color", "#d5dade");
+            map.setPaintProperty(layer.id, "line-opacity", 0.42);
           }
           if (layer.type === "symbol" && id.includes("label")) {
-            map.setPaintProperty(layer.id, "text-color", currentTheme === "night" ? "#8b98a6" : "#91979e");
-            map.setPaintProperty(layer.id, "text-halo-color", currentTheme === "night" ? "#0d1319" : "#f7f7f6");
-            map.setPaintProperty(layer.id, "text-halo-width", currentTheme === "night" ? 0.35 : 0.55);
+            map.setPaintProperty(layer.id, "text-color", "#91979e");
+            map.setPaintProperty(layer.id, "text-halo-color", "#f7f7f6");
+            map.setPaintProperty(layer.id, "text-halo-width", 0.55);
             if (id.includes("transit") || id.includes("rail") || id.includes("station")) {
               map.setLayoutProperty(layer.id, "text-radial-offset", 0.12);
             }
@@ -5758,12 +5900,11 @@ async function init() {
     updateBikeLayers();
   }
 
-  function applyTheme(theme) {
-    currentTheme = theme;
-    bodyEl.dataset.theme = theme === "night" ? "night" : "";
-    btnTheme.textContent = THEMES[theme].themeLabel;
+  function applyDayTheme() {
+    currentTheme = "day";
+    bodyEl.dataset.theme = "";
     deckgl.setProps({
-      mapStyle: THEMES[theme].mapStyle,
+      mapStyle: THEMES.day.mapStyle,
       layers: getLayers(),
       initialViewState: { ...viewState, transitionDuration: 0 },
     });
@@ -5966,6 +6107,7 @@ async function init() {
   };
 
   toggleSchools = function() {
+    if (!activeSchoolRatings.size) activeSchoolRatings = new Set(SCHOOL_RATINGS.filter((rating) => (schoolRatingCounts[rating] || 0) > 0));
     showSchools = !showSchools;
     refreshMapState();
   };
@@ -5989,8 +6131,16 @@ async function init() {
     refreshMapState();
   };
 
-  toggleTheme = function() {
-    applyTheme(currentTheme === "day" ? "night" : "day");
+  toggleSchoolRating = function(rating) {
+    if (!SCHOOL_RATINGS.includes(rating)) return;
+    if ((schoolRatingCounts[rating] || 0) < 1) return;
+    if (activeSchoolRatings.has(rating)) {
+      if (activeSchoolRatings.size === 1) return;
+      activeSchoolRatings.delete(rating);
+    } else {
+      activeSchoolRatings.add(rating);
+    }
+    refreshMapState();
   };
 
   resetView = function() {
@@ -6042,7 +6192,7 @@ async function init() {
   document.getElementById("search-btn").onclick = search;
   document.getElementById("search-input").onkeydown = (e) => { if (e.key === "Enter") search(); };
 
-  applyTheme("day");
+  applyDayTheme();
   refreshMapState();
   bindLoadingOverlayToReadiness();
 }

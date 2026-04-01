@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Schools filters, borough insights, and day-only app
+
+- Added Ofsted outcome filters to the Schools overlay, surfaced borough-level school quality summaries in the borough insight flow, and removed the old night-mode toggle so the atlas now runs on a single day-theme map and overlay treatment.
+
 ## 2026-04-01 — Ofsted schools overlay
 
 - Added a new Schools overlay built from the official GIAS establishments download joined to the latest official Ofsted state-funded schools inspections dataset, filtered to open mainstream London schools and rendered as a compact Ofsted-colored civic layer with school-specific hover and click cards.
