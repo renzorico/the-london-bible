@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — MSOA pub density metric
+
+- Added an MSOA-only pubs-per-km² metric using the same OpenStreetMap amenity=pub snapshot, spatially joined to London MSOA 2021 polygons.
+- Kept borough pubs / km² as the headline pub density metric and labeled the MSOA version as exploratory, with explicit snapshot and community-maintained coverage caveats.
+
 ## 2026-04-01 — Borough building density metric
 
 - Added a borough-level mapped-buildings-per-km² metric using an OpenStreetMap building footprint snapshot aggregated to London borough polygons.

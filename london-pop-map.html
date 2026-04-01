@@ -1274,6 +1274,7 @@
       <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
       <button id="metric-station_access_per_10k" class="toggle-btn metric-btn" onclick="setMetric('station_access_per_10k')">Stations / 10k</button>
       <button id="metric-pubs_per_km2" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2')">Pubs / km²</button>
+      <button id="metric-pubs_per_km2_msoa" class="toggle-btn metric-btn" onclick="setMetric('pubs_per_km2_msoa')">Pubs / km² (MSOA)</button>
       <button id="metric-buildings_per_km2" class="toggle-btn metric-btn" onclick="setMetric('buildings_per_km2')">Buildings / km²</button>
       <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
@@ -1850,6 +1851,24 @@ const METRICS = {
     tooltipTag: "Pub density",
     note: "Community-maintained pub locations aggregated to borough polygons; station or nightlife quality is not implied",
   },
+  pubs_per_km2_msoa: {
+    key: "pubs_per_km2_msoa",
+    label: "Pubs / km² (MSOA)",
+    button: "Pubs / km² (MSOA)",
+    legendLabel: "Pubs per km² (MSOA level)",
+    unit: "pubs/km²",
+    year: "Snapshot 2026-04-01",
+    source: "OpenStreetMap amenity=pub snapshot via Overpass API",
+    geography: "MSOA 2021",
+    scale: "sequential",
+    paletteKey: "pubs_per_km2",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(1)} pubs/km²`,
+    diffFormatter: (v) => `${v.toFixed(1)} pubs/km²`,
+    summaryLabel: "London avg",
+    tooltipTag: "Pub density · MSOA",
+    note: "Community-maintained pub locations joined to MSOA polygons; borough pubs per km² remains the headline pub density metric",
+  },
   buildings_per_km2: {
     key: "buildings_per_km2",
     label: "Mapped buildings per km²",
@@ -1911,6 +1930,12 @@ const SMALL_AREA_DENSITY = {
   sourceUrlPopulation: "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/middlesuperoutputareamidyearpopulationestimatesnationalstatistics",
   sourceUrlBoundaries: "https://data.london.gov.uk/dataset/statistical-gis-boundary-files-for-london-20od9/",
   note: "Density is computed from official mid-year population counts and MSOA polygon area",
+};
+
+const SMALL_AREA_PUBS = {
+  geography: "MSOA 2021",
+  source: "OpenStreetMap amenity=pub snapshot via Overpass API",
+  note: "Community-maintained pub locations joined to MSOA polygons; borough pubs per km² remains the headline pub density metric",
 };
 
 const STORY_CHAPTERS = [
@@ -2038,6 +2063,7 @@ async function init() {
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
+  let msoaPubMeta = null;
   let stationAccessLondonAvg = null;
   let highlightedFeature = null;
   let pinData = [];
@@ -2110,10 +2136,11 @@ async function init() {
   });
 
   statusEl.textContent = "Loading map data…";
-  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
+  const [sectionsGeoJSON, municipiGeoJSON, msoaDensityGeoJSON, msoaPubsJson, thamesGeoJSON, rawStationsGeoJSON, rawTubeLines] = await Promise.all([
     fetch("london_hexes.geojson").then((r) => r.json()),
     fetch("london_boroughs.geojson").then((r) => r.json()).catch(() => null),
     fetch("london_msoa_density.geojson").then((r) => r.json()).catch(() => null),
+    fetch("london_msoa_pubs.json").then((r) => r.json()).catch(() => null),
     fetch("london_thames.geojson").then((r) => r.json()).catch(() => null),
     fetch(TFL_STATIONS_URL).then((r) => r.json()).catch(() => null),
     fetch(TUBE_LINES_URL).then((r) => r.json()).catch(() => null),
@@ -2122,6 +2149,7 @@ async function init() {
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
+  if (msoaPubsJson?.by_msoa) msoaPubMeta = msoaPubsJson;
   const stationAccessData = computeStationAccessData(stationsGeoJSON, municipiGeoJSON);
   stationAccessLondonAvg = stationAccessData.londonRate;
   for (const [boroughName, stationMetrics] of Object.entries(stationAccessData.byBorough || {})) {
@@ -2139,6 +2167,14 @@ async function init() {
   for (const [boroughName, greenspaceShare] of Object.entries(GREENSPACE_SHARE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].greenspace_share_pct = greenspaceShare;
   }
+  if (msoaGeoJSON?.features && msoaPubMeta?.by_msoa) {
+    for (const feature of msoaGeoJSON.features) {
+      const code = feature.properties?.msoa_code;
+      const pubMetrics = code ? msoaPubMeta.by_msoa[code] : null;
+      if (!pubMetrics) continue;
+      Object.assign(feature.properties, pubMetrics);
+    }
+  }
   if (municipiGeoJSON?.features) {
     for (const feature of municipiGeoJSON.features) {
       const boroughName = feature.properties?.[NAME_FIELD];
@@ -2155,7 +2191,7 @@ async function init() {
   }
 
   function featureCollectionForAnalysis() {
-    if (currentDataset === "municipi" && boroughMetric === "density" && activeGeography === "msoa" && msoaGeoJSON?.features) {
+    if (currentDataset === "municipi" && activeGeography === "msoa" && (boroughMetric === "density" || boroughMetric === "pubs_per_km2_msoa") && msoaGeoJSON?.features) {
       return msoaGeoJSON;
     }
     return municipiGeoJSON;
@@ -2237,6 +2273,20 @@ async function init() {
     };
     return { 2021: build(2021), 2024: build(2024) };
   })();
+  const msoaPubStats = (() => {
+    if (!msoaGeoJSON?.features?.length) return null;
+    const values = msoaGeoJSON.features
+      .map((feature) => feature.properties?.pubs_per_km2_msoa)
+      .filter((value) => Number.isFinite(value));
+    if (!values.length) return null;
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: Number.isFinite(msoaPubMeta?.london_avg_pubs_per_km2_msoa)
+        ? msoaPubMeta.london_avg_pubs_per_km2_msoa
+        : values.reduce((sum, value) => sum + value, 0) / values.length,
+    };
+  })();
 
   function getNationalityMetricConfig() {
     if (selectedCountryBirth === "ALL") {
@@ -2289,6 +2339,15 @@ async function init() {
         note: SMALL_AREA_DENSITY.note,
       };
     }
+    if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return {
+        ...METRICS.pubs_per_km2_msoa,
+        year: msoaPubMeta?.snapshot_date || METRICS.pubs_per_km2_msoa.year,
+        source: msoaPubMeta?.source || SMALL_AREA_PUBS.source,
+        geography: msoaPubMeta?.geography || SMALL_AREA_PUBS.geography,
+        note: msoaPubMeta?.note || SMALL_AREA_PUBS.note,
+      };
+    }
     return getMetricConfigFor(metricKey, selectedCountryBirth);
   }
 
@@ -2322,6 +2381,9 @@ async function init() {
   function getMetricStats(metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
+    }
+    if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return msoaPubStats;
     }
     if (metricKey === "station_access_per_10k") {
       return {
@@ -2389,6 +2451,9 @@ async function init() {
   function metricValue(feature, metricKey, countrySelection = selectedCountryBirth) {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return feature?.properties?.[activeDensityField()] ?? null;
+    }
+    if (metricKey === "pubs_per_km2_msoa" && currentDataset === "municipi" && activeGeography === "msoa") {
+      return feature?.properties?.pubs_per_km2_msoa ?? null;
     }
     if (metricKey === "country_of_birth_pct") {
       if (countrySelection === "ALL") {
@@ -3076,6 +3141,7 @@ async function init() {
   function metricAvailableInCurrentView(metricKey) {
     const currentView = currentDataset === "tube" ? "tube" : is3D ? "spikes" : currentDataset;
     if (metricKey === "station_access_per_10k" && !Number.isFinite(stationAccessLondonAvg)) return false;
+    if (metricKey === "pubs_per_km2_msoa" && (!msoaGeoJSON?.features?.length || !msoaPubMeta?.by_msoa || !msoaPubStats)) return false;
     return METRICS[metricKey].views.includes(currentView);
   }
 
@@ -3382,6 +3448,11 @@ async function init() {
       if (Number.isFinite(pubCount)) support.push(`${pubCount.toLocaleString()} mapped pubs in the OpenStreetMap snapshot`);
       support.push("OpenStreetMap amenity=pub points aggregated to borough polygons");
       support.push("Community-maintained pub location baseline, not a measure of pint price or venue quality");
+    } else if (metricKey === "pubs_per_km2_msoa") {
+      const pubCount = feature.properties?.pubs_count_msoa;
+      if (Number.isFinite(pubCount)) support.push(`${pubCount.toLocaleString()} pubs in this MSOA`);
+      support.push(`Borough · ${analysisParentName(feature)}`);
+      support.push("OpenStreetMap amenity=pub points aggregated to MSOA polygons");
     } else if (metricKey === "buildings_per_km2") {
       const buildingCount = feature.properties?.building_count;
       if (Number.isFinite(buildingCount)) support.push(`${buildingCount.toLocaleString()} mapped building footprints in the OpenStreetMap snapshot`);
@@ -4259,7 +4330,8 @@ async function init() {
 
   setMetric = function(metricKey) {
     if (!METRICS[metricKey] || !metricAvailableInCurrentView(metricKey)) return;
-    if (metricKey !== "density") activeGeography = "borough";
+    if (metricKey === "pubs_per_km2_msoa") activeGeography = "msoa";
+    else if (metricKey !== "density") activeGeography = "borough";
     if (metricKey === "country_of_birth_pct" && comparisonEnabled) selectedCountryBirth = "ALL";
     applyActiveMetric(metricKey);
   };
