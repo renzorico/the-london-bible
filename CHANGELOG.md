@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Borough station-access transport metric
+
+- Added a borough-level transport proxy based on mapped TfL / rail stations per 10,000 residents, aggregated from the official TfL stations feed.
+- Wired the transport metric into borough choropleths, legend copy, tooltips, comparison, and spotlight insight rules without extending small-area transport support yet.
+
 ## 2026-04-01 — MSOA density time-travel control
 
 - Replaced the temporary MSOA year buttons with a compact time-travel scrubber that appears only for Boroughs → Density → MSOA.

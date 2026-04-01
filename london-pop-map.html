@@ -906,6 +906,7 @@
       <button id="metric-gender_balance_pp" class="toggle-btn metric-btn" onclick="setMetric('gender_balance_pp')">Gender balance</button>
       <button id="metric-children_share_pct" class="toggle-btn metric-btn" onclick="setMetric('children_share_pct')">Children</button>
       <button id="metric-median_age_years" class="toggle-btn metric-btn" onclick="setMetric('median_age_years')">Median age</button>
+      <button id="metric-station_access_per_10k" class="toggle-btn metric-btn" onclick="setMetric('station_access_per_10k')">Stations / 10k</button>
       <button id="metric-greenspace_share_pct" class="toggle-btn metric-btn" onclick="setMetric('greenspace_share_pct')">Greenspace 2005</button>
       <button id="metric-country_of_birth_pct" class="toggle-btn metric-btn" onclick="setMetric('country_of_birth_pct')">Country of birth</button>
     </div>
@@ -1178,6 +1179,66 @@ function transformStations(raw) {
   };
 }
 
+function boroughFeatureForPoint(lon, lat, boroughFeatures = municipiGeoJSON?.features) {
+  if (!boroughFeatures) return null;
+  for (const f of boroughFeatures) {
+    const geo = f.geometry;
+    if (!geo) continue;
+    const hit = geo.type === "Polygon"
+      ? pointInPolygon(lon, lat, geo.coordinates[0])
+      : geo.type === "MultiPolygon"
+        ? geo.coordinates.some((p) => pointInPolygon(lon, lat, p[0]))
+        : false;
+    if (hit) return f;
+  }
+  return null;
+}
+
+function computeStationAccessData(stationsFeatureCollection, boroughFeatureCollection) {
+  const boroughFeatures = boroughFeatureCollection?.features || [];
+  if (!stationsFeatureCollection?.features?.length || !boroughFeatures.length) {
+    return { byBorough: {}, londonRate: null };
+  }
+
+  const counts = Object.fromEntries(
+    boroughFeatures
+      .map((feature) => feature.properties?.[NAME_FIELD])
+      .filter(Boolean)
+      .map((name) => [name, 0])
+  );
+
+  for (const station of stationsFeatureCollection.features) {
+    const coords = station.geometry?.coordinates;
+    if (!Array.isArray(coords) || coords.length < 2) continue;
+    const boroughFeature = boroughFeatureForPoint(coords[0], coords[1], boroughFeatures);
+    const boroughName = boroughFeature?.properties?.[NAME_FIELD];
+    if (boroughName && counts[boroughName] != null) counts[boroughName] += 1;
+  }
+
+  let londonStations = 0;
+  let londonPopulation = 0;
+  const byBorough = {};
+
+  for (const feature of boroughFeatures) {
+    const boroughName = feature.properties?.[NAME_FIELD];
+    if (!boroughName) continue;
+    const stationCount = counts[boroughName] || 0;
+    const population = feature.properties?.[POP_FIELD] ?? 0;
+    const rate = population ? +(stationCount / population * 10000).toFixed(2) : null;
+    byBorough[boroughName] = {
+      station_count: stationCount,
+      station_access_per_10k: rate,
+    };
+    londonStations += stationCount;
+    londonPopulation += population;
+  }
+
+  return {
+    byBorough,
+    londonRate: londonPopulation ? +(londonStations / londonPopulation * 10000).toFixed(2) : null,
+  };
+}
+
 function normalizeLineName(name) {
   return (name || "")
     .toLowerCase()
@@ -1237,6 +1298,7 @@ const METRIC_PALETTES = {
   median_weekly_earnings_gbp: [[229, 245, 243, 220], [172, 220, 214, 232], [106, 186, 177, 242], [41, 129, 137, 250], [14, 70, 87, 255]],
   children_share_pct: [[247, 246, 219, 220], [224, 213, 122, 232], [185, 154, 54, 242], [131, 105, 35, 250], [74, 58, 25, 255]],
   median_age_years: [[241, 244, 236, 220], [205, 218, 193, 232], [166, 185, 153, 242], [125, 144, 111, 250], [76, 92, 67, 255]],
+  station_access_per_10k: [[236, 241, 244, 220], [190, 210, 222, 232], [138, 176, 196, 242], [85, 131, 159, 250], [41, 82, 109, 255]],
   greenspace_share_pct: [[239, 244, 232, 220], [199, 218, 174, 232], [146, 186, 123, 242], [94, 144, 78, 250], [45, 92, 53, 255]],
   country_of_birth_pct: [[237, 243, 248, 220], [181, 205, 221, 232], [120, 161, 187, 242], [72, 112, 143, 250], [37, 59, 87, 255]],
 };
@@ -1342,6 +1404,24 @@ const METRICS = {
     summaryLabel: "London median",
     tooltipTag: "Median age",
     note: "Derived from Census 2021 single-year age counts for usual residents, interpolated to a borough median age",
+  },
+  station_access_per_10k: {
+    key: "station_access_per_10k",
+    label: "Stations per 10,000 residents",
+    button: "Stations / 10k",
+    legendLabel: "Mapped TfL / rail stations per 10,000 residents",
+    unit: "stations / 10k residents",
+    year: "Live snapshot",
+    source: "TfL Stations open data aggregated to borough boundaries",
+    geography: "Borough",
+    scale: "sequential",
+    paletteKey: "station_access_per_10k",
+    views: ["municipi"],
+    formatter: (v) => `${v.toFixed(2)} / 10k residents`,
+    diffFormatter: (v) => `${v.toFixed(2)} / 10k`,
+    summaryLabel: "London rate",
+    tooltipTag: "Stations / 10k",
+    note: "Station-based proxy derived from TfL station locations only; excludes buses, service frequency, and full PTAL",
   },
   greenspace_share_pct: {
     key: "greenspace_share_pct",
@@ -1455,6 +1535,7 @@ async function init() {
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
+  let stationAccessLondonAvg = null;
   let highlightedFeature = null;
   let pinData = [];
   let currentMainLayer = null;
@@ -1512,6 +1593,11 @@ async function init() {
   if (rawStationsGeoJSON) stationsGeoJSON = transformStations(rawStationsGeoJSON);
   if (rawTubeLines) tubeLinesGeoJSON = transformTubeLines(rawTubeLines);
   if (msoaDensityGeoJSON?.features) msoaGeoJSON = msoaDensityGeoJSON;
+  const stationAccessData = computeStationAccessData(stationsGeoJSON, municipiGeoJSON);
+  stationAccessLondonAvg = stationAccessData.londonRate;
+  for (const [boroughName, stationMetrics] of Object.entries(stationAccessData.byBorough || {})) {
+    if (BOROUGH_METRIC_DATA[boroughName]) Object.assign(BOROUGH_METRIC_DATA[boroughName], stationMetrics);
+  }
   for (const [boroughName, medianAge] of Object.entries(MEDIAN_AGE_DATA)) {
     if (BOROUGH_METRIC_DATA[boroughName]) BOROUGH_METRIC_DATA[boroughName].median_age_years = medianAge;
   }
@@ -1702,6 +1788,12 @@ async function init() {
     if (metricKey === "density" && currentDataset === "municipi" && activeGeography === "msoa") {
       return msoaDensityStats[activeYear];
     }
+    if (metricKey === "station_access_per_10k") {
+      return {
+        ...boroughStats[metricKey],
+        avg: stationAccessLondonAvg,
+      };
+    }
     if (metricKey === "median_age_years") {
       return {
         ...boroughStats[metricKey],
@@ -1890,6 +1982,14 @@ async function init() {
       if (delta <= -0.8) return "lower";
       return "similar";
     }
+    if (metricKey === "station_access_per_10k") {
+      const ratio = average ? value / average : null;
+      if (ratio != null && ratio >= 1.55) return "much-higher";
+      if (ratio != null && ratio >= 1.15) return "higher";
+      if (ratio != null && ratio <= 0.6) return "much-lower";
+      if (ratio != null && ratio <= 0.85) return "lower";
+      return "similar";
+    }
     return "similar";
   }
 
@@ -1921,6 +2021,11 @@ async function init() {
       const delta = Math.abs(value - average);
       const direction = value >= average ? "above" : "below";
       return `${delta.toFixed(1)} pp ${direction} the London average`;
+    }
+    if (metricKey === "station_access_per_10k") {
+      const delta = Math.abs(value - average);
+      const direction = value >= average ? "above" : "below";
+      return `${delta.toFixed(2)} / 10k residents ${direction} the London rate`;
     }
     if (metricKey === "median_age_years") {
       const delta = Math.abs(value - average);
@@ -1996,6 +2101,14 @@ async function init() {
       return makeInsight(`Median age is close to the London-wide figure, at <strong>${formatted}</strong>.`, 22, key);
     }
 
+    if (key === "station_access_per_10k") {
+      if (bucket === "much-higher" || rank === "top-5") return makeInsight(`One of the better-served borough station proxies, with <strong>${formatted}</strong>, ${diff}.`, 76, key);
+      if (bucket === "higher") return makeInsight(`Station coverage runs above the London rate, at <strong>${formatted}</strong>.`, 58, key);
+      if (bucket === "much-lower" || rank === "bottom-5") return makeInsight(`Station coverage is limited by London standards, at <strong>${formatted}</strong>, ${diff}.`, 74, key);
+      if (bucket === "lower") return makeInsight(`Station coverage is a little below the London rate, at <strong>${formatted}</strong>.`, 54, key);
+      return makeInsight(`Station coverage is close to the London-wide rate, at <strong>${formatted}</strong>.`, 22, key);
+    }
+
     if (key === "greenspace_share_pct") {
       if (bucket === "much-higher" || rank === "top-5") return makeInsight(`In the GLUD 2005 baseline, a notably large <strong>${formatted}</strong> of borough land was classified as greenspace, ${diff}.`, 74, key);
       if (bucket === "higher") return makeInsight(`The GLUD 2005 baseline shows a higher-than-average greenspace land share here, reaching <strong>${formatted}</strong>.`, 60, key);
@@ -2021,6 +2134,7 @@ async function init() {
     const earningsCtx = spotlightMetricContext(feature, "median_weekly_earnings_gbp");
     const childrenCtx = spotlightMetricContext(feature, "children_share_pct");
     const ageCtx = spotlightMetricContext(feature, "median_age_years");
+    const transportCtx = spotlightMetricContext(feature, "station_access_per_10k");
     const greenspaceCtx = spotlightMetricContext(feature, "greenspace_share_pct");
     const internationalCtx = spotlightMetricContext(feature, "country_of_birth_pct", "ALL");
 
@@ -2030,6 +2144,7 @@ async function init() {
       buildSpotlightMetricInsight(earningsCtx),
       buildSpotlightMetricInsight(childrenCtx),
       buildSpotlightMetricInsight(ageCtx),
+      buildSpotlightMetricInsight(transportCtx),
       buildSpotlightMetricInsight(greenspaceCtx),
       buildSpotlightMetricInsight(internationalCtx),
     ].filter(Boolean);
@@ -2042,12 +2157,20 @@ async function init() {
       insights.push(makeInsight(`Dense urban form and a high international share combine to give the borough a distinctly inner-London profile.`, 90, "dense-international"));
     }
 
+    if (transportCtx && densityCtx && (transportCtx.bucket === "much-higher" || transportCtx.bucket === "higher") && (densityCtx.bucket === "higher" || densityCtx.bucket === "much-higher")) {
+      insights.push(makeInsight(`Strong station coverage and high density reinforce a well-connected inner-urban borough profile.`, 83, "transport-dense"));
+    }
+
     if (densityCtx && childrenCtx && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower") && (childrenCtx.bucket === "much-higher" || childrenCtx.bucket === "higher")) {
       insights.push(makeInsight(`Lower density and a larger child population make this feel more family-oriented than much of inner London.`, 88, "family-outer"));
     }
 
     if (ageCtx && childrenCtx && (ageCtx.bucket === "much-lower" || ageCtx.bucket === "lower") && (childrenCtx.bucket === "higher" || childrenCtx.bucket === "much-higher")) {
       insights.push(makeInsight(`A younger median age alongside a larger child share gives the borough a distinctly younger family profile.`, 86, "young-family"));
+    }
+
+    if (transportCtx && densityCtx && (transportCtx.bucket === "higher" || transportCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`For a lower-density borough, station coverage still looks relatively strong, suggesting a better-connected outer-London profile.`, 81, "transport-outer-connected"));
     }
 
     if (greenspaceCtx && densityCtx && (greenspaceCtx.bucket === "much-higher" || greenspaceCtx.bucket === "higher") && (densityCtx.bucket === "much-lower" || densityCtx.bucket === "lower")) {
@@ -2064,6 +2187,14 @@ async function init() {
 
     if (ageCtx && greenspaceCtx && densityCtx && (ageCtx.bucket === "higher" || ageCtx.bucket === "much-higher") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
       insights.push(makeInsight(`An older age profile, more greenspace, and lower density together point to a calmer outer-borough pattern.`, 82, "older-green-spacious"));
+    }
+
+    if (transportCtx && priceCtx && (transportCtx.bucket === "much-higher" || transportCtx.bucket === "higher") && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher")) {
+      insights.push(makeInsight(`Stronger station coverage lines up with higher housing costs, hinting at the premium attached to better-connected boroughs.`, 78, "transport-price-premium"));
+    }
+
+    if (transportCtx && greenspaceCtx && densityCtx && (transportCtx.bucket === "lower" || transportCtx.bucket === "much-lower") && (greenspaceCtx.bucket === "higher" || greenspaceCtx.bucket === "much-higher") && (densityCtx.bucket === "lower" || densityCtx.bucket === "much-lower")) {
+      insights.push(makeInsight(`Lower station coverage fits a greener, lower-density borough pattern more typical of London’s outer edge.`, 76, "transport-green-outer"));
     }
 
     if (priceCtx && childrenCtx && (priceCtx.bucket === "much-higher" || priceCtx.bucket === "higher") && (childrenCtx.bucket === "lower" || childrenCtx.bucket === "much-lower")) {
@@ -2095,6 +2226,12 @@ async function init() {
       const notUk = feature.properties?.not_born_uk_share_pct;
       const ukBorn = Number.isFinite(notUk) ? 100 - notUk : null;
       if (Number.isFinite(ukBorn) && Number.isFinite(notUk)) return `UK-born ${ukBorn.toFixed(1)}% · Not UK-born ${notUk.toFixed(1)}%`;
+    }
+    if (boroughMetric === "station_access_per_10k") {
+      const stationCount = feature.properties?.station_count;
+      return Number.isFinite(stationCount)
+        ? `${stationCount.toLocaleString()} mapped TfL / rail stations`
+        : "Station-based borough proxy";
     }
     if (boroughMetric === "median_age_years") {
       return "Census 2021 median age of usual residents";
@@ -2131,6 +2268,7 @@ async function init() {
 
   function metricAvailableInCurrentView(metricKey) {
     const currentView = currentDataset === "tube" ? "tube" : is3D ? "spikes" : currentDataset;
+    if (metricKey === "station_access_per_10k" && !Number.isFinite(stationAccessLondonAvg)) return false;
     return METRICS[metricKey].views.includes(currentView);
   }
 
@@ -2427,6 +2565,11 @@ async function init() {
       }
     } else if (metricKey === "children_share_pct") {
       support.push("Share of residents aged 0–15");
+    } else if (metricKey === "station_access_per_10k") {
+      const stationCount = feature.properties?.station_count;
+      if (Number.isFinite(stationCount)) support.push(`${stationCount.toLocaleString()} mapped TfL / rail stations`);
+      support.push("Station-based borough proxy derived from station locations only");
+      support.push("Excludes buses, service frequency, and full PTAL");
     } else if (metricKey === "median_age_years") {
       support.push("Census 2021 median age of usual residents");
       support.push("Derived from single-year age counts at borough level");
