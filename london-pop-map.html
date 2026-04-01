@@ -624,6 +624,99 @@
     padding-top: 10px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
   }
+  #chapter-toggle {
+    position: relative;
+    z-index: 10;
+    display: none;
+    flex-wrap: wrap;
+    gap: 7px;
+    max-width: 360px;
+    padding: 12px 13px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #chapter-toggle .chapter-btn {
+    padding: 7px 10px 6px;
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: none;
+  }
+  #chapter-panel {
+    position: absolute;
+    top: 110px;
+    right: 24px;
+    z-index: 10;
+    display: none;
+    width: min(340px, calc(100vw - 48px));
+    padding: 15px 16px 14px;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+    border-radius: 14px;
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(16px);
+  }
+  #chapter-panel .ch-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  #chapter-panel .ch-title {
+    font-family: var(--font-ui);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--subtitle);
+  }
+  #chapter-panel .ch-clear {
+    border: none;
+    background: transparent;
+    color: var(--legend-accent);
+    font-family: var(--font-ui);
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0;
+  }
+  #chapter-panel .ch-name {
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    line-height: 1.02;
+    letter-spacing: .03em;
+    color: var(--title);
+  }
+  #chapter-panel .ch-meta,
+  #chapter-panel .ch-description,
+  #chapter-panel .ch-foot {
+    font-family: var(--font-ui);
+    font-size: .69rem;
+    line-height: 1.55;
+    color: var(--hint);
+  }
+  #chapter-panel .ch-meta {
+    margin-top: 5px;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--legend-accent);
+  }
+  #chapter-panel .ch-description {
+    margin-top: 8px;
+    color: var(--title);
+  }
+  #chapter-panel .ch-foot {
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 84%, transparent);
+  }
 
   #tube-legend {
     position: absolute; top: 50%; right: 24px;
@@ -960,10 +1053,12 @@
     #tube-legend    { top: auto; bottom: 16px; right: 14px; transform: none; max-width: 220px; }
     #spotlight-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
     #similar-panel { right: 14px; left: 14px; top: auto; bottom: 180px; transform: none; width: auto; max-width: none; }
+    #chapter-panel { right: 14px; left: 14px; top: 118px; width: auto; max-width: none; }
     #comparison-panel { right: 14px; left: 14px; bottom: 118px; width: auto; }
     #comparison-panel .c-grid { grid-template-columns: 1fr; gap: 12px; }
     #comparison-panel .c-mid { padding-top: 0; }
     #credit         { right: 14px; bottom: 82px; }
+    #chapter-toggle { max-width: none; }
   }
 </style>
 </head>
@@ -1023,6 +1118,7 @@
         <button id="btn-compare" class="toggle-btn secondary-btn tool-btn" onclick="toggleComparison()">Compare boroughs</button>
         <button id="btn-spotlight" class="toggle-btn secondary-btn tool-btn" onclick="toggleSpotlight()">Why here?</button>
         <button id="btn-similar" class="toggle-btn secondary-btn tool-btn" onclick="toggleSimilar()">Similar areas</button>
+        <button id="btn-chapters" class="toggle-btn secondary-btn tool-btn" onclick="toggleChapterPicker()">Stories</button>
       </div>
     </div>
     <div class="metric-option-row" id="geography-row">
@@ -1044,6 +1140,14 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="chapter-toggle">
+    <button class="toggle-btn metric-btn chapter-btn" data-chapter="inner-outer" onclick="applyChapter('inner-outer')">Inner vs outer</button>
+    <button class="toggle-btn metric-btn chapter-btn" data-chapter="east-west-divide" onclick="applyChapter('east-west-divide')">East-west divide</button>
+    <button class="toggle-btn metric-btn chapter-btn" data-chapter="family-suburbs" onclick="applyChapter('family-suburbs')">Family suburbs</button>
+    <button class="toggle-btn metric-btn chapter-btn" data-chapter="high-rent-core" onclick="applyChapter('high-rent-core')">High-rent core</button>
+    <button class="toggle-btn metric-btn chapter-btn" data-chapter="international-london" onclick="applyChapter('international-london')">International London</button>
   </div>
 
   <div id="country-toggle">
@@ -1092,6 +1196,14 @@
     <div class="sim-kicker">Borough profile match</div>
   </div>
   <div id="similar-content"></div>
+</div>
+
+<div id="chapter-panel">
+  <div class="ch-head">
+    <div class="ch-title">Story chapter</div>
+    <button id="chapter-clear" class="ch-clear" onclick="clearChapter()">Clear</button>
+  </div>
+  <div id="chapter-content"></div>
 </div>
 
 <div id="tube-legend">
@@ -1581,12 +1693,50 @@ const SMALL_AREA_DENSITY = {
   note: "Density is computed from official mid-year population counts and MSOA polygon area",
 };
 
+const STORY_CHAPTERS = [
+  {
+    id: "inner-outer",
+    title: "Inner vs outer London",
+    description: "Density draws a clear central belt and outer ring. Look for the sharp fall-off from inner boroughs into the outer edge.",
+    state: { view: "municipi", metric: "density", geography: "borough" },
+    camera: { longitude: -0.118, latitude: 51.505, zoom: 9.95, pitch: 0, bearing: 0 },
+  },
+  {
+    id: "east-west-divide",
+    title: "East–west divide",
+    description: "House prices expose a west-central premium and a softer east-London edge. Read this as a broad cost gradient rather than a hard border.",
+    state: { view: "municipi", metric: "house_price_proxy_gbp", geography: "borough" },
+    camera: { longitude: -0.12, latitude: 51.505, zoom: 9.9, pitch: 0, bearing: 0 },
+  },
+  {
+    id: "family-suburbs",
+    title: "Family suburbs",
+    description: "Child share rises across several outer boroughs. Compare this with lower density and more space around the edge of London.",
+    state: { view: "municipi", metric: "children_share_pct", geography: "borough" },
+    camera: { longitude: -0.13, latitude: 51.5, zoom: 9.85, pitch: 0, bearing: 0 },
+  },
+  {
+    id: "high-rent-core",
+    title: "High-rent / high-access core",
+    description: "Expensive central and west-central boroughs overlap with stronger station coverage and dense urban form. This is the connected premium core.",
+    state: { view: "municipi", metric: "house_price_proxy_gbp", geography: "borough" },
+    camera: { longitude: -0.145, latitude: 51.507, zoom: 10.15, pitch: 0, bearing: 0 },
+  },
+  {
+    id: "international-london",
+    title: "International London",
+    description: "The borough share of residents born outside the UK highlights London’s most internationally mixed areas, especially across the inner east and west.",
+    state: { view: "municipi", metric: "country_of_birth_pct", geography: "borough", countrySelection: "ALL" },
+    camera: { longitude: -0.11, latitude: 51.507, zoom: 9.95, pitch: 0, bearing: 0 },
+  },
+];
+
 function paletteGradient(stops) {
   return `linear-gradient(to right, ${stops.map((rgb) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`).join(", ")})`;
 }
 
 let setMode, setView, setMetric, setCountryMetric, resetView, toggleStations, toggleTheme, toggleComparison, clearComparison, toggleSpotlight;
-let setGeography, setYear, setYearFromIndex, toggleSimilar;
+let setGeography, setYear, setYearFromIndex, toggleSimilar, toggleChapterPicker, applyChapter, clearChapter;
 
 async function init() {
   const bodyEl = document.body;
@@ -1603,6 +1753,9 @@ async function init() {
   const spotlightContentEl = document.getElementById("spotlight-content");
   const similarPanelEl = document.getElementById("similar-panel");
   const similarContentEl = document.getElementById("similar-content");
+  const chapterPanelEl = document.getElementById("chapter-panel");
+  const chapterContentEl = document.getElementById("chapter-content");
+  const chapterToggleEl = document.getElementById("chapter-toggle");
   const countryToggleEl = document.getElementById("country-toggle");
   const viewGroupEl = document.getElementById("view-group");
   const viewLabelEl = document.getElementById("view-label");
@@ -1624,10 +1777,14 @@ async function init() {
   const btnCompare = document.getElementById("btn-compare");
   const btnSpotlight = document.getElementById("btn-spotlight");
   const btnSimilar = document.getElementById("btn-similar");
+  const btnChapters = document.getElementById("btn-chapters");
   const btnTubeMap = document.getElementById("btn-tube-map");
   const metricButtons = Object.fromEntries(Object.keys(METRICS).map((key) => [key, document.getElementById(`metric-${key}`)]));
   const countryButtons = Object.fromEntries(
     [...countryToggleEl.querySelectorAll("[data-country]")].map((button) => [button.dataset.country, button])
+  );
+  const chapterButtons = Object.fromEntries(
+    [...chapterToggleEl.querySelectorAll("[data-chapter]")].map((button) => [button.dataset.chapter, button])
   );
   const geographyButtons = {
     borough: document.getElementById("geo-borough"),
@@ -1649,6 +1806,8 @@ async function init() {
   let comparisonB = null;
   let spotlightEnabled = false;
   let similarEnabled = false;
+  let chapterPickerOpen = false;
+  let activeChapterId = null;
   let stationsGeoJSON = null;
   let tubeLinesGeoJSON = null;
   let msoaGeoJSON = null;
@@ -1990,6 +2149,14 @@ async function init() {
 
   function similarityAvailable() {
     return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
+  function chapterAvailable() {
+    return currentDataset === "municipi" && activeGeography === "borough";
+  }
+
+  function activeChapter() {
+    return STORY_CHAPTERS.find((chapter) => chapter.id === activeChapterId) || null;
   }
 
   function spotlightFeature() {
@@ -2962,6 +3129,7 @@ async function init() {
     btnCompare.classList.toggle("active", currentDataset === "municipi" && comparisonEnabled);
     btnSpotlight.classList.toggle("active", currentDataset === "municipi" && spotlightEnabled && !comparisonEnabled);
     btnSimilar.classList.toggle("active", currentDataset === "municipi" && similarEnabled && !comparisonEnabled && !spotlightEnabled);
+    btnChapters.classList.toggle("active", currentDataset === "municipi" && (chapterPickerOpen || !!activeChapterId));
     document.getElementById("btn-3d").classList.toggle("active", currentDataset === "sections" && is3D);
     document.getElementById("btn-flat").classList.toggle("active", currentDataset === "sections" && !is3D);
   }
@@ -3003,6 +3171,12 @@ async function init() {
       : (spotlightEnabled
         ? "Disable the borough spotlight to find similar areas"
         : (similarityAvailable() ? "Find boroughs with a similar profile" : "Similarity is available in borough geography only"));
+    btnChapters.style.display = compareMode ? "" : "none";
+    btnChapters.disabled = !chapterAvailable();
+    btnChapters.title = chapterAvailable()
+      ? "Open the borough story chapters"
+      : "Story chapters are available in borough geography only";
+    chapterToggleEl.style.display = compareMode && chapterPickerOpen ? "flex" : "none";
     countryToggleEl.style.display = countryMode ? "flex" : "none";
   }
 
@@ -3010,6 +3184,13 @@ async function init() {
     for (const [country, button] of Object.entries(countryButtons)) {
       if (!button) continue;
       button.classList.toggle("active", selectedCountryBirth === country);
+    }
+  }
+
+  function updateChapterSelector() {
+    for (const [chapterId, button] of Object.entries(chapterButtons)) {
+      if (!button) continue;
+      button.classList.toggle("active", activeChapterId === chapterId);
     }
   }
 
@@ -3208,6 +3389,26 @@ async function init() {
     `;
   }
 
+  function renderChapterPanel() {
+    const chapter = activeChapter();
+    const visible = !!chapter;
+    chapterPanelEl.style.display = visible ? "block" : "none";
+    if (!visible) {
+      chapterContentEl.innerHTML = "";
+      return;
+    }
+
+    const metricConfig = getMetricConfigFor(chapter.state.metric, chapter.state.countrySelection ?? selectedCountryBirth);
+    const geographyLabel = chapter.state.geography === "msoa" ? "MSOA" : "Borough";
+    const yearLabel = chapter.state.year ? ` · ${chapter.state.year}` : "";
+    chapterContentEl.innerHTML = `
+      <div class="ch-name">${chapter.title}</div>
+      <div class="ch-meta">${metricConfig.label} · ${geographyLabel}${yearLabel}</div>
+      <div class="ch-description">${chapter.description}</div>
+      <div class="ch-foot">Preset chapters set the initial borough lens and camera, then leave normal exploration intact.</div>
+    `;
+  }
+
   function updateStopHoverBehavior() {
     return onlyTubeMode();
   }
@@ -3222,6 +3423,7 @@ async function init() {
     renderComparisonPanel();
     renderSpotlightPanel();
     renderSimilarPanel();
+    renderChapterPanel();
   }
 
   function refreshMapState(nextViewState = null) {
@@ -3242,6 +3444,7 @@ async function init() {
     updateGeographyButtons();
     updateYearControl();
     updateCountrySelector();
+    updateChapterSelector();
     updateLegend();
     refreshHighlightedFeature();
     renderPinnedTooltip();
@@ -3511,9 +3714,11 @@ async function init() {
       selectedCountryBirth = "ALL";
       spotlightEnabled = false;
       similarEnabled = false;
+      chapterPickerOpen = false;
     } else {
       spotlightEnabled = false;
       similarEnabled = false;
+      chapterPickerOpen = false;
     }
     clearPinnedTooltip();
     refreshMapState();
@@ -3533,7 +3738,10 @@ async function init() {
       return;
     }
     spotlightEnabled = !spotlightEnabled;
-    if (spotlightEnabled) similarEnabled = false;
+    if (spotlightEnabled) {
+      similarEnabled = false;
+      chapterPickerOpen = false;
+    }
     refreshMapState();
   };
 
@@ -3549,7 +3757,50 @@ async function init() {
       comparisonEnabled = false;
       comparisonA = null;
       comparisonB = null;
+      chapterPickerOpen = false;
     }
+    refreshMapState();
+  };
+
+  toggleChapterPicker = function() {
+    if (!chapterAvailable()) {
+      chapterPickerOpen = false;
+      refreshMapState();
+      return;
+    }
+    chapterPickerOpen = !chapterPickerOpen;
+    refreshMapState();
+  };
+
+  applyChapter = function(chapterId) {
+    const chapter = STORY_CHAPTERS.find((entry) => entry.id === chapterId);
+    if (!chapter) return;
+
+    currentDataset = chapter.state.view || "municipi";
+    boroughMetric = chapter.state.metric;
+    activeGeography = chapter.state.geography || "borough";
+    if (chapter.state.countrySelection) selectedCountryBirth = chapter.state.countrySelection;
+    if (chapter.state.year != null) activeYear = chapter.state.year;
+    else activeYear = resolvedActiveYear();
+
+    showStations = false;
+    is3D = false;
+    comparisonEnabled = false;
+    comparisonA = null;
+    comparisonB = null;
+    spotlightEnabled = false;
+    similarEnabled = false;
+    chapterPickerOpen = false;
+    activeChapterId = chapter.id;
+    highlightedFeature = null;
+    pinData = [];
+    clearPinnedTooltip();
+
+    refreshMapState(chapter.camera ? { ...viewState, ...chapter.camera, transitionDuration: 700 } : undefined);
+  };
+
+  clearChapter = function() {
+    activeChapterId = null;
     refreshMapState();
   };
 

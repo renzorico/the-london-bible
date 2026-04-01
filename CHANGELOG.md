@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-04-01 — Story chapters v1
+
+- Added compact borough-only story chapters that preset key analytical views such as inner vs outer London, family suburbs, and the high-rent core.
+- Added a lightweight chapter card with a short reading prompt while keeping normal map interaction, compare, spotlight, and similarity workflows available after the preset is applied.
+
 ## 2026-04-01 — Borough similarity search
 
 - Added a borough-only Similar areas analysis tool that finds the top three profile matches using the existing normalized borough metrics.
