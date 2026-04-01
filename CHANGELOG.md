@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-01 — Tube lines overlay restored
+
+- Fixed a regression that hid Tube lines by restoring the full local Tube network source and keeping the line overlay path intact, so Tube lines and stations render together again without affecting the new contours layer.
+
 ## 2026-04-01 — Contours layer and MSOA gender rollback
 
 - Reverted the experimental MSOA gender-balance path so gender balance is borough-only again, leaving MSOA density as the only annual small-area timeline and MSOA pubs density as a fixed-year snapshot.
