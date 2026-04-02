@@ -5234,14 +5234,14 @@ async function init() {
     if (currentDataset === "municipi" && activeGeography === "msoa" && object?.properties?.msoa_name) return object.properties.msoa_name;
     if (object?.properties?.[NAME_FIELD] && currentDataset === "municipi") return object.properties[NAME_FIELD];
     if (object?.properties?.[NAME_FIELD] && currentDataset !== "sections") return object.properties[NAME_FIELD];
-    if (coordinate) return currentDataset === "municipi" ? boroughAt(coordinate[0], coordinate[1]) : zoneAt(coordinate[0], coordinate[1]);
+    if (coordinate) return currentDataset === "municipi" || currentDataset === "sections" ? boroughAt(coordinate[0], coordinate[1]) : zoneAt(coordinate[0], coordinate[1]);
     const geo = object?.geometry;
     let ring;
     if (geo?.type === "Polygon") ring = geo.coordinates[0];
     else if (geo?.type === "MultiPolygon") ring = geo.coordinates[0]?.[0];
     const cx = ring ? ring.reduce((s, p) => s + p[0], 0) / ring.length : -0.118;
     const cy = ring ? ring.reduce((s, p) => s + p[1], 0) / ring.length : 51.505;
-    return currentDataset === "municipi" ? boroughAt(cx, cy) : zoneAt(cx, cy);
+    return currentDataset === "municipi" || currentDataset === "sections" ? boroughAt(cx, cy) : zoneAt(cx, cy);
   }
 
   function positionTooltip(x, y) {
@@ -5358,7 +5358,7 @@ async function init() {
     if (currentDataset === "sections") {
       tooltipEl.classList.remove("summary-card");
       const stats = statsAt(...pinnedCoord);
-      const zone = zoneAt(...pinnedCoord);
+      const zone = boroughAt(...pinnedCoord);
       tooltipEl.innerHTML = densityTooltipHtml(zone, stats.population, stats.density, true);
       tooltipEl.style.display = "block";
       updatePinnedPosition(viewState);
