@@ -4609,9 +4609,10 @@ async function init() {
     if (!map) return;
     const apply = () => applyContourStyles(map);
     if (map.isStyleLoaded?.()) {
+      clearStyledataCallback(map, "contours");
       apply();
     } else {
-      map.once?.("styledata", apply);
+      scheduleStyledataCallback(map, "contours", apply);
     }
   }
 
@@ -4703,9 +4704,10 @@ async function init() {
     if (!map) return;
     const apply = () => applyBikeStyles(map);
     if (map.isStyleLoaded?.()) {
+      clearStyledataCallback(map, "bikes");
       apply();
     } else {
-      map.once?.("styledata", apply);
+      scheduleStyledataCallback(map, "bikes", apply);
     }
   }
 
@@ -6895,6 +6897,35 @@ async function init() {
     return deckgl.getMapboxMap?.() || deckgl.map || deckgl._map || null;
   }
 
+  const pendingStyledataCallbacks = new WeakMap();
+
+  function scheduleStyledataCallback(map, key, callback) {
+    if (!map?.on || !map?.off) return;
+    let registry = pendingStyledataCallbacks.get(map);
+    if (!registry) {
+      registry = new Map();
+      pendingStyledataCallbacks.set(map, registry);
+    }
+    const previous = registry.get(key);
+    if (previous) map.off("styledata", previous);
+    const wrapped = () => {
+      map.off("styledata", wrapped);
+      if (registry.get(key) === wrapped) registry.delete(key);
+      callback();
+    };
+    registry.set(key, wrapped);
+    map.on("styledata", wrapped);
+  }
+
+  function clearStyledataCallback(map, key) {
+    const registry = pendingStyledataCallbacks.get(map);
+    if (!registry || !map?.off) return;
+    const pending = registry.get(key);
+    if (!pending) return;
+    map.off("styledata", pending);
+    registry.delete(key);
+  }
+
   function bindLoadingOverlayToReadiness() {
     const map = getBaseMap();
     if (!map) {
@@ -6907,6 +6938,8 @@ async function init() {
       if (settled) return;
       settled = true;
       clearTimeout(fallbackTimer);
+      map.off?.("idle", finish);
+      map.off?.("error", finish);
       statusEl.textContent = "Opening atlas…";
       markAtlasReady();
     };
@@ -6917,8 +6950,8 @@ async function init() {
       return;
     }
 
-    map.once?.("idle", finish);
-    map.once?.("error", finish);
+    map.on?.("idle", finish);
+    map.on?.("error", finish);
   }
 
   function applyBasemapThemeStyles() {
@@ -6958,8 +6991,12 @@ async function init() {
       }
     };
 
-    if (map.isStyleLoaded?.()) tuneStyle();
-    map.once?.("styledata", tuneStyle);
+    if (map.isStyleLoaded?.()) {
+      clearStyledataCallback(map, "basemap-theme");
+      tuneStyle();
+    } else {
+      scheduleStyledataCallback(map, "basemap-theme", tuneStyle);
+    }
     updateContourLayers();
     updateBikeLayers();
   }
@@ -7282,6 +7319,13 @@ async function init() {
 }
 
 init();
+
+/*
+Memory-leak note:
+- The main leak pattern was pending map style callbacks piling up during repeated refreshes and style churn (especially contour, bike, and basemap restyling paths), which retained closures longer than intended.
+- The fix dedupes queued styledata callbacks per map + purpose and clears readiness listeners once the loader settles, so repeated interaction does not keep stacking stale listeners.
+- The app still does intentional heavy in-memory caching of GeoJSON and layer state for responsiveness, so short-lived heap spikes during redraws are expected, but the heap should now stabilise after GC instead of drifting upward from retained listeners.
+*/
 </script>
 </body>
 </html>
