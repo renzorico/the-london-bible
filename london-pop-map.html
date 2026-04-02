@@ -530,6 +530,10 @@
     box-shadow: var(--panel-shadow);
   }
   .toggle-btn:hover:not(:disabled) { background: var(--button-hover); border-color: rgba(83, 66, 58, .34); transform: translateY(-1px); }
+  .toggle-btn,
+  .toggle-btn * {
+    -webkit-text-fill-color: currentColor;
+  }
   .toggle-btn.active { background: var(--button-active); color: var(--button-active-text); border-color: var(--button-active-border); }
   .toggle-btn:disabled { opacity: .4; cursor: default; }
   .toggle-btn.metric-btn {
@@ -1391,6 +1395,21 @@
     border-radius: 12px;
     background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
   }
+  #analysis-panel button.c-state-slot {
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .14s ease, background .14s ease, transform .14s ease;
+  }
+  #analysis-panel button.c-state-slot:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--button-active) 32%, var(--panel-border) 68%);
+  }
+  #analysis-panel .c-state-slot.targeting {
+    border-color: color-mix(in srgb, var(--button-active) 78%, var(--panel-border) 22%);
+    background: color-mix(in srgb, var(--button-active) 18%, var(--panel) 82%);
+  }
   #analysis-panel .c-state-slot.pending {
     border-style: dashed;
     background: color-mix(in srgb, var(--panel) 86%, transparent);
@@ -1694,12 +1713,14 @@
       position: fixed;
       top: calc(var(--safe-top) + 4px);
       left: 12px;
-      right: 12px;
+      right: auto;
+      width: fit-content;
+      max-width: min(calc(100vw - 24px), 344px);
       z-index: 24;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
       border: 1px solid var(--panel-border);
       background: linear-gradient(180deg, var(--panel-strong), var(--panel));
       border-radius: 18px;
@@ -1708,6 +1729,24 @@
     }
     .mobile-brand-copy {
       min-width: 0;
+    }
+    .mobile-brand-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--panel-border) 92%, transparent);
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      color: var(--title);
+      font-family: var(--font-ui);
+      font-size: .55rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex: 0 0 auto;
     }
     .mobile-brand-kicker {
       font-family: var(--font-ui);
@@ -1753,7 +1792,7 @@
       z-index: 24;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom) * 0.18);
+      padding: 8px 9px calc(8px + env(safe-area-inset-bottom) * 0.18);
       border: 1px solid var(--panel-border);
       background: linear-gradient(180deg, var(--panel-strong), var(--panel));
       border-radius: 20px;
@@ -1762,13 +1801,15 @@
     }
     .mobile-dock-btn {
       min-width: 0;
-      min-height: 56px;
-      padding: 9px 4px 8px;
+      min-height: 50px;
+      padding: 7px 4px 6px;
       border-radius: 14px;
       flex-direction: column;
-      gap: 6px;
+      justify-content: center;
+      gap: 4px;
       letter-spacing: .12em;
-      font-size: .53rem;
+      font-size: .52rem;
+      line-height: 1.05;
       box-shadow: none;
     }
     .mobile-dock-btn .dock-mark {
@@ -1789,7 +1830,7 @@
       top: auto;
       left: 12px;
       right: 12px;
-      bottom: calc(var(--safe-bottom) + 78px);
+      bottom: calc(var(--safe-bottom) + 72px);
       width: auto;
       max-width: none;
       gap: 10px;
@@ -1827,21 +1868,7 @@
       margin-bottom: 8px;
     }
     body.mobile-shell #top-right-controls {
-      top: calc(var(--safe-top) + 68px);
-      left: 12px;
-      right: 12px;
-      gap: 10px;
-      justify-content: stretch;
-      z-index: 23;
-    }
-    body.mobile-shell #search-wrap,
-    body.mobile-shell #search-input {
-      width: 100%;
-      min-width: 0;
-    }
-    body.mobile-shell #search-input {
-      min-height: 44px;
-      font-size: 16px;
+      display: none;
     }
     body.mobile-shell #layer-toggle {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1905,7 +1932,7 @@
     body.mobile-shell #bottom-left-stack {
       left: 12px;
       right: 12px;
-      bottom: calc(var(--safe-bottom) + 78px);
+      bottom: calc(var(--safe-bottom) + 72px);
       width: auto;
       max-width: none;
       z-index: 22;
@@ -1932,8 +1959,8 @@
     body.mobile-shell #analysis-panel {
       left: 12px;
       right: 12px;
-      top: calc(var(--safe-top) + 116px);
-      bottom: calc(var(--safe-bottom) + 78px);
+      top: calc(var(--safe-top) + 82px);
+      bottom: calc(var(--safe-bottom) + 72px);
       width: auto;
       max-width: none;
       z-index: 23;
@@ -1958,7 +1985,7 @@
       left: 12px !important;
       right: 12px !important;
       top: auto !important;
-      bottom: calc(var(--safe-bottom) + 82px) !important;
+      bottom: calc(var(--safe-bottom) + 74px) !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: none !important;
@@ -1980,16 +2007,14 @@
 
   @media (max-width: 430px) {
     body.mobile-shell #mobile-brand-bar {
-      padding: 10px 12px;
+      max-width: calc(100vw - 24px);
+      padding: 9px 11px;
     }
     body.mobile-shell .mobile-brand-context {
       font-size: .76rem;
     }
-    body.mobile-shell #top-right-controls {
-      top: calc(var(--safe-top) + 64px);
-    }
     body.mobile-shell #analysis-panel {
-      top: calc(var(--safe-top) + 110px);
+      top: calc(var(--safe-top) + 78px);
     }
     body.mobile-shell #metric-toggle {
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2020,6 +2045,7 @@
     <div class="mobile-brand-kicker">The London Bible</div>
     <div id="mobile-brand-context" class="mobile-brand-context">One city, every layer.</div>
   </div>
+  <button id="mobile-brand-action" class="mobile-brand-action" type="button" onclick="cancelCompareSelection()" hidden>Cancel</button>
 </div>
 <div id="mobile-scrim" hidden></div>
 <div id="mobile-dock" role="toolbar" aria-label="Mobile controls">
@@ -2869,6 +2895,7 @@ async function init() {
   const yearStopsEl = document.getElementById("year-stops");
   const topRightControlsEl = document.getElementById("top-right-controls");
   const mobileBrandContextEl = document.getElementById("mobile-brand-context");
+  const mobileBrandActionEl = document.getElementById("mobile-brand-action");
   const mobileScrimEl = document.getElementById("mobile-scrim");
   const mobileDockEl = document.getElementById("mobile-dock");
   const btnTube = document.getElementById("btn-tube");
@@ -2923,6 +2950,7 @@ async function init() {
   let analysisMode = null;
   let comparisonA = null;
   let comparisonB = null;
+  let selectingCompareTarget = null;
   let correlationXMetric = "house_price_proxy_gbp";
   let correlationYMetric = "median_weekly_earnings_gbp";
   let correlationHoverName = null;
@@ -3058,6 +3086,7 @@ async function init() {
   }
 
   function mobileContextLabel() {
+    if (selectingCompareTarget) return `Tap a borough for Borough ${selectingCompareTarget}`;
     if (analysisMode) return mobileAnalysisLabel(analysisMode);
     if (currentDataset === "tube") return "Only-tube view";
     if (currentDataset === "sections") return is3D ? "Spike terrain" : "Hexes overview";
@@ -3071,14 +3100,29 @@ async function init() {
 
   function syncMobileUi() {
     const mobile = isMobileLayout();
-    if (!mobile) mobilePanelMode = null;
+    if (!mobile) {
+      mobilePanelMode = null;
+      selectingCompareTarget = null;
+    }
+    const showingAnalysisPanel = mobile && !!analysisMode && !mobilePanelMode && !selectingCompareTarget;
     bodyEl.classList.toggle("mobile-shell", mobile);
-    bodyEl.classList.toggle("mobile-panel-open", mobile && (!!mobilePanelMode || !!analysisMode));
+    bodyEl.classList.toggle("mobile-panel-open", mobile && (!!mobilePanelMode || showingAnalysisPanel));
+    bodyEl.classList.toggle("mobile-compare-picking", mobile && !!selectingCompareTarget);
     bodyEl.dataset.mobilePanel = mobile ? (mobilePanelMode || "") : "";
 
     if (mobileBrandContextEl) mobileBrandContextEl.textContent = mobileContextLabel();
+    if (mobileBrandActionEl) {
+      const showAction = mobile && !!selectingCompareTarget;
+      mobileBrandActionEl.hidden = !showAction;
+      mobileBrandActionEl.setAttribute("aria-hidden", showAction ? "false" : "true");
+      if (showAction) {
+        mobileBrandActionEl.textContent = "Cancel";
+        mobileBrandActionEl.title = `Cancel selecting Borough ${selectingCompareTarget}`;
+        mobileBrandActionEl.setAttribute("aria-label", `Cancel selecting Borough ${selectingCompareTarget}`);
+      }
+    }
 
-    const scrimActive = mobile && (!!mobilePanelMode || !!analysisMode);
+    const scrimActive = mobile && !!mobilePanelMode;
     if (mobileScrimEl) {
       mobileScrimEl.hidden = !scrimActive;
       mobileScrimEl.classList.toggle("visible", scrimActive);
@@ -3086,26 +3130,30 @@ async function init() {
 
     for (const [mode, button] of Object.entries(mobileDockButtons)) {
       if (!button) continue;
-      button.classList.toggle("active", mobile && (mobilePanelMode === mode || (mode === "analysis" && !!analysisMode)));
+      button.classList.toggle("active", mobile && (mobilePanelMode === mode || (mode === "analysis" && (!!analysisMode || !!selectingCompareTarget))));
     }
   }
 
   toggleMobilePanel = function(mode) {
     if (!isMobileLayout()) return;
+    if (selectingCompareTarget) selectingCompareTarget = null;
     mobilePanelMode = mobilePanelMode === mode ? null : mode;
     syncMobileUi();
+    renderAnalysisPanel();
   };
 
   closeMobilePanel = function() {
     if (!mobilePanelMode) return;
     mobilePanelMode = null;
     syncMobileUi();
+    renderAnalysisPanel();
   };
 
   mobileScrimEl?.addEventListener("click", () => {
     if (mobilePanelMode) {
       mobilePanelMode = null;
       syncMobileUi();
+      renderAnalysisPanel();
       return;
     }
     if (analysisMode) {
@@ -4248,9 +4296,11 @@ async function init() {
   }
 
   function comparisonInstructionText() {
-    if (!comparisonA) return "Click a borough to start a side-by-side comparison.";
-    if (!comparisonB) return "Select a second borough to compare against Borough A.";
-    return "Click another borough to replace Borough B, or click a selected borough to clear it.";
+    if (selectingCompareTarget) return `Tap a borough on the map for Borough ${selectingCompareTarget}.`;
+    if (!comparisonA && comparisonB) return isMobileLayout() ? "Choose Borough A to pair with Borough B." : "Select Borough A to complete the comparison pair.";
+    if (!comparisonA) return isMobileLayout() ? "Choose Borough A to start the comparison." : "Click a borough to start a side-by-side comparison.";
+    if (!comparisonB) return isMobileLayout() ? "Choose Borough B to complete the comparison." : "Select a second borough to compare against Borough A.";
+    return isMobileLayout() ? "Tap Borough A or Borough B to replace either selection." : "Click another borough to replace Borough B, or click a selected borough to clear it.";
   }
 
   function getActiveMetricState() {
@@ -6113,6 +6163,7 @@ async function init() {
   function clearComparisonSelectionState() {
     comparisonA = null;
     comparisonB = null;
+    selectingCompareTarget = null;
   }
 
   function clearAnalysisModeState(mode) {
@@ -6128,8 +6179,37 @@ async function init() {
     analysisMode = null;
   }
 
+  function startCompareSelection(target) {
+    if (!comparisonAvailable() || !["A", "B"].includes(target)) return;
+    if (!isAnalysisMode("compare")) setAnalysisMode("compare");
+    selectingCompareTarget = target;
+    if (isMobileLayout()) mobilePanelMode = null;
+    syncMobileUi();
+    renderAnalysisPanel();
+  }
+
+  function cancelCompareSelection() {
+    if (!selectingCompareTarget) return;
+    selectingCompareTarget = null;
+    syncMobileUi();
+    renderAnalysisPanel();
+  }
+
+  function assignComparisonTarget(target, boroughName) {
+    if (!boroughName) return;
+    if (target === "A") {
+      comparisonA = boroughName;
+      if (comparisonB === boroughName) comparisonB = null;
+    } else if (target === "B") {
+      comparisonB = boroughName;
+      if (comparisonA === boroughName) comparisonB = null;
+    }
+    if (comparisonA && comparisonB && comparisonA === comparisonB) comparisonB = null;
+  }
+
   function setAnalysisMode(mode) {
     const nextMode = mode === analysisMode ? null : mode;
+    if (nextMode !== "compare") selectingCompareTarget = null;
     const currentMode = analysisMode;
 
     if (nextMode && !analysisModeAvailable(nextMode)) {
@@ -6247,6 +6327,18 @@ async function init() {
     const valueB = featureB ? comparisonMetricValue(featureB) : null;
     const diff = Number.isFinite(valueA) && Number.isFinite(valueB) ? valueB - valueA : null;
     const metricKicker = `<div class="c-kicker">${metric.label}</div>`;
+    const stateGrid = `
+      <div class="c-state-grid">
+        <button type="button" class="c-state-slot ${featureA ? "" : "pending"} ${selectingCompareTarget === "A" ? "targeting" : ""}" onclick="startCompareSelection('A')">
+          <div class="c-state-label">Borough A</div>
+          <div class="c-state-name ${featureA ? "" : "pending"}">${featureA?.properties?.[NAME_FIELD] ?? "Tap to choose"}</div>
+        </button>
+        <button type="button" class="c-state-slot ${featureB ? "" : "pending"} ${selectingCompareTarget === "B" ? "targeting" : ""}" onclick="startCompareSelection('B')">
+          <div class="c-state-label">Borough B</div>
+          <div class="c-state-name ${featureB ? "" : "pending"}">${featureB?.properties?.[NAME_FIELD] ?? "Tap to choose"}</div>
+        </button>
+      </div>
+    `;
 
     if (!featureA || !featureB) {
       return `
@@ -6255,16 +6347,7 @@ async function init() {
           <div class="analysis-empty">Select two boroughs to compare the current active metric side by side.</div>
           <button class="c-clear" onclick="clearComparison()">Clear</button>
         </div>
-        <div class="c-state-grid">
-          <div class="c-state-slot ${featureA ? "" : "pending"}">
-            <div class="c-state-label">Borough A</div>
-            <div class="c-state-name ${featureA ? "" : "pending"}">${featureA?.properties?.[NAME_FIELD] ?? "Awaiting selection"}</div>
-          </div>
-          <div class="c-state-slot ${featureB ? "" : "pending"}">
-            <div class="c-state-label">Borough B</div>
-            <div class="c-state-name ${featureB ? "" : "pending"}">${featureB?.properties?.[NAME_FIELD] ?? "Awaiting selection"}</div>
-          </div>
-        </div>
+        ${stateGrid}
         <div class="c-state-help">${comparisonInstructionText()}</div>
         <div class="c-foot">${metric.source} · ${metric.year}</div>
       `;
@@ -6275,9 +6358,10 @@ async function init() {
     return `
       ${metricKicker}
       <div class="story-head">
-        <div class="analysis-empty">Click another borough to replace B, or click a selected borough to clear it.</div>
+        <div class="analysis-empty">Tap Borough A or Borough B to replace either selection from the map.</div>
         <button class="c-clear" onclick="clearComparison()">Clear</button>
       </div>
+      ${stateGrid}
       <div class="c-grid">
         <div class="c-col a">
           <span class="c-tag a">A</span>
@@ -6294,6 +6378,7 @@ async function init() {
           ${supportB ? `<div class="c-support">${supportB}</div>` : ""}
         </div>
       </div>
+      <div class="c-state-help">${comparisonInstructionText()}</div>
       <div class="c-delta-row">
         <div class="c-diff-label">Difference</div>
         <div class="c-diff ${comparisonDifferenceTone(diff)}">${comparisonDifferenceLabel(metricKey, diff)}</div>
@@ -6533,7 +6618,7 @@ async function init() {
 
   function renderAnalysisPanel() {
     normalizeAnalysisModeForState();
-    const visible = !!analysisMode;
+    const visible = !!analysisMode && !(isMobileLayout() && (mobilePanelMode || selectingCompareTarget));
     analysisPanelEl.style.display = visible ? "flex" : "none";
     if (!visible) {
       analysisPanelContentEl.innerHTML = "";
@@ -6580,7 +6665,7 @@ async function init() {
       ACTIVE_FEATURES = [];
     }
     updateBoroughStyling();
-    const props = { layers: getLayers() };
+    const props = { layers: getLayers(), controller: deckControllerConfig() };
     if (nextViewState) props.initialViewState = nextViewState;
     deckgl.setProps(props);
     updateModeButtons();
@@ -6619,9 +6704,29 @@ async function init() {
     syncPinnedSelectionState();
   }
 
+  function deckControllerConfig() {
+    const rotateEnabled = currentDataset === "sections" && is3D;
+    return {
+      scrollZoom: { smooth: true, speed: 0.02 },
+      inertia: 0,
+      doubleClickZoom: false,
+      dragRotate: rotateEnabled,
+      touchRotate: rotateEnabled,
+      touchZoom: true,
+    };
+  }
+
   function handleComparisonSelection(feature) {
     const boroughName = feature?.properties?.[NAME_FIELD];
     if (!boroughName) return;
+
+    if (selectingCompareTarget) {
+      assignComparisonTarget(selectingCompareTarget, boroughName);
+      selectingCompareTarget = null;
+      clearPinnedTooltip();
+      refreshMapState();
+      return;
+    }
 
     if (comparisonA === boroughName) comparisonA = null;
     else if (comparisonB === boroughName) comparisonB = null;
@@ -6638,7 +6743,7 @@ async function init() {
     container: "map",
     mapStyle: THEMES.day.mapStyle,
     initialViewState: viewState,
-    controller: { scrollZoom: { smooth: true, speed: 0.02 }, inertia: 0, doubleClickZoom: false },
+    controller: deckControllerConfig(),
     pickingRadius: 8,
     layers: [],
     onViewStateChange: ({ viewState: vs, oldViewState }) => {
@@ -6731,6 +6836,7 @@ async function init() {
       if (isMobileLayout() && mobilePanelMode) {
         mobilePanelMode = null;
         syncMobileUi();
+        renderAnalysisPanel();
       }
       if (!coordinate) return;
       if (onlyTubeMode() && !object) {
@@ -6762,9 +6868,19 @@ async function init() {
         return;
       }
 
+      if (currentDataset === "municipi" && isAnalysisMode("compare") && comparisonAvailable() && selectingCompareTarget) {
+        const compareFeature = featureAt(...coordinate);
+        if (compareFeature?.properties?.[NAME_FIELD]) {
+          handleComparisonSelection(compareFeature);
+          return;
+        }
+      }
+
       if (currentDataset === "municipi" && isAnalysisMode("compare") && comparisonAvailable() && object?.properties?.[NAME_FIELD]) {
-        handleComparisonSelection(object);
-        return;
+        if (!isMobileLayout()) {
+          handleComparisonSelection(object);
+          return;
+        }
       }
 
       if (isSchoolObject(object)) {

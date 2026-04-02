@@ -1,3 +1,6 @@
+## 2026-04-02 — Mobile UX polish branch
+- Removed the mobile address search strip, tightened the phone dock and title bar, restored controlled spikes rotation, and rebuilt mobile compare boroughs around an explicit map-picking flow so phone interactions stay clear without touching the live branch.
+
 ## 2026-04-02 — Mobile V2 QA polish
 - Tightened the feat/mobile-v2 phone shell with safer top and bottom spacing, calmer dense-overlay visibility, and more reliable tap-first cards and drawers so the branch is closer to merge-ready pending real-device QA.
 
