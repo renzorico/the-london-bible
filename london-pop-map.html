@@ -6900,7 +6900,15 @@ async function init() {
   const pendingStyledataCallbacks = new WeakMap();
 
   function scheduleStyledataCallback(map, key, callback) {
-    if (!map?.on || !map?.off) return;
+    if (map?.isStyleLoaded?.()) {
+      clearStyledataCallback(map, key);
+      callback();
+      return;
+    }
+    if (!map?.on || !map?.off) {
+      callback();
+      return;
+    }
     let registry = pendingStyledataCallbacks.get(map);
     if (!registry) {
       registry = new Map();
@@ -6909,6 +6917,7 @@ async function init() {
     const previous = registry.get(key);
     if (previous) map.off("styledata", previous);
     const wrapped = () => {
+      if (!map.isStyleLoaded?.()) return;
       map.off("styledata", wrapped);
       if (registry.get(key) === wrapped) registry.delete(key);
       callback();
@@ -6938,8 +6947,6 @@ async function init() {
       if (settled) return;
       settled = true;
       clearTimeout(fallbackTimer);
-      map.off?.("idle", finish);
-      map.off?.("error", finish);
       statusEl.textContent = "Opening atlas…";
       markAtlasReady();
     };
@@ -6950,8 +6957,8 @@ async function init() {
       return;
     }
 
-    map.on?.("idle", finish);
-    map.on?.("error", finish);
+    map.once?.("idle", finish);
+    map.once?.("error", finish);
   }
 
   function applyBasemapThemeStyles() {
